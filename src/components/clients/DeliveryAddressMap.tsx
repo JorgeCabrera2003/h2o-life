@@ -1,8 +1,28 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { MapPin, Navigation, Compass, Check, Search, Crosshair } from 'lucide-react';
-import { POPULAR_ADDRESS_SUGGESTIONS, REFERENCE_POINT_CHIPS } from '@/lib/validators';
+import dynamic from 'next/dynamic';
+import { MapPin, Compass, Search, Crosshair, Check, AlertCircle } from 'lucide-react';
+import {
+  generateSmartAddressSuggestions,
+  REFERENCE_POINT_CHIPS,
+  sanitizeAddressText,
+  resolveBarquisimetoCoordinates,
+} from '@/lib/validators';
+
+// Carga dinámica del mapa interactivo para asegurar compatibilidad total con SSR en Next.js
+const InteractiveMapPicker = dynamic(
+  () => import('./InteractiveMapPicker').then((mod) => mod.InteractiveMapPicker),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-52 sm:h-64 rounded-2xl bg-slate-100 flex flex-col items-center justify-center border border-slate-200">
+        <Compass className="w-8 h-8 text-sky-500 animate-spin mb-2" />
+        <span className="text-xs text-slate-500 font-semibold">Cargando mapa interactivo...</span>
+      </div>
+    ),
+  }
+);
 
 interface DeliveryAddressMapProps {
   address: string;
@@ -13,88 +33,104 @@ interface DeliveryAddressMapProps {
   setCoordinates?: (coords: { lat: number; lng: number }) => void;
 }
 
+// Coordenadas base (Barquisimeto / Centro de Lara, Venezuela)
+const DEFAULT_COORDS = { lat: 10.07125, lng: -69.32535 }; // Calle 26 con Carrera 25 Barquisimeto
+
 export function DeliveryAddressMap({
   address,
   setAddress,
   referencePoint,
   setReferencePoint,
-  coordinates,
+  coordinates = DEFAULT_COORDS,
   setCoordinates,
 }: DeliveryAddressMapProps) {
-  const [mapQuery, setMapQuery] = useState(address || 'Venezuela');
+  const [currentCoords, setCurrentCoords] = useState<{ lat: number; lng: number }>(coordinates);
   const [isLocating, setIsLocating] = useState(false);
-  const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
-  // Sincronizar el mapa cuando cambia la dirección con debounce
+  // Generar sugerencias inteligentes en tiempo real al escribir
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (address.trim()) {
-        setMapQuery(`${address.trim()}, Venezuela`);
-      }
-    }, 600);
-    return () => clearTimeout(timer);
+    if (address && address.trim().length > 0) {
+      const generated = generateSmartAddressSuggestions(address);
+      setSuggestions(generated);
+    } else {
+      setSuggestions(generateSmartAddressSuggestions(''));
+    }
   }, [address]);
 
-  // Filtrar sugerencias mientras escribe
-  const handleAddressChange = (val: string) => {
-    setAddress(val);
-    if (val.trim().length > 1) {
-      const matches = POPULAR_ADDRESS_SUGGESTIONS.filter(item =>
-        item.toLowerCase().includes(val.toLowerCase())
-      );
-      setFilteredSuggestions(matches.length > 0 ? matches : POPULAR_ADDRESS_SUGGESTIONS.slice(0, 4));
-      setShowSuggestions(true);
-    } else {
-      setFilteredSuggestions(POPULAR_ADDRESS_SUGGESTIONS.slice(0, 4));
-      setShowSuggestions(false);
+  const updateCoords = (lat: number, lng: number) => {
+    const newCoords = { lat, lng };
+    setCurrentCoords(newCoords);
+    if (setCoordinates) {
+      setCoordinates(newCoords);
     }
   };
 
-  const handleSelectSuggestion = (sug: string) => {
-    setAddress(sug);
-    setMapQuery(`${sug}, Venezuela`);
-    setShowSuggestions(false);
+  // Manejar cambio en el input de dirección
+  const handleAddressInputChange = (val: string) => {
+    const sanitized = sanitizeAddressText(val);
+    setAddress(sanitized);
+    setShowSuggestions(true);
+
+    // Resolver coordenadas exactas en la cuadrícula de Barquisimeto
+    const resolved = resolveBarquisimetoCoordinates(sanitized);
+    if (resolved) {
+      updateCoords(resolved.lat, resolved.lng);
+    }
   };
 
-  // Obtener ubicación GPS del dispositivo
+  // Al seleccionar una sugerencia del menú desplegable
+  const handleSelectSuggestion = (sug: string) => {
+    setAddress(sug);
+    setShowSuggestions(false);
+
+    // Ajustar mapa exactamente hacia la intersección seleccionada
+    const resolved = resolveBarquisimetoCoordinates(sug);
+    if (resolved) {
+      updateCoords(resolved.lat, resolved.lng);
+    }
+  };
+
+  // Callback cuando el usuario arrastra o toca el mapa interactivo
+  const handleMapPinMoved = (newLat: number, newLng: number) => {
+    updateCoords(newLat, newLng);
+  };
+
+  // Obtener ubicación GPS real del teléfono
   const handleGetGpsLocation = () => {
     if (!navigator.geolocation) {
-      alert('Tu navegador no soporta geolocalización GPS.');
+      alert('Tu dispositivo o navegador no soporta geolocalización GPS.');
       return;
     }
 
     setIsLocating(true);
     navigator.geolocation.getCurrentPosition(
-      pos => {
+      (pos) => {
         const lat = pos.coords.latitude;
         const lng = pos.coords.longitude;
-        if (setCoordinates) {
-          setCoordinates({ lat, lng });
-        }
-        const coordsStr = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-        setMapQuery(coordsStr);
+        updateCoords(lat, lng);
         if (!address) {
-          setAddress(`Ubicación GPS (${coordsStr})`);
+          setAddress(`Ubicación GPS (${lat.toFixed(5)}, ${lng.toFixed(5)})`);
         }
         setIsLocating(false);
       },
-      () => {
+      (err) => {
         setIsLocating(false);
-        alert('No se pudo obtener el GPS. Verifica los permisos de ubicación de tu dispositivo.');
+        alert('No se pudo acceder al GPS. Verifica los permisos de ubicación en tu navegador.');
       },
-      { enableHighAccuracy: true, timeout: 8000 }
+      { enableHighAccuracy: true, timeout: 10000 }
     );
   };
 
   return (
     <div className="space-y-3">
-      {/* Input de Dirección con Sugerencias tipo Datalist / Apps de Delivery */}
+      {/* 1. INPUT DE DIRECCIÓN CON AUTOCOMPLETADO INTELIGENTE */}
       <div className="relative">
         <div className="flex justify-between items-center mb-1">
           <label className="text-xs font-bold text-slate-800 flex items-center space-x-1">
             <MapPin className="w-3.5 h-3.5 text-rose-500" />
-            <span>Dirección de Despacho / Entrega:</span>
+            <span>Dirección de Despacho (con autocompletado de calles):</span>
           </label>
           <button
             type="button"
@@ -103,46 +139,44 @@ export function DeliveryAddressMap({
             className="text-[11px] font-bold text-sky-700 bg-sky-50 hover:bg-sky-100 border border-sky-200 px-2.5 py-1 rounded-lg flex items-center space-x-1 active:scale-95 transition-all"
           >
             <Crosshair className={`w-3 h-3 ${isLocating ? 'animate-spin text-sky-600' : ''}`} />
-            <span>{isLocating ? 'Obteniendo GPS...' : 'Usar mi GPS'}</span>
+            <span>{isLocating ? 'Fijando GPS...' : 'Usar mi GPS'}</span>
           </button>
         </div>
 
         <input
           type="text"
           value={address}
-          onChange={e => handleAddressChange(e.target.value)}
-          onFocus={() => {
-            setFilteredSuggestions(POPULAR_ADDRESS_SUGGESTIONS.slice(0, 4));
-            setShowSuggestions(true);
-          }}
-          placeholder="Escribe calle, avenida o sector (ej. Calle 25 con Carrera 19)..."
+          onChange={(e) => handleAddressInputChange(e.target.value)}
+          onFocus={() => setShowSuggestions(true)}
+          placeholder="Escribe calle, carrera o sector (ej. Calle 26 con Carrera 25)..."
+          maxLength={120}
           className="w-full text-xs font-semibold p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:border-sky-500 shadow-2xs"
           required
         />
 
-        {/* Lista de Sugerencias Unificadas (Dropdown estilo Vamos / Yummy) */}
-        {showSuggestions && (
+        {/* Desplegable de Sugerencias Dinámicas */}
+        {showSuggestions && suggestions.length > 0 && (
           <div className="absolute left-0 right-0 top-full mt-1 z-30 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-1 duration-150">
             <div className="p-1.5 bg-slate-50 border-b border-slate-100 flex items-center justify-between text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-              <span>Sugerencias de Calles y Sectores</span>
+              <span>Sugerencias de Calles y Cuadrículas</span>
               <button
                 type="button"
                 onClick={() => setShowSuggestions(false)}
-                className="hover:text-slate-700 text-xs px-1"
+                className="hover:text-slate-700 text-xs px-1.5 py-0.5 rounded hover:bg-slate-200"
               >
                 ✕
               </button>
             </div>
-            <div className="max-h-40 overflow-y-auto divide-y divide-slate-100">
-              {filteredSuggestions.map((item, idx) => (
+            <div className="max-h-44 overflow-y-auto divide-y divide-slate-100">
+              {suggestions.map((item, idx) => (
                 <button
                   key={idx}
                   type="button"
                   onClick={() => handleSelectSuggestion(item)}
-                  className="w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-sky-50 hover:text-sky-900 flex items-center space-x-2 transition-colors"
+                  className="w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-sky-50 hover:text-sky-900 flex items-center space-x-2 transition-colors group"
                 >
-                  <MapPin className="w-3 h-3 text-sky-500 shrink-0" />
-                  <span className="truncate">{item}</span>
+                  <MapPin className="w-3.5 h-3.5 text-sky-500 shrink-0 group-hover:scale-110 transition-transform" />
+                  <span className="font-medium truncate">{item}</span>
                 </button>
               ))}
             </div>
@@ -150,16 +184,17 @@ export function DeliveryAddressMap({
         )}
       </div>
 
-      {/* Punto de Referencia & Chips de Llenado Rápido */}
+      {/* 2. PUNTO DE REFERENCIA & CHIPS RÁPIDOS */}
       <div>
         <label className="text-xs font-bold text-slate-800 block mb-1">
-          Punto de Referencia (para que el repartidor no se pierda):
+          Punto de Referencia (detalles para el repartidor):
         </label>
         <input
           type="text"
           value={referencePoint}
-          onChange={e => setReferencePoint(e.target.value)}
-          placeholder="Ej. Frente a la panadería, portón azul, timbre blanco..."
+          onChange={(e) => setReferencePoint(sanitizeAddressText(e.target.value))}
+          placeholder="Ej. Al lado de la farmacia, portón azul, frente a..."
+          maxLength={100}
           className="w-full text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-xl mb-2"
         />
 
@@ -182,33 +217,24 @@ export function DeliveryAddressMap({
         </div>
       </div>
 
-      {/* Mapa en Vivo Integrado (Iframe Google Maps / OSM) */}
+      {/* 3. MAPA INTERACTIVO MANIPULABLE (Leaflet Drag & Drop Pin) */}
       <div className="mt-3">
         <div className="flex items-center justify-between mb-1.5">
-          <span className="text-[11px] font-bold text-slate-500 flex items-center space-x-1">
+          <span className="text-[11px] font-bold text-slate-700 flex items-center space-x-1">
             <Compass className="w-3.5 h-3.5 text-sky-600" />
-            <span>Vista Previa del Mapa en Tiempo Real:</span>
+            <span>Mapa Interactivo (Puedes moverlo y arrastrar el pin):</span>
           </span>
-          <span className="text-[10px] text-slate-400 font-mono truncate max-w-xs">
-            📍 {mapQuery}
+          <span className="text-[10px] font-mono text-sky-700 bg-sky-50 px-2 py-0.5 rounded-md border border-sky-200">
+            {currentCoords.lat.toFixed(5)}, {currentCoords.lng.toFixed(5)}
           </span>
         </div>
 
-        <div className="w-full h-44 rounded-2xl overflow-hidden border border-slate-200 shadow-inner bg-slate-100 relative group">
-          <iframe
-            title="Mapa de Entrega"
-            width="100%"
-            height="100%"
-            frameBorder="0"
-            scrolling="no"
-            src={`https://maps.google.com/maps?q=${encodeURIComponent(mapQuery)}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
-            className="w-full h-full filter saturate-[0.95]"
-            loading="lazy"
-          />
-          <div className="absolute bottom-2 right-2 pointer-events-none bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-md border border-slate-200 text-[10px] font-bold text-slate-700 shadow-xs">
-            H2O Life GPS
-          </div>
-        </div>
+        <InteractiveMapPicker
+          lat={currentCoords.lat}
+          lng={currentCoords.lng}
+          onCoordinatesChange={handleMapPinMoved}
+          addressLabel={address || 'Punto seleccionado'}
+        />
       </div>
     </div>
   );

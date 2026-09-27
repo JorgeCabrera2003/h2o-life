@@ -4,6 +4,26 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 
 ---
 
+## [1.2.0] - 2026-09-27
+
+### 🚀 Agregado & Optimizado
+* **Limitación Estricta de Teléfono con Regex & Sanitización Anti-Desbordamiento:**
+  * Truncado automático e inmediato a un máximo estricto de **11 dígitos** (`04XX-XXXXXXX`), imposibilitando desbordamientos como los 18 dígitos (`0424 556701672435435`) reportados en pruebas.
+  * Sanitización con regex que rechaza caracteres inválidos, asteriscos (`*`), puntos innecesarios y previene inyecciones maliciosas o caracteres corruptos en BD.
+  * Selector de operadoras móviles de Venezuela (`0412`, `0414`, `0424`, `0416`, `0426`) con validación regex en tiempo real e indicador visual de estado.
+* **Geocodificación Precisa de la Cuadrícula Urbana de Barquisimeto:**
+  * Motor inteligente en [`src/lib/validators.ts`](file:///c:/proyectos/h2o-life/src/lib/validators.ts) (`resolveBarquisimetoCoordinates` y `generateSmartAddressSuggestions`).
+  * Autocompletado dinámico de intersecciones: al escribir `calle 26`, genera de inmediato `Calle 26 con Carrera 25, Barquisimeto`, `Calle 26 con Carrera 24`, etc.
+  * Cálculo paramétrico exacto de latitud/longitud en la retícula urbana central (`10.07125, -69.32535`), eliminando los desvíos anteriores que mostraban comercios distantes (como "fashion full belleza ca") en Google Maps.
+* **Mapa Manipulable Nativo en la App (Leaflet OSM):**
+  * Componente [`InteractiveMapPicker.tsx`](file:///c:/proyectos/h2o-life/src/components/clients/InteractiveMapPicker.tsx) completamente navegable dentro de la app sin tener que salir ni abrir apps externas.
+  * Permite deslizar el mapa (pan), zoom con dos dedos o botones, y arrastrar el pin interactivo 💧 a la puerta exacta de la casa o local comercial.
+  * Botón de **"🎯 Re-centrar Pin"** y soporte para pantallas de alta densidad (Retina) en dispositivos Android, iOS, Windows y Mac.
+* **Suite de Pruebas Automatizadas Extendida (10 Pruebas Totales):**
+  * Script [`scripts/test-system.js`](file:///c:/proyectos/h2o-life/scripts/test-system.js) con 10 pruebas unitarias y de estrés que verifican el truncado de 18 a 11 dígitos, anti-XSS, anti-SQLi, geocodificación de cuadrículas y referencias bancarias.
+
+---
+
 ## [1.1.0] - 2026-09-27
 
 ### 🚀 Agregado

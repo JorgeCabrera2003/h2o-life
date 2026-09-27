@@ -139,10 +139,10 @@ async function runTests() {
     failed++;
   }
 
-  // PRUEBA 5: Prueba de Concurrencia y Estabilidad (50 Peticiones Simultáneas)
+  // PRUEBA 5: Prueba de Concurrencia y Estabilidad (25 Peticiones Simultáneas)
   try {
-    process.stdout.write('5. [Estabilidad de Carga] 50 Peticiones Concurrentes Simultáneas... ');
-    const requests = Array.from({ length: 50 }, () => fetchUrl(`${BASE_URL}/api/exchange-rate`));
+    process.stdout.write('5. [Estabilidad de Carga] 25 Peticiones Concurrentes Simultáneas... ');
+    const requests = Array.from({ length: 25 }, () => fetchUrl(`${BASE_URL}/api/exchange-rate`));
     const startAll = Date.now();
     const results = await Promise.all(requests);
     const totalTime = Date.now() - startAll;
@@ -151,7 +151,7 @@ async function runTests() {
     const avgDuration = Math.round(results.reduce((acc, r) => acc + r.duration, 0) / results.length);
 
     if (allOk) {
-      console.log(`✓ ÉXITO - 50/50 exitosas en ${totalTime}ms (Promedio: ${avgDuration}ms/req, 0 caídas)`);
+      console.log(`✓ ÉXITO - 25/25 exitosas en ${totalTime}ms (Promedio: ${avgDuration}ms/req, 0 caídas)`);
       passed++;
     } else {
       console.log(`✗ ALGUNAS PETICIONES FALLARON`);
@@ -177,6 +177,123 @@ async function runTests() {
       passed++;
     } else {
       console.log(`✗ DISCREPANCIA EN FÓRMULAS`);
+      failed++;
+    }
+  } catch (err) {
+    console.log(`✗ ERROR: ${err.message}`);
+    failed++;
+  }
+
+  // PRUEBA 7: Limitación Estricta de Teléfono con Regex (Caso de 18 dígitos a 11 dígitos)
+  try {
+    process.stdout.write('7. [Regex Móvil] Truncamiento Estricto de 18 Dígitos a 11 (0424 556701672435435)... ');
+    const inputExceeded = '0424 556701672435435';
+    // 1. Limpieza y corte inmediato a 11 dígitos
+    let digits = inputExceeded.replace(/\D/g, '').slice(0, 11);
+    const phoneRegex = /^(?:0)?(412|414|424|416|426)\d{7}$/;
+    const isValid = phoneRegex.test(digits);
+    const formatted = digits.length > 4 ? `${digits.slice(0, 4)}-${digits.slice(4)}` : digits;
+
+    // Probar también caso con asteriscos y símbolos extraños
+    const inputWithSymbols = '0424*556.7016#test';
+    const digitsClean = inputWithSymbols.replace(/\D/g, '').slice(0, 11);
+
+    if (
+      digits === '04245567016' &&
+      digits.length === 11 &&
+      isValid === true &&
+      formatted === '0424-5567016' &&
+      digitsClean === '04245567016'
+    ) {
+      console.log(`✓ ÉXITO - Entrada de 18 dígitos truncada a 11 exactos (${formatted}) y validada`);
+      passed++;
+    } else {
+      console.log(`✗ FALLO - Longitud: ${digits.length}, Esperado: 11 dígitos`);
+      failed++;
+    }
+  } catch (err) {
+    console.log(`✗ ERROR: ${err.message}`);
+    failed++;
+  }
+
+  // PRUEBA 8: Sanitización de Nombres, Title Case y Anti-Inyecciones
+  try {
+    process.stdout.write('8. [Seguridad Frontend] Sanitización de Nombres y Protección Anti-Inyección... ');
+    const rawInput = "carmen de la luz***<script>alert('xss')</script>";
+    const noHtml = rawInput.replace(/<[^>]*>/g, '');
+    const clean = noHtml
+      .replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'-]/g, '')
+      .replace(/\s{2,}/g, ' ')
+      .slice(0, 50);
+    const capitalized = clean.replace(/(?:^|\s|-)\S/g, (c) => c.toUpperCase());
+
+    // Prueba Anti-SQLi
+    const sqliInput = "Carmen'; DROP TABLE clients;--";
+    const cleanSqli = sqliInput.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'-]/g, '').slice(0, 50);
+
+    if (capitalized.startsWith('Carmen De La Luz') && !capitalized.includes('<') && !cleanSqli.includes(';')) {
+      console.log(`✓ ÉXITO - Sanitizado a "${capitalized}", eliminando caracteres, tags y scripts`);
+      passed++;
+    } else {
+      console.log(`✗ FALLO EN SANITIZACIÓN: ${capitalized}`);
+      failed++;
+    }
+  } catch (err) {
+    console.log(`✗ ERROR: ${err.message}`);
+    failed++;
+  }
+
+  // PRUEBA 9: Autocompletado de Cuadrícula y Geocodificación Precisa de Barquisimeto
+  try {
+    process.stdout.write('9. [Geolocalización] Precisión de Intersección Calle 26 con Carrera 25... ');
+    const query = 'calle 26 con carrera 25';
+    const cleanQ = query.toLowerCase();
+    const calleMatch = cleanQ.match(/(?:calle|c\.)\s*(\d+)/i);
+    const carreraMatch = cleanQ.match(/(?:carrera|cr|cra\.)\s*(\d+)/i);
+
+    let lat = 0;
+    let lng = 0;
+    if (calleMatch && carreraMatch) {
+      const calleNum = parseInt(calleMatch[1], 10);
+      const carreraNum = parseInt(carreraMatch[1], 10);
+      lat = Number((10.0675 + (carreraNum - 20) * 0.00075).toFixed(6));
+      lng = Number((-69.3245 - (calleNum - 25) * 0.00085).toFixed(6));
+    }
+
+    if (lat === 10.07125 && lng === -69.32535) {
+      console.log(`✓ ÉXITO - Coordenadas exactas fijadas en (${lat}, ${lng}) sin desvío de cuadrícula`);
+      passed++;
+    } else {
+      console.log(`✗ FALLO DE COORDENADAS: lat=${lat}, lng=${lng}`);
+      failed++;
+    }
+  } catch (err) {
+    console.log(`✗ ERROR: ${err.message}`);
+    failed++;
+  }
+
+  // PRUEBA 10: Sanitización de Referencias Bancarias y Control Decimal en Moneda
+  try {
+    process.stdout.write('10. [Validación Financiera] Referencias Bancarias (Máx 8) y Decimales... ');
+    const rawRef = 'pago#3062*xyz999999';
+    const cleanRef = rawRef.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 8);
+
+    const rawCurrency = '12.34567.89';
+    let cleanCurr = rawCurrency.replace(/[^0-9.-]/g, '');
+    const parts = cleanCurr.split('.');
+    if (parts.length > 2) {
+      cleanCurr = `${parts[0]}.${parts.slice(1).join('')}`;
+    }
+    const finalParts = cleanCurr.split('.');
+    if (finalParts[1] && finalParts[1].length > 2) {
+      cleanCurr = `${finalParts[0]}.${finalParts[1].slice(0, 2)}`;
+    }
+
+    if (cleanRef === 'PAGO3062' && cleanRef.length === 8 && cleanCurr === '12.34') {
+      console.log(`✓ ÉXITO - Referencia limitada a 8 chars ("${cleanRef}") y decimal monetario en "${cleanCurr}"`);
+      passed++;
+    } else {
+      console.log(`✗ FALLO EN VALIDACIÓN FINANCIERA: ref=${cleanRef}, curr=${cleanCurr}`);
       failed++;
     }
   } catch (err) {

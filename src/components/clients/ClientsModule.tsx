@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import dynamic from 'next/dynamic';
 import { useH2OStore } from '@/lib/store';
 import { Client } from '@/types';
 import {
@@ -8,7 +9,6 @@ import {
   Search,
   Phone,
   MapPin,
-  ExternalLink,
   MessageCircle,
   Plus,
   Edit2,
@@ -17,17 +17,30 @@ import {
   CheckCircle,
   AlertCircle,
   Navigation,
-  Check,
   Compass,
 } from 'lucide-react';
 import {
-  toTitleCase,
-  formatVenezuelanPhone,
-  isValidVenezuelanPhone,
+  sanitizeAndCapitalizeName,
+  sanitizeVenezuelanPhoneInput,
+  sanitizeCurrencyInput,
+  resolveBarquisimetoCoordinates,
   COUNTRY_CODES,
   VENEZUELAN_OPERATORS,
 } from '@/lib/validators';
 import { DeliveryAddressMap } from './DeliveryAddressMap';
+
+// Carga dinámica del mapa interactivo para las tarjetas
+const InteractiveMapPicker = dynamic(
+  () => import('./InteractiveMapPicker').then((mod) => mod.InteractiveMapPicker),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-36 rounded-xl bg-slate-100 flex items-center justify-center text-xs text-slate-400">
+        Cargando mapa interactivo...
+      </div>
+    ),
+  }
+);
 
 interface ClientsModuleProps {
   onSelectClientForSale?: (client: Client) => void;
@@ -43,7 +56,7 @@ export function ClientsModule({ onSelectClientForSale }: ClientsModuleProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
 
-  // Campos del formulario con regex y selectores
+  // Campos del formulario con regex y selectores estrictos
   const [name, setName] = useState('');
   const [countryCode, setCountryCode] = useState('+58');
   const [phoneBody, setPhoneBody] = useState('');
@@ -51,8 +64,12 @@ export function ClientsModule({ onSelectClientForSale }: ClientsModuleProps) {
   const [referencePoint, setReferencePoint] = useState('');
   const [notes, setNotes] = useState('');
   const [balanceUsd, setBalanceUsd] = useState('0');
+  const [coordinates, setCoordinates] = useState<{ lat: number; lng: number }>({
+    lat: 10.0682,
+    lng: -69.3235,
+  });
 
-  // Tarjeta con mapa expandido opcional
+  // Tarjeta con mapa expandido interactivo
   const [expandedMapClientId, setExpandedMapClientId] = useState<string | null>(null);
 
   const filteredClients = clients.filter(c => {
@@ -75,60 +92,73 @@ export function ClientsModule({ onSelectClientForSale }: ClientsModuleProps) {
     setEditingClient(null);
     setName('');
     setCountryCode('+58');
-    setPhoneBody('412');
+    setPhoneBody('0424-');
     setAddress('');
     setReferencePoint('');
     setNotes('');
     setBalanceUsd('0');
+    setCoordinates({ lat: 10.07125, lng: -69.32535 }); // Barquisimeto Centro
     setIsModalOpen(true);
   };
 
   const handleOpenEdit = (client: Client) => {
     setEditingClient(client);
     setName(client.name);
-    // Extraer código de país si existe
     if (client.phone.startsWith('+58')) {
       setCountryCode('+58');
-      setPhoneBody(client.phone.replace('+58', '').trim());
+      const local = client.phone.replace('+58', '').trim();
+      const res = sanitizeVenezuelanPhoneInput(local);
+      setPhoneBody(res.formatted);
     } else {
       setCountryCode('+58');
-      setPhoneBody(client.phone.trim());
+      const res = sanitizeVenezuelanPhoneInput(client.phone);
+      setPhoneBody(res.formatted);
     }
     setAddress(client.address);
     setReferencePoint(client.reference_point || '');
     setNotes(client.notes || '');
     setBalanceUsd(client.balance_usd.toString());
+
+    // Si tiene coordenadas fijadas, respetarlas; si era el default o una cuadrícula conocida, resolverla
+    const resolved = resolveBarquisimetoCoordinates(client.address);
+    const isOldDefault = !client.latitude || (Math.abs(client.latitude - 10.0682) < 0.001 && Math.abs((client.longitude ?? 0) - -69.3235) < 0.001);
+    setCoordinates({
+      lat: (isOldDefault && resolved) ? resolved.lat : (client.latitude || resolved?.lat || 10.07125),
+      lng: (isOldDefault && resolved) ? resolved.lng : (client.longitude || resolved?.lng || -69.32535),
+    });
     setIsModalOpen(true);
   };
 
-  // Capitalización de nombre
+  // Capitalización y filtrado de nombre estricto
   const handleNameChange = (val: string) => {
-    setName(toTitleCase(val));
+    setName(sanitizeAndCapitalizeName(val));
   };
 
-  // Formateo del teléfono con regex
+  // Validación y formateo estricto del teléfono
+  const phoneValidation = sanitizeVenezuelanPhoneInput(phoneBody);
   const handlePhoneBodyChange = (val: string) => {
-    // Permitir solo dígitos y guión/espacio
-    const cleaned = val.replace(/[^\d\s-]/g, '');
-    setPhoneBody(cleaned);
+    const result = sanitizeVenezuelanPhoneInput(val);
+    setPhoneBody(result.formatted);
   };
 
-  const fullPhone = `${countryCode} ${phoneBody.trim()}`;
-  const isPhoneValid = isValidVenezuelanPhone(fullPhone);
+  const fullPhone = `${countryCode} ${phoneValidation.formatted}`.trim();
 
   const handleSaveClient = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) return;
+    if (!name.trim()) {
+      alert('Por favor ingresa el nombre del cliente.');
+      return;
+    }
 
-    const mapsUrl = address
-      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${address}, ${referencePoint || ''}, Venezuela`)}`
-      : undefined;
+    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${coordinates.lat.toFixed(6)},${coordinates.lng.toFixed(6)}`;
 
     const clientPayload = {
       name: name.trim(),
-      phone: fullPhone.trim() || 'N/A',
+      phone: fullPhone || 'N/A',
       address: address.trim() || 'Venta en tienda / mostrador',
       reference_point: referencePoint.trim(),
+      latitude: coordinates.lat,
+      longitude: coordinates.lng,
       notes: notes.trim(),
       balance_usd: parseFloat(balanceUsd) || 0,
       maps_url: mapsUrl,
@@ -215,6 +245,10 @@ export function ClientsModule({ onSelectClientForSale }: ClientsModuleProps) {
         {filteredClients.map(client => {
           const hasDebt = client.balance_usd < 0;
           const isMapExpanded = expandedMapClientId === client.id;
+          const resolved = resolveBarquisimetoCoordinates(client.address);
+          const isOldDefault = !client.latitude || (Math.abs(client.latitude - 10.0682) < 0.001 && Math.abs((client.longitude ?? 0) - -69.3235) < 0.001);
+          const clientLat = (isOldDefault && resolved) ? resolved.lat : (client.latitude || resolved?.lat || 10.07125);
+          const clientLng = (isOldDefault && resolved) ? resolved.lng : (client.longitude || resolved?.lng || -69.32535);
 
           return (
             <div
@@ -274,26 +308,27 @@ export function ClientsModule({ onSelectClientForSale }: ClientsModuleProps) {
                     </div>
                   )}
 
-                  {/* Vista Previa Opcional del Mapa en la Tarjeta */}
-                  {isMapExpanded && client.address && (
-                    <div className="mt-2 pt-2 border-t border-slate-200 animate-in fade-in">
-                      <div className="w-full h-36 rounded-xl overflow-hidden border border-slate-200">
-                        <iframe
-                          title="Mapa Cliente"
-                          width="100%"
-                          height="100%"
-                          frameBorder="0"
-                          scrolling="no"
-                          src={`https://maps.google.com/maps?q=${encodeURIComponent(`${client.address}, ${client.reference_point || ''}, Venezuela`)}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
-                          loading="lazy"
-                        />
-                      </div>
+                  {/* Mapa Interactivo Manipulable dentro de la Tarjeta */}
+                  {isMapExpanded && (
+                    <div className="mt-2.5 pt-2 border-t border-slate-200 animate-in fade-in">
+                      <InteractiveMapPicker
+                        lat={clientLat}
+                        lng={clientLng}
+                        onCoordinatesChange={(newLat, newLng) => {
+                          updateClient(client.id, {
+                            latitude: newLat,
+                            longitude: newLng,
+                            maps_url: `https://www.google.com/maps/search/?api=1&query=${newLat.toFixed(6)},${newLng.toFixed(6)}`,
+                          });
+                        }}
+                        addressLabel={client.address}
+                      />
                     </div>
                   )}
                 </div>
               </div>
 
-              {/* Botones de Acción (WhatsApp, Maps, Toggle Mapa, Nueva Venta) */}
+              {/* Botones de Acción */}
               <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
                 <div className="flex items-center space-x-1.5">
                   {client.phone && client.phone !== 'N/A' && (
@@ -318,20 +353,18 @@ export function ClientsModule({ onSelectClientForSale }: ClientsModuleProps) {
                     </a>
                   )}
 
-                  {/* Botón para previsualizar mapa dentro de la tarjeta */}
-                  {client.address && (
-                    <button
-                      onClick={() => setExpandedMapClientId(isMapExpanded ? null : client.id)}
-                      className={`p-2 rounded-xl transition-colors ${
-                        isMapExpanded
-                          ? 'bg-sky-600 text-white'
-                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                      }`}
-                      title={isMapExpanded ? 'Ocultar mapa' : 'Ver mapa aquí'}
-                    >
-                      <Compass className="w-4 h-4" />
-                    </button>
-                  )}
+                  {/* Botón para abrir el mapa interactivo manipulable en la tarjeta */}
+                  <button
+                    onClick={() => setExpandedMapClientId(isMapExpanded ? null : client.id)}
+                    className={`p-2 rounded-xl transition-colors ${
+                      isMapExpanded
+                        ? 'bg-sky-600 text-white shadow-xs'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }`}
+                    title={isMapExpanded ? 'Ocultar mapa interactivo' : 'Manipular mapa aquí'}
+                  >
+                    <Compass className="w-4 h-4" />
+                  </button>
 
                   <button
                     onClick={() => handleOpenEdit(client)}
@@ -383,34 +416,45 @@ export function ClientsModule({ onSelectClientForSale }: ClientsModuleProps) {
             </p>
 
             <form onSubmit={handleSaveClient} className="space-y-4">
-              {/* Nombre con auto-capitalización */}
+              {/* Nombre con auto-capitalización y límite estricto de 50 caracteres */}
               <div>
-                <label className="text-xs font-bold text-slate-800 block mb-1">
-                  Nombre Completo (Auto-capitalizado):
-                </label>
+                <div className="flex justify-between items-center mb-1">
+                  <label className="text-xs font-bold text-slate-800">
+                    Nombre Completo (Auto-capitalizado):
+                  </label>
+                  <span className="text-[10px] text-slate-400 font-mono">
+                    {name.length}/50
+                  </span>
+                </div>
                 <input
                   type="text"
                   placeholder="Ej. Carmen De La Luz"
                   value={name}
                   onChange={e => handleNameChange(e.target.value)}
+                  maxLength={50}
                   className="w-full text-xs font-semibold p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:border-sky-500 shadow-2xs"
                   required
                 />
               </div>
 
-              {/* Teléfono con selector de País y Operadoras de Venezuela */}
+              {/* Teléfono con selector de País y Operadoras de Venezuela con límite estricto */}
               <div>
                 <div className="flex justify-between items-center mb-1">
                   <label className="text-xs font-bold text-slate-800">
                     Teléfono (WhatsApp):
                   </label>
-                  <span
-                    className={`text-[10px] font-bold ${
-                      isPhoneValid ? 'text-emerald-600' : 'text-slate-400'
-                    }`}
-                  >
-                    {isPhoneValid ? '✓ Formato Válido' : 'Ej: 0412-1234567'}
-                  </span>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-[10px] text-slate-400 font-mono">
+                      {phoneValidation.rawDigits.length}/11 dígitos
+                    </span>
+                    <span
+                      className={`text-[10px] font-bold ${
+                        phoneValidation.isValid ? 'text-emerald-600' : 'text-amber-600'
+                      }`}
+                    >
+                      {phoneValidation.isValid ? '✓ Válido' : 'Máx. 11 dígitos'}
+                    </span>
+                  </div>
                 </div>
 
                 <div className="flex space-x-2 mb-1.5">
@@ -418,7 +462,7 @@ export function ClientsModule({ onSelectClientForSale }: ClientsModuleProps) {
                   <select
                     value={countryCode}
                     onChange={e => setCountryCode(e.target.value)}
-                    className="text-xs font-bold bg-slate-50 border border-slate-200 rounded-xl px-2 py-2"
+                    className="text-xs font-bold bg-slate-50 border border-slate-200 rounded-xl px-2 py-2 shrink-0"
                   >
                     {COUNTRY_CODES.map(c => (
                       <option key={c.code} value={c.code}>
@@ -427,24 +471,29 @@ export function ClientsModule({ onSelectClientForSale }: ClientsModuleProps) {
                     ))}
                   </select>
 
-                  {/* Número telefónico */}
+                  {/* Número telefónico con límite estricto */}
                   <input
-                    type="text"
-                    placeholder="412 1234567"
+                    type="tel"
+                    placeholder="0424-5567016"
                     value={phoneBody}
                     onChange={e => handlePhoneBodyChange(e.target.value)}
-                    className="flex-1 text-xs font-bold p-2 bg-slate-50 border border-slate-200 rounded-xl"
+                    maxLength={12}
+                    className={`flex-1 text-xs font-bold p-2 bg-slate-50 border rounded-xl ${
+                      phoneBody.length > 0 && !phoneValidation.isValid
+                        ? 'border-amber-400 focus:border-amber-500'
+                        : 'border-slate-200 focus:border-sky-500'
+                    }`}
                   />
                 </div>
 
                 {/* Chips de Operadoras Móviles para llenado instantáneo */}
                 <div className="flex items-center space-x-1.5 overflow-x-auto pb-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold shrink-0">Operadora:</span>
+                  <span className="text-[10px] text-slate-400 font-bold shrink-0">Prefijo:</span>
                   {VENEZUELAN_OPERATORS.map(op => (
                     <button
                       key={op.code}
                       type="button"
-                      onClick={() => setPhoneBody(`${op.code} `)}
+                      onClick={() => setPhoneBody(`${op.code}-`)}
                       className="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-slate-100 hover:bg-sky-50 hover:text-sky-700 text-slate-700 border border-slate-200 transition-colors shrink-0"
                     >
                       {op.code} ({op.name})
@@ -453,26 +502,28 @@ export function ClientsModule({ onSelectClientForSale }: ClientsModuleProps) {
                 </div>
               </div>
 
-              {/* Componente de Dirección con Autocomplete y Mapa en Vivo Integrado */}
+              {/* Componente de Dirección con Autocomplete y Mapa Interactivo Manipulable */}
               <DeliveryAddressMap
                 address={address}
                 setAddress={setAddress}
                 referencePoint={referencePoint}
                 setReferencePoint={setReferencePoint}
+                coordinates={coordinates}
+                setCoordinates={setCoordinates}
               />
 
-              {/* Saldo y Notas */}
+              {/* Saldo y Notas con límites numéricos estrictos */}
               <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100">
                 <div>
                   <label className="text-xs font-bold text-slate-700 block mb-1">
                     Estado de Saldo ($ USD):
                   </label>
                   <input
-                    type="number"
-                    step="0.5"
-                    placeholder="0 = al día, negativo = deuda"
+                    type="text"
+                    placeholder="0 = al día, -1 = debe $1"
                     value={balanceUsd}
-                    onChange={e => setBalanceUsd(e.target.value)}
+                    onChange={e => setBalanceUsd(sanitizeCurrencyInput(e.target.value))}
+                    maxLength={8}
                     className="w-full text-xs font-bold p-2.5 bg-slate-50 border border-slate-200 rounded-xl"
                   />
                   <span className="text-[10px] text-slate-400">Ej: -2.00 si debe $2</span>
@@ -486,7 +537,8 @@ export function ClientsModule({ onSelectClientForSale }: ClientsModuleProps) {
                     type="text"
                     placeholder="Ej. Siempre compra de recargas"
                     value={notes}
-                    onChange={e => setNotes(e.target.value)}
+                    onChange={e => setNotes(e.target.value.slice(0, 100))}
+                    maxLength={100}
                     className="w-full text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-xl"
                   />
                 </div>

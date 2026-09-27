@@ -20,6 +20,7 @@ import {
   X,
   MessageCircle,
 } from 'lucide-react';
+import { sanitizeBankReference, sanitizeCurrencyInput } from '@/lib/validators';
 
 interface PosModuleProps {
   isCartDrawerOpen?: boolean;
@@ -475,8 +476,9 @@ export function PosModule({ isCartDrawerOpen = false, setIsCartDrawerOpen }: Pos
                       type="text"
                       placeholder="Ej. 3062"
                       value={pagoMovilRef}
-                      onChange={e => setPagoMovilRef(e.target.value)}
-                      className="w-full text-xs font-bold bg-white border border-slate-200 rounded-lg p-2"
+                      onChange={e => setPagoMovilRef(sanitizeBankReference(e.target.value))}
+                      maxLength={8}
+                      className="w-full text-xs font-bold bg-white border border-slate-200 rounded-lg p-2 font-mono uppercase"
                     />
                   </div>
                 </div>
@@ -492,8 +494,9 @@ export function PosModule({ isCartDrawerOpen = false, setIsCartDrawerOpen }: Pos
                   type="text"
                   placeholder="Ej. 8841"
                   value={puntoRef}
-                  onChange={e => setPuntoRef(e.target.value)}
-                  className="w-full text-xs font-bold bg-white border border-slate-200 rounded-lg p-2"
+                  onChange={e => setPuntoRef(sanitizeBankReference(e.target.value))}
+                  maxLength={8}
+                  className="w-full text-xs font-bold bg-white border border-slate-200 rounded-lg p-2 font-mono uppercase"
                 />
               </div>
             )}
@@ -505,11 +508,11 @@ export function PosModule({ isCartDrawerOpen = false, setIsCartDrawerOpen }: Pos
                 </label>
                 <div className="flex items-center space-x-2">
                   <input
-                    type="number"
-                    step="1"
+                    type="text"
                     placeholder={`Mínimo $${totalUsd.toFixed(2)}`}
                     value={cashUsdGiven}
-                    onChange={e => setCashUsdGiven(e.target.value)}
+                    onChange={e => setCashUsdGiven(sanitizeCurrencyInput(e.target.value))}
+                    maxLength={8}
                     className="flex-1 text-sm font-black bg-white border border-emerald-300 rounded-lg p-2 text-slate-900"
                   />
                   {[1, 5, 10, 20].map(bill => (
