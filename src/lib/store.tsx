@@ -610,7 +610,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       created_at: new Date().toISOString(),
       maps_url: clientData.maps_url || (clientData.address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(clientData.address)}` : undefined),
     };
-    setClients(prev => [...prev, newClient]);
+    setClients(prev => [newClient, ...prev]);
     return newClient;
   };
 

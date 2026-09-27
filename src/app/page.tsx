@@ -10,11 +10,13 @@ import { AiCameraModule } from '@/components/camera/AiCameraModule';
 import { CashClosureModule } from '@/components/closure/CashClosureModule';
 import { TankModule } from '@/components/tanks/TankModule';
 import { FinanceModule } from '@/components/finance/FinanceModule';
+import { Client } from '@/types';
 import { SettingsModule } from '@/components/settings/SettingsModule';
 
 function H2OLifeApp() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('pos');
   const [isCartDrawerOpen, setIsCartDrawerOpen] = useState(false);
+  const [selectedClientForSale, setSelectedClientForSale] = useState<Client | null>(null);
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900">
@@ -25,12 +27,14 @@ function H2OLifeApp() {
           <PosModule
             isCartDrawerOpen={isCartDrawerOpen}
             setIsCartDrawerOpen={setIsCartDrawerOpen}
+            preselectedClient={selectedClientForSale}
           />
         )}
 
         {activeTab === 'clients' && (
           <ClientsModule
-            onSelectClientForSale={() => {
+            onSelectClientForSale={(client) => {
+              setSelectedClientForSale(client);
               setActiveTab('pos');
             }}
           />

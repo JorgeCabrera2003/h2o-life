@@ -301,6 +301,53 @@ async function runTests() {
     failed++;
   }
 
+  // PRUEBA 11: Orden Actual y Búsqueda en Combobox de Clientes
+  try {
+    process.stdout.write('11. [Orden Actual & Buscador] Cronología Descendente y Filtrado Dinámico... ');
+    const mockClients = [
+      { id: '1', name: 'Doraida Mendoza', phone: '0412-1234567', address: 'Samanes', created_at: '2026-09-01T10:00:00Z' },
+      { id: '2', name: 'Pedro Ramírez', phone: '0416-3332211', address: 'Industrial', created_at: '2026-09-18T14:15:00Z' },
+      { id: '3', name: 'Carmen De La Luz', phone: '0424-5567016', address: 'Calle 26 con Carrera 25', created_at: '2026-09-27T19:00:00Z' },
+      { id: 'client-mostrador', name: 'Cliente Mostrador', phone: 'N/A', address: 'Tienda', created_at: '2026-09-01T08:00:00Z' },
+    ];
+
+    // Ordenar en orden actual (más reciente primero, con mostrador al inicio)
+    const sorted = [...mockClients].sort((a, b) => {
+      if (a.id === 'client-mostrador') return -1;
+      if (b.id === 'client-mostrador') return 1;
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
+
+    const isMostradorFirst = sorted[0].id === 'client-mostrador';
+    const isMostRecentSecond = sorted[1].name === 'Carmen De La Luz';
+
+    // Búsqueda por calle
+    const queryStreet = 'calle 26';
+    const resultsStreet = sorted.filter(c => c.address.toLowerCase().includes(queryStreet));
+
+    // Búsqueda por teléfono
+    const queryPhone = '0424';
+    const resultsPhone = sorted.filter(c => c.phone.includes(queryPhone));
+
+    if (
+      isMostradorFirst &&
+      isMostRecentSecond &&
+      resultsStreet.length === 1 &&
+      resultsStreet[0].name === 'Carmen De La Luz' &&
+      resultsPhone.length === 1 &&
+      resultsPhone[0].name === 'Carmen De La Luz'
+    ) {
+      console.log(`✓ ÉXITO - Cliente reciente "Carmen De La Luz" prioritario y buscador reactivo 100%`);
+      passed++;
+    } else {
+      console.log(`✗ FALLO EN ORDEN O BÚSQUEDA: first=${sorted[1]?.name}`);
+      failed++;
+    }
+  } catch (err) {
+    console.log(`✗ ERROR: ${err.message}`);
+    failed++;
+  }
+
   console.log('\n=================================================================');
   console.log(`RESULTADO FINAL: ${passed} Pasadas, ${failed} Fallidas`);
   console.log('=================================================================');

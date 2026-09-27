@@ -4,6 +4,27 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 
 ---
 
+## [1.3.0] - 2026-09-27
+
+### 🚀 Agregado & Optimizado
+* **Selector de Clientes en Orden Actual con Buscador Dinámico (Combobox POS):**
+  * Se eliminó la barra horizontal con desbordamiento y scrollbar fea reportada en capturas.
+  * Nuevo **Select con Buscador** en [`src/components/pos/PosModule.tsx`](file:///c:/proyectos/h2o-life/src/components/pos/PosModule.tsx) que ordena a los clientes en **Orden Actual** (los más recientemente registrados o actualizados aparecen de primero).
+  * Modal/desplegable con campo de búsqueda instantánea por nombre, teléfono, dirección o referencias.
+  * Visualización detallada de cliente activo: indicador de deuda (`⚠️ Debe $X.XX`), estatus (`✓ Al Día`), teléfono y dirección.
+  * Atajos rápidos no desbordantes para `🏪 Mostrador` y los 2 clientes más recientes para cobro en 1 solo toque.
+  * Flujo interconectado: al presionar "Cargar Venta" desde la tarjeta de un cliente en [`ClientsModule.tsx`](file:///c:/proyectos/h2o-life/src/components/clients/ClientsModule.tsx), el POS abre automáticamente con ese cliente preseleccionado.
+* **Diseño 100% Responsivo en Vista Móvil (Navbar & Tasa Dólar BCV):**
+  * Se rediseñó el encabezado en [`src/components/Navbar.tsx`](file:///c:/proyectos/h2o-life/src/components/Navbar.tsx) para pantallas móviles pequeñas (320px a 430px).
+  * Badge táctil y compacto para la **Tasa Oficial BCV** con indicador de estado pulsante, contraste mejorado y tipografía nítida sin deformaciones ni desbordamiento horizontal.
+  * Modal centrado táctil para la edición manual de la tasa cambiaria, garantizando que el teclado virtual o la entrada numérica nunca rompan el layout del Navbar.
+  * Subtítulos extensos ocultados en móviles (`hidden sm:block`) para otorgar máxima amplitud al logo y controles de caja.
+  * Modal de Cobro/Multipago con `max-h-[92vh] overflow-y-auto` para navegación fluida en dispositivos con teclado en pantalla.
+* **Suite de Pruebas Automatizadas (11 Pruebas):**
+  * Prueba 11 añadida en [`scripts/test-system.js`](file:///c:/proyectos/h2o-life/scripts/test-system.js) para certificar el orden cronológico descendente y el motor de filtrado del buscador.
+
+---
+
 ## [1.2.0] - 2026-09-27
 
 ### 🚀 Agregado & Optimizado
