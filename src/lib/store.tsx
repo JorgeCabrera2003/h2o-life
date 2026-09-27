@@ -13,9 +13,9 @@ import {
   CashClosure,
   ExchangeRateInfo,
   PaymentLine,
+  SystemSettings,
 } from '@/types';
 
-// Perfiles iniciales del sistema (RBAC)
 export const INITIAL_USERS: UserProfile[] = [
   {
     id: 'user-jorge',
@@ -23,6 +23,7 @@ export const INITIAL_USERS: UserProfile[] = [
     role: 'superadmin',
     email: 'jorge@h2olife.com',
     avatar: '👨‍💼',
+    phone: '+584147654321',
   },
   {
     id: 'user-freyeli',
@@ -30,6 +31,7 @@ export const INITIAL_USERS: UserProfile[] = [
     role: 'admin',
     email: 'freyeli@h2olife.com',
     avatar: '👩‍💼',
+    phone: '+584121234567',
   },
   {
     id: 'user-carla',
@@ -37,8 +39,21 @@ export const INITIAL_USERS: UserProfile[] = [
     role: 'worker',
     email: 'carla@h2olife.com',
     avatar: '👩‍🔧',
+    phone: '+584249998877',
   },
 ];
+
+export const INITIAL_SETTINGS: SystemSettings = {
+  business_name: 'H2O Life Purified Water',
+  business_rif: 'J-50982341-2',
+  freyeli_phone: '+58 412 1234567',
+  jorge_phone: '+58 414 7654321',
+  tank_low_threshold_pct: 30,
+  auto_notify_sales: true,
+  auto_notify_tank_alerts: true,
+  auto_notify_cisterns: true,
+  auto_notify_closures: true,
+};
 
 export const INITIAL_PRODUCTS: Product[] = [
   {
@@ -46,6 +61,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     name: 'Recarga de Agua 20L / 18L',
     category: 'agua',
     price_usd: 0.50,
+    cost_usd: 0.10,
     stock: 9999,
     unit: 'recarga',
     icon: '💧',
@@ -56,6 +72,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     name: 'Botellón Nuevo 20L (Lleno)',
     category: 'botellon',
     price_usd: 7.00,
+    cost_usd: 4.50,
     stock: 28,
     unit: 'unidad',
     icon: '🧴',
@@ -66,6 +83,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     name: 'Botellón Vacío 20L',
     category: 'botellon',
     price_usd: 6.50,
+    cost_usd: 4.00,
     stock: 18,
     unit: 'unidad',
     icon: '🫙',
@@ -76,6 +94,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     name: 'Botellón 5L (Lleno)',
     category: 'botellon',
     price_usd: 2.50,
+    cost_usd: 1.20,
     stock: 22,
     unit: 'unidad',
     icon: '🚰',
@@ -86,6 +105,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     name: 'Tapa / Precinto de Seguridad',
     category: 'insumo',
     price_usd: 0.20,
+    cost_usd: 0.05,
     stock: 180,
     unit: 'unidad',
     icon: '🔘',
@@ -96,6 +116,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     name: 'Helado Tío Rico / Artesanal',
     category: 'helado',
     price_usd: 1.00,
+    cost_usd: 0.60,
     stock: 45,
     unit: 'unidad',
     icon: '🍦',
@@ -106,6 +127,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     name: 'Helado Premium Paleta',
     category: 'helado',
     price_usd: 1.50,
+    cost_usd: 0.90,
     stock: 35,
     unit: 'unidad',
     icon: '🍧',
@@ -116,6 +138,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     name: 'Tostones Caseros',
     category: 'snack',
     price_usd: 1.00,
+    cost_usd: 0.50,
     stock: 20,
     unit: 'bolsa',
     icon: '🥔',
@@ -126,6 +149,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     name: 'Empanadas Chilenas',
     category: 'snack',
     price_usd: 1.50,
+    cost_usd: 0.80,
     stock: 15,
     unit: 'unidad',
     icon: '🥟',
@@ -136,26 +160,66 @@ export const INITIAL_PRODUCTS: Product[] = [
 export const INITIAL_CLIENTS: Client[] = [
   {
     id: 'client-doraida',
-    name: 'Doraida',
+    name: 'Doraida Mendoza',
     phone: '+58 412 1234567',
-    notes: 'Cliente habitual de 2 a 4 recargas semanales',
+    address: 'Calle Los Samanes, Casa #42, Sector Central',
+    reference_point: 'Frente a la panadería El Manantial',
+    maps_url: 'https://www.google.com/maps/search/?api=1&query=Calle+Los+Samanes+Sector+Central',
+    notes: 'Cliente fija de 2 a 4 recargas semanales. Paga con Pago Móvil o Efectivo.',
     balance_usd: 0,
+    total_orders: 14,
+    favorite_product: 'Recarga de Agua 20L',
     created_at: '2026-09-01T10:00:00Z',
   },
   {
     id: 'client-carlos',
-    name: 'Carlos Mendoza',
+    name: 'Carlos Mendoza (Panadería)',
     phone: '+58 414 7654321',
-    notes: 'Compra botellones para panadería',
+    address: 'Av. Bolívar, Local #12, Zona Comercial',
+    reference_point: 'Al lado de la farmacia SAAS',
+    maps_url: 'https://www.google.com/maps/search/?api=1&query=Av+Bolivar+Zona+Comercial',
+    notes: 'Pide 5 a 8 botellones cada martes para producción de panadería.',
     balance_usd: 0,
-    created_at: '2026-09-10T11:00:00Z',
+    total_orders: 22,
+    favorite_product: 'Botellón Nuevo 20L',
+    created_at: '2026-09-05T11:00:00Z',
+  },
+  {
+    id: 'client-maria',
+    name: 'Sra. María González',
+    phone: '+58 424 5558899',
+    address: 'Urb. La Esmeralda, Manzana 4, Casa #15',
+    reference_point: 'Casa de portón azul cerca del ambulatorio',
+    maps_url: 'https://www.google.com/maps/search/?api=1&query=Urb+La+Esmeralda',
+    notes: 'Tiene saldo pendiente de $1.00 de la semana pasada.',
+    balance_usd: -1.00, // Deuda pendiente
+    total_orders: 8,
+    favorite_product: 'Recarga de Agua 20L',
+    created_at: '2026-09-12T09:30:00Z',
+  },
+  {
+    id: 'client-pedro',
+    name: 'Pedro Ramírez (Taller)',
+    phone: '+58 416 3332211',
+    address: 'Callejón Industrial, Galpón #3',
+    reference_point: 'Detrás de la estación de servicio',
+    maps_url: 'https://www.google.com/maps/search/?api=1&query=Callejon+Industrial',
+    notes: 'Paga puntual por transferencia bancaria.',
+    balance_usd: 0,
+    total_orders: 5,
+    favorite_product: 'Recarga de Agua 20L',
+    created_at: '2026-09-18T14:15:00Z',
   },
   {
     id: 'client-mostrador',
-    name: 'Cliente Mostrador',
-    phone: '',
-    notes: 'Público general',
+    name: 'Cliente Mostrador / Transeúnte',
+    phone: 'N/A',
+    address: 'Venta directa en tienda',
+    reference_point: 'Mostrador H2O Life',
+    notes: 'Público general sin registro de entrega',
     balance_usd: 0,
+    total_orders: 80,
+    favorite_product: 'Recarga de Agua 20L / Helados',
     created_at: '2026-09-01T08:00:00Z',
   },
 ];
@@ -181,14 +245,13 @@ export const INITIAL_TANKS: WaterTank[] = [
   },
 ];
 
-// Ventas registradas de la libreta física de Carla (ej. 23/09/2026)
 export const INITIAL_SALES: Sale[] = [
   {
     id: 'sale-001',
     folio: 'H2O-2026-001',
     created_at: '2026-09-23T09:15:00Z',
     client_id: 'client-doraida',
-    client_name: 'Doraida',
+    client_name: 'Doraida Mendoza',
     worker_id: 'user-carla',
     worker_name: 'Carla',
     total_usd: 1.00,
@@ -214,12 +277,13 @@ export const INITIAL_SALES: Sale[] = [
     ],
     status: 'completada',
     notes: '2 recargas anotadas en libreta',
+    notified_to_admin: true,
   },
   {
     id: 'sale-002',
     folio: 'H2O-2026-002',
     created_at: '2026-09-23T10:30:00Z',
-    client_name: 'Cliente Mostrador',
+    client_name: 'Cliente Mostrador / Transeúnte',
     worker_id: 'user-carla',
     worker_name: 'Carla',
     total_usd: 2.00,
@@ -245,12 +309,13 @@ export const INITIAL_SALES: Sale[] = [
     ],
     status: 'completada',
     notes: '4 recargas pagadas por punto',
+    notified_to_admin: true,
   },
   {
     id: 'sale-003',
     folio: 'H2O-2026-003',
     created_at: '2026-09-23T11:45:00Z',
-    client_name: 'Cliente Mostrador',
+    client_name: 'Cliente Mostrador / Transeúnte',
     worker_id: 'user-carla',
     worker_name: 'Carla',
     total_usd: 1.50,
@@ -283,6 +348,7 @@ export const INITIAL_SALES: Sale[] = [
     change_bs: 22.75,
     status: 'completada',
     notes: 'Pagó con billete de $2, vuelto $0.50 anotado',
+    notified_to_admin: true,
   },
 ];
 
@@ -313,6 +379,8 @@ export const INITIAL_EXPENSES: Expense[] = [
 interface StoreContextType {
   currentUser: UserProfile;
   setCurrentUser: (user: UserProfile) => void;
+  systemSettings: SystemSettings;
+  updateSystemSettings: (settings: Partial<SystemSettings>) => void;
   products: Product[];
   clients: Client[];
   tanks: WaterTank[];
@@ -334,16 +402,21 @@ interface StoreContextType {
   ) => Sale;
   createExpense: (expense: Omit<Expense, 'id' | 'created_at'>) => void;
   addClient: (client: Omit<Client, 'id' | 'created_at'>) => Client;
+  updateClient: (id: string, clientData: Partial<Client>) => void;
+  deleteClient: (id: string) => void;
   updateTankLevel: (tankId: string, liters: number) => void;
   registerCisternDelivery: (delivery: Omit<CisternDelivery, 'id' | 'created_at'>) => void;
   createCashClosure: (notes?: string) => CashClosure;
   cashClosures: CashClosure[];
+  getWhatsAppSaleUrl: (sale: Sale, targetPhone?: string) => string;
+  getWhatsAppTankAlertUrl: (tank: WaterTank, targetPhone?: string) => string;
 }
 
 const StoreContext = createContext<StoreContextType | null>(null);
 
 export function StoreProvider({ children }: { children: React.ReactNode }) {
-  const [currentUser, setCurrentUser] = useState<UserProfile>(INITIAL_USERS[2]); // Default Carla (Worker)
+  const [currentUser, setCurrentUser] = useState<UserProfile>(INITIAL_USERS[2]); // Carla (Worker)
+  const [systemSettings, setSystemSettings] = useState<SystemSettings>(INITIAL_SETTINGS);
   const [products] = useState<Product[]>(INITIAL_PRODUCTS);
   const [clients, setClients] = useState<Client[]>(INITIAL_CLIENTS);
   const [tanks, setTanks] = useState<WaterTank[]>(INITIAL_TANKS);
@@ -358,7 +431,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     is_manual_override: false,
   });
 
-  // Consultar la tasa de cambio oficial de Venezuela al cargar
+  // Tasa de cambio oficial
   useEffect(() => {
     async function fetchRate() {
       try {
@@ -368,7 +441,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           setExchangeRate(prev => (prev.is_manual_override ? prev : data));
         }
       } catch {
-        // Fallback silencioso a la tasa predeterminada
+        // Fallback
       }
     }
     fetchRate();
@@ -381,6 +454,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       updated_at: new Date().toISOString(),
       is_manual_override: isManual,
     });
+  };
+
+  const updateSystemSettings = (newSettings: Partial<SystemSettings>) => {
+    setSystemSettings(prev => ({ ...prev, ...newSettings }));
   };
 
   // Carrito de compras
@@ -434,7 +511,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const clearCart = () => setCart([]);
 
-  // Crear Venta y descontar agua automáticamente del tanque
+  // Crear Venta y descontar agua
   const createSale = (
     client: Client | null,
     payments: PaymentLine[],
@@ -452,7 +529,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       folio,
       created_at: new Date().toISOString(),
       client_id: client?.id,
-      client_name: client ? client.name : 'Cliente Mostrador',
+      client_name: client ? client.name : 'Cliente Mostrador / Transeúnte',
       worker_id: currentUser.id,
       worker_name: currentUser.name,
       total_usd: Number(totalUsd.toFixed(2)),
@@ -470,13 +547,25 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       change_usd: changeUsd,
       change_bs: changeBs,
       status: 'completada',
+      notified_to_admin: false,
     };
 
-    // Descontar litros de los tanques si hay agua vendida
+    // Actualizar historial del cliente
+    if (client) {
+      setClients(prev =>
+        prev.map(c =>
+          c.id === client.id
+            ? { ...c, total_orders: (c.total_orders || 0) + 1 }
+            : c
+        )
+      );
+    }
+
+    // Descontar agua del tanque
     let waterLitersToDeduct = 0;
     cart.forEach(item => {
       if (item.product.category === 'agua') {
-        waterLitersToDeduct += item.quantity * 20; // 20L por recarga estándar
+        waterLitersToDeduct += item.quantity * 20;
       }
     });
 
@@ -517,10 +606,22 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     const newClient: Client = {
       ...clientData,
       id: `client-${Date.now()}`,
+      total_orders: 1,
       created_at: new Date().toISOString(),
+      maps_url: clientData.maps_url || (clientData.address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(clientData.address)}` : undefined),
     };
     setClients(prev => [...prev, newClient]);
     return newClient;
+  };
+
+  const updateClient = (id: string, clientData: Partial<Client>) => {
+    setClients(prev =>
+      prev.map(c => (c.id === id ? { ...c, ...clientData } : c))
+    );
+  };
+
+  const deleteClient = (id: string) => {
+    setClients(prev => prev.filter(c => c.id !== id));
   };
 
   const updateTankLevel = (tankId: string, liters: number) => {
@@ -543,7 +644,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   };
 
   const registerCisternDelivery = (delivery: Omit<CisternDelivery, 'id' | 'created_at'>) => {
-    // Aumentar los litros del tanque indicado
     setTanks(prev =>
       prev.map(tank => {
         if (tank.id === delivery.tank_id) {
@@ -561,7 +661,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       })
     );
 
-    // Registrar como gasto operativo si tiene costo
     createExpense({
       description: `Cisterna: ${delivery.supplier_name} (+${delivery.liters_delivered.toLocaleString()}L)`,
       category: 'cisterna',
@@ -574,7 +673,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   };
 
   const createCashClosure = (notes?: string): CashClosure => {
-    // Calcular totales de las ventas del día
     const breakdown = {
       efectivo_usd: 0,
       efectivo_bs: 0,
@@ -621,11 +719,32 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     return closure;
   };
 
+  // Generador de enlaces para WhatsApp a Freyeli (Administradora)
+  const getWhatsAppSaleUrl = (sale: Sale, targetPhone?: string) => {
+    const phone = (targetPhone || systemSettings.freyeli_phone).replace(/\D/g, '');
+    const itemsList = sale.items
+      .map(i => `• ${i.quantity}x ${i.product_name} ($${i.subtotal_usd.toFixed(2)})`)
+      .join('%0A');
+
+    const msg = `💧 *H2O LIFE - NOTIFICACIÓN DE VENTA*%0A-----------------------------%0A*Folio:* ${sale.folio}%0A*Operador:* ${sale.worker_name}%0A*Cliente:* ${sale.client_name}%0A*Items Vendidos:*%0A${itemsList}%0A-----------------------------%0A*Total:* $${sale.total_usd.toFixed(2)} / Bs. ${sale.total_bs.toFixed(2)}%0A*Método:* ${sale.payments.map(p => `${p.method.toUpperCase()} ${p.reference ? `(Ref: ${p.reference})` : ''}`).join(', ')}%0A${sale.notes ? `*Nota:* ${sale.notes}%0A` : ''}Hora: ${new Date(sale.created_at).toLocaleTimeString()}`;
+
+    return `https://wa.me/${phone}?text=${msg}`;
+  };
+
+  const getWhatsAppTankAlertUrl = (tank: WaterTank, targetPhone?: string) => {
+    const phone = (targetPhone || systemSettings.freyeli_phone).replace(/\D/g, '');
+    const msg = `⚠️ *ALERTA DE SUMINISTRO - H2O LIFE*%0A-----------------------------%0AEl *${tank.name}* está al *${tank.percentage}%* (${tank.current_liters.toLocaleString()} Litros restantes).%0A%0A*Capacidad Total:* ${tank.capacity_liters.toLocaleString()} L%0ASe requiere solicitar un camión cisterna para reabastecimiento.%0A%0A_Notificación automática del Sistema H2O Life POS_`;
+
+    return `https://wa.me/${phone}?text=${msg}`;
+  };
+
   return (
     <StoreContext.Provider
       value={{
         currentUser,
         setCurrentUser,
+        systemSettings,
+        updateSystemSettings,
         products,
         clients,
         tanks,
@@ -641,10 +760,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         createSale,
         createExpense,
         addClient,
+        updateClient,
+        deleteClient,
         updateTankLevel,
         registerCisternDelivery,
         createCashClosure,
         cashClosures,
+        getWhatsAppSaleUrl,
+        getWhatsAppTankAlertUrl,
       }}
     >
       {children}

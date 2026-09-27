@@ -18,6 +18,7 @@ import {
   CheckCircle2,
   Search,
   X,
+  MessageCircle,
 } from 'lucide-react';
 
 interface PosModuleProps {
@@ -37,6 +38,8 @@ export function PosModule({ isCartDrawerOpen = false, setIsCartDrawerOpen }: Pos
     exchangeRate,
     createSale,
     addClient,
+    systemSettings,
+    getWhatsAppSaleUrl,
   } = useH2OStore();
 
   const [selectedCategory, setSelectedCategory] = useState<string>('todos');
@@ -594,11 +597,22 @@ export function PosModule({ isCartDrawerOpen = false, setIsCartDrawerOpen }: Pos
 
             <div className="space-y-2">
               <button
-                onClick={handleShareWhatsApp}
-                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl shadow-md flex items-center justify-center space-x-2 text-xs"
+                onClick={() => {
+                  const url = getWhatsAppSaleUrl(completedSale, systemSettings.freyeli_phone);
+                  window.open(url, '_blank');
+                }}
+                className="w-full bg-sky-600 hover:bg-sky-700 text-white font-extrabold py-3 rounded-xl shadow-md flex items-center justify-center space-x-2 text-xs"
               >
                 <Share2 className="w-4 h-4" />
-                <span>Enviar Recibo por WhatsApp</span>
+                <span>📲 Notificar a Freyeli (WhatsApp Admin)</span>
+              </button>
+
+              <button
+                onClick={handleShareWhatsApp}
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl shadow-sm flex items-center justify-center space-x-2 text-xs"
+              >
+                <MessageCircle className="w-4 h-4" />
+                <span>Enviar Recibo al Cliente</span>
               </button>
 
               <button
@@ -652,7 +666,8 @@ export function PosModule({ isCartDrawerOpen = false, setIsCartDrawerOpen }: Pos
                   if (newClientName.trim()) {
                     const client = addClient({
                       name: newClientName.trim(),
-                      phone: newClientPhone.trim(),
+                      phone: newClientPhone.trim() || 'N/A',
+                      address: 'Entrega en tienda / Mostrador',
                       balance_usd: 0,
                     });
                     setSelectedClient(client);

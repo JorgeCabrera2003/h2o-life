@@ -6,6 +6,7 @@ export interface UserProfile {
   role: RoleType;
   email: string;
   avatar?: string;
+  phone?: string;
 }
 
 export type ProductCategory = 'agua' | 'botellon' | 'helado' | 'snack' | 'insumo';
@@ -15,6 +16,7 @@ export interface Product {
   name: string;
   category: ProductCategory;
   price_usd: number;
+  cost_usd?: number;
   stock?: number;
   unit: string;
   icon?: string;
@@ -24,10 +26,16 @@ export interface Product {
 export interface Client {
   id: string;
   name: string;
-  phone?: string;
-  address?: string;
+  phone: string;
+  address: string;
+  reference_point?: string;
+  latitude?: number;
+  longitude?: number;
+  maps_url?: string;
   notes?: string;
-  balance_usd: number; // Positive = credit, Negative = debt
+  balance_usd: number; // 0 = al día, negativo = deuda pendiente, positivo = saldo a favor
+  total_orders?: number;
+  favorite_product?: string;
   created_at: string;
 }
 
@@ -66,6 +74,7 @@ export interface Sale {
   change_usd?: number;
   change_bs?: number;
   status: 'completada' | 'anulada';
+  notified_to_admin?: boolean;
 }
 
 export interface SaleItem {
@@ -136,4 +145,16 @@ export interface ExchangeRateInfo {
   source: 'BCV Oficial' | 'Paralelo' | 'Manual';
   updated_at: string;
   is_manual_override: boolean;
+}
+
+export interface SystemSettings {
+  business_name: string;
+  business_rif: string;
+  freyeli_phone: string; // WhatsApp de Freyeli para notificaciones inmediatas
+  jorge_phone: string;   // WhatsApp de TSU Jorge Cabrera
+  tank_low_threshold_pct: number;
+  auto_notify_sales: boolean;
+  auto_notify_tank_alerts: boolean;
+  auto_notify_cisterns: boolean;
+  auto_notify_closures: boolean;
 }

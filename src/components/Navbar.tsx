@@ -2,9 +2,15 @@
 
 import React, { useState } from 'react';
 import { useH2OStore, INITIAL_USERS } from '@/lib/store';
-import { Droplet, RefreshCw, Edit3, Check, ShieldCheck, UserCheck } from 'lucide-react';
+import { ActiveTab } from '@/components/BottomNav';
+import { Droplet, Edit3, Check, Settings } from 'lucide-react';
 
-export function Navbar() {
+interface NavbarProps {
+  onNavigate?: (tab: ActiveTab) => void;
+  activeTab?: ActiveTab;
+}
+
+export function Navbar({ onNavigate, activeTab }: NavbarProps) {
   const { currentUser, setCurrentUser, exchangeRate, setExchangeRateValue } = useH2OStore();
   const [isEditingRate, setIsEditingRate] = useState(false);
   const [customRate, setCustomRate] = useState(exchangeRate.rate.toString());
@@ -22,8 +28,11 @@ export function Navbar() {
     <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-sky-100 shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
         {/* Logo & Marca */}
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-600 to-cyan-400 flex items-center justify-center text-white shadow-md shadow-sky-500/20">
+        <div
+          onClick={() => onNavigate && onNavigate('pos')}
+          className="flex items-center space-x-3 cursor-pointer group"
+        >
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-600 to-cyan-400 flex items-center justify-center text-white shadow-md shadow-sky-500/20 group-hover:scale-105 transition-transform">
             <Droplet className="w-6 h-6 fill-white text-transparent" />
           </div>
           <div>
@@ -40,7 +49,7 @@ export function Navbar() {
           </div>
         </div>
 
-        {/* Tasa BCV & Selector de Roles */}
+        {/* Tasa BCV, Ajustes & Selector de Roles */}
         <div className="flex items-center space-x-2 sm:space-x-3">
           {/* Tasa Dólar BCV */}
           <div className="bg-sky-50/80 border border-sky-200 rounded-lg px-2.5 py-1 flex items-center space-x-2">
@@ -85,6 +94,21 @@ export function Navbar() {
               )}
             </div>
           </div>
+
+          {/* Botón de Configuración del Sistema (Ajustes) */}
+          {onNavigate && (
+            <button
+              onClick={() => onNavigate('settings')}
+              className={`p-2 rounded-xl border transition-colors ${
+                activeTab === 'settings'
+                  ? 'bg-sky-100 text-sky-800 border-sky-300'
+                  : 'bg-slate-50 text-slate-500 hover:text-slate-800 border-slate-200 hover:bg-slate-100'
+              }`}
+              title="Configuración del Sistema"
+            >
+              <Settings className="w-4 h-4" />
+            </button>
+          )}
 
           {/* Selector de Rol / Usuario Activo */}
           <div className="relative">

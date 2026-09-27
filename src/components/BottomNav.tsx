@@ -1,10 +1,10 @@
 'use client';
 
 import React from 'react';
-import { ShoppingCart, Camera, Lock, Database, BarChart3 } from 'lucide-react';
+import { ShoppingCart, Users, Camera, Lock, Database, BarChart3, Settings } from 'lucide-react';
 import { useH2OStore } from '@/lib/store';
 
-export type ActiveTab = 'pos' | 'camera' | 'closure' | 'tanks' | 'finance';
+export type ActiveTab = 'pos' | 'clients' | 'camera' | 'closure' | 'tanks' | 'finance' | 'settings';
 
 interface BottomNavProps {
   activeTab: ActiveTab;
@@ -21,34 +21,39 @@ export function BottomNav({ activeTab, setActiveTab, onOpenCart }: BottomNavProp
   const navItems: { id: ActiveTab; label: string; icon: React.ReactNode }[] = [
     {
       id: 'pos',
-      label: 'Ventas POS',
-      icon: <ShoppingCart className="w-5 h-5" />,
+      label: 'Ventas',
+      icon: <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />,
+    },
+    {
+      id: 'clients',
+      label: 'Clientes',
+      icon: <Users className="w-4 h-4 sm:w-5 sm:h-5" />,
     },
     {
       id: 'camera',
-      label: 'Cámara AI',
-      icon: <Camera className="w-5 h-5" />,
+      label: 'Cámara',
+      icon: <Camera className="w-4 h-4 sm:w-5 sm:h-5" />,
     },
     {
       id: 'closure',
-      label: 'Cierre Caja',
-      icon: <Lock className="w-5 h-5" />,
+      label: 'Cierre',
+      icon: <Lock className="w-4 h-4 sm:w-5 sm:h-5" />,
     },
     {
       id: 'tanks',
       label: 'Tanques',
-      icon: <Database className="w-5 h-5" />,
+      icon: <Database className="w-4 h-4 sm:w-5 sm:h-5" />,
     },
     {
       id: 'finance',
       label: 'Finanzas',
-      icon: <BarChart3 className="w-5 h-5" />,
+      icon: <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5" />,
     },
   ];
 
   return (
     <>
-      {/* Botón Flotante del Carrito para vista móvil (cuando hay ítems y no estamos en POS o se quiere cobrar rápido) */}
+      {/* Botón Flotante del Carrito para vista móvil */}
       {totalCartItems > 0 && activeTab === 'pos' && onOpenCart && (
         <div className="fixed bottom-20 left-4 right-4 z-30 md:hidden animate-in slide-in-from-bottom-4 duration-200">
           <button
@@ -69,9 +74,9 @@ export function BottomNav({ activeTab, setActiveTab, onOpenCart }: BottomNavProp
         </div>
       )}
 
-      {/* Barra de Navegación Inferior Fija Mobile-First */}
+      {/* Barra de Navegación Inferior Mobile-First */}
       <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-lg border-t border-slate-200/80 shadow-lg pb-safe">
-        <div className="max-w-md mx-auto grid grid-cols-5 h-16 items-center px-1">
+        <div className="max-w-lg mx-auto grid grid-cols-6 h-16 items-center px-1">
           {navItems.map(item => {
             const isActive = activeTab === item.id;
             return (
@@ -91,7 +96,7 @@ export function BottomNav({ activeTab, setActiveTab, onOpenCart }: BottomNavProp
                 >
                   {item.icon}
                 </div>
-                <span className="text-[10px] tracking-tight mt-0.5">{item.label}</span>
+                <span className="text-[10px] tracking-tight mt-0.5 truncate">{item.label}</span>
               </button>
             );
           })}
