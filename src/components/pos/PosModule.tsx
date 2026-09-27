@@ -68,6 +68,8 @@ export function PosModule({
       setSelectedClient(preselectedClient);
     }
   }, [preselectedClient]);
+
+  const clientComboboxRef = React.useRef<HTMLDivElement>(null);
   const [isClientSelectOpen, setIsClientSelectOpen] = useState(false);
   const [clientSearchQuery, setClientSearchQuery] = useState('');
   const [isClientModalOpen, setIsClientModalOpen] = useState(false);
@@ -75,6 +77,22 @@ export function PosModule({
   const [newClientPhone, setNewClientPhone] = useState('');
   const [newClientAddress, setNewClientAddress] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Cerrar el dropdown al hacer clic fuera del combobox
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (clientComboboxRef.current && !clientComboboxRef.current.contains(event.target as Node)) {
+        setIsClientSelectOpen(false);
+      }
+    };
+
+    if (isClientSelectOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isClientSelectOpen]);
 
   // Clientes ordenados por Orden Actual (más recientemente registrados/actualizados primero)
   const sortedClients = React.useMemo(() => {
@@ -241,18 +259,26 @@ export function PosModule({
         {/* SELECT CON BUSCADOR DE CLIENTES */}
         <div className="flex-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
           {/* Botón Principal del Combobox de Clientes */}
-          <div className="relative flex-1">
+          <div className="relative flex-1" ref={clientComboboxRef}>
             <button
               type="button"
               onClick={() => {
                 setClientSearchQuery('');
-                setIsClientSelectOpen(true);
+                setIsClientSelectOpen(!isClientSelectOpen);
               }}
-              className="w-full bg-white hover:bg-slate-50 border border-slate-200 hover:border-sky-300 rounded-2xl px-3 py-2 text-left shadow-2xs transition-all flex items-center justify-between gap-2 group cursor-pointer"
+              className={`w-full bg-white hover:bg-slate-50 border rounded-2xl px-3.5 py-2 text-left shadow-2xs transition-all flex items-center justify-between gap-2.5 group cursor-pointer ${
+                isClientSelectOpen ? 'border-sky-500 ring-2 ring-sky-500/20' : 'border-slate-200 hover:border-sky-300'
+              }`}
             >
               <div className="flex items-center space-x-2.5 overflow-hidden">
-                <div className="w-8 h-8 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center shrink-0 font-black text-xs">
-                  {selectedClient ? selectedClient.name.slice(0, 1).toUpperCase() : '👤'}
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-sky-600 to-cyan-500 text-white flex items-center justify-center shrink-0 font-black text-xs shadow-xs">
+                  {selectedClient ? (
+                    selectedClient.id === 'client-mostrador'
+                      ? '🏪'
+                      : selectedClient.name.split(' ').length >= 2
+                      ? `${selectedClient.name.split(' ')[0][0]}${selectedClient.name.split(' ').slice(-1)[0][0]}`.toUpperCase()
+                      : selectedClient.name.slice(0, 2).toUpperCase()
+                  ) : '👤'}
                 </div>
                 <div className="truncate">
                   <div className="flex items-center space-x-1.5">
@@ -267,51 +293,53 @@ export function PosModule({
                     )}
                   </div>
                   <p className="text-[11px] text-slate-500 truncate">
-                    {selectedClient?.phone && selectedClient.phone !== 'N/A' ? selectedClient.phone : 'Mostrador'}
-                    {selectedClient?.address && selectedClient.address !== 'Venta directa en tienda' ? ` • ${selectedClient.address}` : ''}
+                    {selectedClient?.phone && selectedClient.phone !== 'N/A' ? `📞 ${selectedClient.phone}` : 'Venta en Tienda'}
+                    {selectedClient?.address && selectedClient.address !== 'Venta directa en tienda' ? ` • 📍 ${selectedClient.address}` : ''}
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center space-x-1 shrink-0 text-slate-400 group-hover:text-sky-600 transition-colors">
-                <span className="text-[10px] font-bold hidden sm:inline">Buscar</span>
-                <ChevronDown className="w-4 h-4" />
+              <div className="flex items-center space-x-1.5 shrink-0 text-slate-400 group-hover:text-sky-600 transition-colors">
+                <span className="text-[10px] font-bold bg-slate-100 group-hover:bg-sky-50 px-2 py-0.5 rounded-lg hidden sm:inline">
+                  {isClientSelectOpen ? 'Cerrar' : 'Buscar'}
+                </span>
+                <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isClientSelectOpen ? 'rotate-180 text-sky-600' : ''}`} />
               </div>
             </button>
 
-            {/* MODAL / DROPDOWN BUSCADOR DE CLIENTES (ORDEN ACTUAL) */}
+            {/* DROPDOWN / POPOVER ANCLADO (SELECT CON BUSCADOR DINÁMICO) */}
             {isClientSelectOpen && (
-              <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
-                <div className="bg-white rounded-3xl max-w-lg w-full p-4 sm:p-5 shadow-2xl animate-in zoom-in-95 flex flex-col max-h-[85vh]">
-                  {/* Encabezado del Buscador */}
-                  <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                    <div>
-                      <h4 className="font-black text-sm text-slate-900 flex items-center space-x-1.5">
-                        <User className="w-4 h-4 text-sky-600" />
-                        <span>Seleccionar Cliente (Orden Actual)</span>
-                      </h4>
-                      <p className="text-[11px] text-slate-400">
-                        Los clientes más recientes y actualizados aparecen primero
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setIsClientSelectOpen(false)}
-                      className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 text-sm cursor-pointer"
-                    >
-                      <X className="w-5 h-5" />
-                    </button>
+              <div className="absolute left-0 right-0 sm:right-auto sm:w-[480px] top-full mt-2 z-40 bg-white rounded-3xl border border-slate-200 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-150 flex flex-col max-h-[72vh] sm:max-h-[480px] overflow-hidden">
+                {/* Encabezado del Dropdown */}
+                <div className="p-3.5 pb-2.5 border-b border-slate-100 bg-slate-50/80 flex items-center justify-between">
+                  <div>
+                    <h4 className="font-black text-xs sm:text-sm text-slate-900 flex items-center space-x-1.5">
+                      <User className="w-4 h-4 text-sky-600" />
+                      <span>Directorio de Clientes</span>
+                    </h4>
+                    <p className="text-[10px] sm:text-[11px] text-slate-500">
+                      Ordenados por registro más reciente
+                    </p>
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsClientSelectOpen(false)}
+                    className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 text-xs cursor-pointer"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
 
-                  {/* Campo de Búsqueda en Tiempo Real */}
-                  <div className="relative my-3">
-                    <Search className="w-4 h-4 text-sky-500 absolute left-3 top-3" />
+                {/* Campo de Búsqueda Rápida */}
+                <div className="p-3 pb-2 border-b border-slate-100 bg-white">
+                  <div className="relative">
+                    <Search className="w-4 h-4 text-sky-500 absolute left-3 top-2.5" />
                     <input
                       type="text"
-                      placeholder="Buscar por nombre, teléfono, calle o referencia..."
+                      placeholder="Buscar por nombre, teléfono, calle..."
                       value={clientSearchQuery}
                       onChange={e => setClientSearchQuery(e.target.value)}
-                      className="w-full pl-9 pr-8 py-2.5 text-xs font-semibold bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:border-sky-500 shadow-inner"
+                      className="w-full pl-9 pr-8 py-2 text-xs font-semibold bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:border-sky-500 focus:bg-white shadow-2xs"
                       autoFocus
                     />
                     {clientSearchQuery && (
@@ -324,114 +352,132 @@ export function PosModule({
                       </button>
                     )}
                   </div>
+                </div>
 
-                  {/* Lista de Resultados con Orden Actual */}
-                  <div className="overflow-y-auto flex-1 divide-y divide-slate-100 -mx-1 px-1">
-                    {filteredClientsForSelect.length > 0 ? (
-                      filteredClientsForSelect.map(client => {
-                        const isSelected = selectedClient?.id === client.id;
-                        const hasDebt = client.balance_usd < 0;
-                        return (
-                          <button
-                            key={client.id}
-                            type="button"
-                            onClick={() => {
-                              setSelectedClient(client);
-                              setIsClientSelectOpen(false);
-                            }}
-                            className={`w-full text-left p-3 rounded-2xl flex items-center justify-between gap-3 transition-colors cursor-pointer ${
-                              isSelected
-                                ? 'bg-sky-50 text-sky-950 border border-sky-200'
-                                : 'hover:bg-slate-50 text-slate-800'
-                            }`}
-                          >
-                            <div className="flex items-center space-x-2.5 truncate">
-                              <div
-                                className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${
-                                  isSelected ? 'bg-sky-600 text-white' : 'bg-slate-100 text-slate-600'
-                                }`}
-                              >
-                                {client.name.slice(0, 1).toUpperCase()}
-                              </div>
-                              <div className="truncate">
-                                <div className="flex items-center space-x-1.5">
-                                  <span className="text-xs font-black text-slate-900 truncate">
-                                    {client.name}
-                                  </span>
-                                  {client.id === 'client-mostrador' && (
-                                    <span className="text-[10px] bg-slate-200 text-slate-700 font-bold px-1.5 py-0.2 rounded-md">
-                                      Mostrador
-                                    </span>
-                                  )}
-                                  {client.total_orders && client.total_orders >= 10 && (
-                                    <span className="text-[10px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.2 rounded-md">
-                                      ⭐ Habitual
-                                    </span>
-                                  )}
-                                </div>
-                                <div className="flex items-center space-x-2 text-[11px] text-slate-500 mt-0.5 truncate">
-                                  {client.phone && client.phone !== 'N/A' && (
-                                    <span className="font-semibold text-sky-700">{client.phone}</span>
-                                  )}
-                                  {client.address && (
-                                    <span className="truncate">📍 {client.address}</span>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
+                {/* Lista de Clientes con Scroll Suave */}
+                <div className="overflow-y-auto p-2 space-y-1.5 divide-y divide-slate-100/60">
+                  {filteredClientsForSelect.length > 0 ? (
+                    filteredClientsForSelect.map(client => {
+                      const isSelected = selectedClient?.id === client.id;
+                      const hasDebt = client.balance_usd < 0;
+                      const isMostrador = client.id === 'client-mostrador';
 
-                            <div className="flex items-center space-x-2 shrink-0">
-                              {hasDebt ? (
-                                <span className="text-[10px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-full">
-                                  Debe ${Math.abs(client.balance_usd).toFixed(2)}
-                                </span>
-                              ) : (
-                                <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full hidden sm:inline">
-                                  Al día
-                                </span>
-                              )}
-                              {isSelected && <Check className="w-4 h-4 text-sky-600" />}
-                            </div>
-                          </button>
-                        );
-                      })
-                    ) : (
-                      <div className="text-center py-8">
-                        <p className="text-xs text-slate-500 font-medium mb-3">
-                          No se encontraron clientes para &quot;{clientSearchQuery}&quot;
-                        </p>
+                      // Calcular iniciales profesionales
+                      const parts = client.name.trim().split(/\s+/);
+                      const initials = parts.length >= 2
+                        ? `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase()
+                        : client.name.slice(0, 2).toUpperCase();
+
+                      return (
                         <button
+                          key={client.id}
                           type="button"
                           onClick={() => {
-                            setNewClientName(clientSearchQuery);
+                            setSelectedClient(client);
                             setIsClientSelectOpen(false);
-                            setIsClientModalOpen(true);
                           }}
-                          className="bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs px-3.5 py-2 rounded-xl shadow-xs cursor-pointer"
+                          className={`w-full text-left p-2.5 rounded-2xl flex items-center justify-between gap-2.5 transition-all cursor-pointer ${
+                            isSelected
+                              ? 'bg-sky-50/90 text-sky-950 border border-sky-300 ring-1 ring-sky-300 shadow-2xs'
+                              : 'hover:bg-slate-50 text-slate-800 border border-transparent'
+                          }`}
                         >
-                          + Registrar a &quot;{clientSearchQuery}&quot; como nuevo cliente
-                        </button>
-                      </div>
-                    )}
-                  </div>
+                          <div className="flex items-center space-x-2.5 min-w-0">
+                            <div
+                              className={`w-9 h-9 rounded-xl flex items-center justify-center font-black text-xs shrink-0 ${
+                                isMostrador
+                                  ? 'bg-amber-100 text-amber-800'
+                                  : isSelected
+                                  ? 'bg-sky-600 text-white'
+                                  : 'bg-slate-100 text-slate-700'
+                              }`}
+                            >
+                              {isMostrador ? '🏪' : initials}
+                            </div>
 
-                  {/* Pie del modal con botón de Nuevo Cliente */}
-                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2 mt-2">
-                    <span className="text-[11px] font-semibold text-slate-400">
-                      {filteredClientsForSelect.length} cliente(s) registrados
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsClientSelectOpen(false);
-                        setIsClientModalOpen(true);
-                      }}
-                      className="bg-gradient-to-r from-sky-600 to-cyan-500 text-white font-bold text-xs px-3.5 py-2 rounded-xl shadow-sm hover:from-sky-700 active:scale-95 transition-all flex items-center space-x-1.5 cursor-pointer"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>+ Nuevo Cliente</span>
-                    </button>
-                  </div>
+                            <div className="min-w-0">
+                              <div className="flex items-center space-x-1.5">
+                                <span className="text-xs font-black text-slate-900 truncate">
+                                  {client.name}
+                                </span>
+                                {isMostrador && (
+                                  <span className="text-[9px] bg-slate-200 text-slate-700 font-bold px-1.5 py-0.2 rounded-md shrink-0">
+                                    Tienda
+                                  </span>
+                                )}
+                                {client.total_orders && client.total_orders >= 10 && (
+                                  <span className="text-[9px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.2 rounded-md shrink-0">
+                                    ⭐ Habitual
+                                  </span>
+                                )}
+                              </div>
+
+                              <div className="flex items-center space-x-2 text-[11px] text-slate-500 mt-0.5">
+                                {client.phone && client.phone !== 'N/A' && (
+                                  <span className="font-semibold text-sky-700 shrink-0">
+                                    {client.phone}
+                                  </span>
+                                )}
+                                {client.address && (
+                                  <span className="truncate text-slate-400">
+                                    📍 {client.address}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center space-x-2 shrink-0">
+                            {hasDebt ? (
+                              <span className="text-[10px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-full">
+                                Debe ${Math.abs(client.balance_usd).toFixed(2)}
+                              </span>
+                            ) : (
+                              <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full hidden sm:inline">
+                                Al día
+                              </span>
+                            )}
+                            {isSelected && <Check className="w-4 h-4 text-sky-600 shrink-0" />}
+                          </div>
+                        </button>
+                      );
+                    })
+                  ) : (
+                    <div className="text-center py-6">
+                      <p className="text-xs text-slate-500 font-medium mb-2.5">
+                        No se encontraron clientes para &quot;{clientSearchQuery}&quot;
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setNewClientName(clientSearchQuery);
+                          setIsClientSelectOpen(false);
+                          setIsClientModalOpen(true);
+                        }}
+                        className="bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs px-3.5 py-2 rounded-xl shadow-xs cursor-pointer active:scale-95"
+                      >
+                        + Registrar a &quot;{clientSearchQuery}&quot; ahora
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Pie del Dropdown */}
+                <div className="p-3 border-t border-slate-100 bg-slate-50/70 flex items-center justify-between gap-2">
+                  <span className="text-[11px] font-semibold text-slate-400">
+                    {filteredClientsForSelect.length} cliente(s)
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsClientSelectOpen(false);
+                      setIsClientModalOpen(true);
+                    }}
+                    className="bg-gradient-to-r from-sky-600 to-cyan-500 text-white font-bold text-xs px-3 py-1.5 rounded-xl shadow-sm hover:from-sky-700 active:scale-95 transition-all flex items-center space-x-1 cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Nuevo Cliente</span>
+                  </button>
                 </div>
               </div>
             )}
@@ -536,17 +582,31 @@ export function PosModule({
 
         {/* Panel del Carrito de Ventas (Visible en Desktop y Bottom Sheet en Mobile) */}
         <div
-          className={`fixed inset-y-0 right-0 z-50 w-full sm:w-96 bg-white shadow-2xl p-5 transform transition-transform duration-200 lg:static lg:w-auto lg:h-auto lg:shadow-none lg:border lg:border-slate-200/80 lg:rounded-2xl lg:p-5 flex flex-col justify-between ${
+          className={`fixed inset-y-0 right-0 z-40 w-full sm:w-96 bg-white shadow-2xl p-5 transform transition-transform duration-200 lg:static lg:z-auto lg:w-auto lg:h-auto lg:shadow-none lg:border lg:border-slate-200/80 lg:rounded-2xl lg:p-5 flex flex-col justify-between ${
             isCartDrawerOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'
           }`}
         >
           <div>
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
               <div>
-                <h3 className="font-extrabold text-base text-slate-900">Orden Actual</h3>
-                <p className="text-xs text-slate-500">
-                  Cliente: <span className="font-bold text-sky-700">{selectedClient?.name}</span>
-                </p>
+                <h3 className="font-extrabold text-base text-slate-900 flex items-center space-x-1.5">
+                  <span>🛒 Detalle del Pedido</span>
+                </h3>
+                <div className="flex items-center space-x-2 mt-0.5">
+                  <p className="text-xs text-slate-500 truncate max-w-[190px]">
+                    Cliente: <span className="font-bold text-sky-700">{selectedClient?.name}</span>
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsClientSelectOpen(prev => !prev);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    className="text-[10px] font-bold text-sky-600 hover:text-sky-800 bg-sky-50 hover:bg-sky-100 px-1.5 py-0.5 rounded-md cursor-pointer transition-colors"
+                  >
+                    Cambiar
+                  </button>
+                </div>
               </div>
               <div className="flex items-center space-x-2">
                 {cart.length > 0 && (

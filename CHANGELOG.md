@@ -4,6 +4,21 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 
 ---
 
+## [1.3.1] - 2026-09-27
+
+### 🚀 Agregado & Optimizado
+* **Dropdown Popover Anclado para el Directorio de Clientes (Anti-Split Screen):**
+  * Se sustituyó el modal a pantalla completa con fondo oscuro opaco por un **desplegable anclado (`Combobox Popover`)** que nace directamente del botón de cliente sin tapar la pantalla ni generar conflicto con el carrito de ventas lateral.
+  * Cierre inteligente automático al hacer clic fuera del desplegable (`click-outside handler`) o al seleccionar un cliente.
+  * Corrección de nombres duplicados: se renombró el dropdown a **"Directorio de Clientes"** (`Ordenados por registro más reciente`) y el panel lateral a **"🛒 Detalle del Pedido"**, eliminando la repetición confusa de "Orden Actual" en ambos lados de la pantalla.
+  * Botón de cambio rápido `[ Cambiar ]` directamente en el encabezado del carrito para conmutar el cliente en cualquier momento.
+  * Corrección del botón de creación: corregido el duplicado `+ + Nuevo Cliente` a un icono limpio con texto estructurado.
+  * Avatares de dos letras personalizados (`CL`, `DM`, `PR`, `CM`, `MG`) y distintivo comercial `🏪` para mostrador con paleta de colores contrastante.
+* **Corrección de Contexto de Apilamiento CSS (`z-index: auto` en Desktop):**
+  * Se ajustó el panel del carrito para usar `lg:z-auto`, evitando que en pantallas de escritorio el carrito compita o quede sobrepuesto a modales o capas de interfaz superpuestas.
+
+---
+
 ## [1.3.0] - 2026-09-27
 
 ### 🚀 Agregado & Optimizado
