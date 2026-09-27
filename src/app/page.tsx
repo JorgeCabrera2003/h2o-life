@@ -20,7 +20,7 @@ function H2OLifeApp() {
     <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900">
       <Navbar onNavigate={setActiveTab} activeTab={activeTab} />
 
-      <main className="flex-1 w-full">
+      <main className="flex-1 w-full pb-36 sm:pb-40">
         {activeTab === 'pos' && (
           <PosModule
             isCartDrawerOpen={isCartDrawerOpen}

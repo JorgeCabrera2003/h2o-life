@@ -71,7 +71,7 @@ export function FinanceModule() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-4 pb-24 md:pb-8">
+    <div className="max-w-5xl mx-auto px-4 py-4 pb-40 md:pb-36">
       {/* Título & Botón de Gasto */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
         <div>

@@ -142,7 +142,7 @@ export function PosModule({ isCartDrawerOpen = false, setIsCartDrawerOpen }: Pos
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-4 pb-24 md:pb-8">
+    <div className="max-w-7xl mx-auto px-4 py-4 pb-40 md:pb-36">
       {/* 1. SECCIÓN RÁPIDA: RECARGAS (Atajo instantáneo de libreta) */}
       <div className="bg-gradient-to-r from-sky-500 via-sky-600 to-cyan-600 rounded-2xl p-4 text-white shadow-md shadow-sky-500/15 mb-5">
         <div className="flex items-center justify-between mb-3">

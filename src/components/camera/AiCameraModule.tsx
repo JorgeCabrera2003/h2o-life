@@ -94,7 +94,7 @@ export function AiCameraModule({ onProductAddedToCart }: AiCameraModuleProps) {
   };
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-4 pb-24 md:pb-8">
+    <div className="max-w-3xl mx-auto px-4 py-4 pb-40 md:pb-36">
       {/* Header */}
       <div className="text-center mb-5">
         <div className="inline-flex items-center space-x-1.5 bg-sky-50 text-sky-700 px-3 py-1 rounded-full text-xs font-bold border border-sky-200 mb-2">

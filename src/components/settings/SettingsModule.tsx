@@ -55,7 +55,7 @@ export function SettingsModule() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-4 pb-24 md:pb-8">
+    <div className="max-w-4xl mx-auto px-4 py-4 pb-40 md:pb-36">
       {/* Título */}
       <div className="flex items-center justify-between mb-6">
         <div>
