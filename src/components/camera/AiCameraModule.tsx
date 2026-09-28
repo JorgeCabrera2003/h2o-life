@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 import { useH2OStore } from '@/lib/store';
-import { Camera, RefreshCw, CheckCircle, AlertTriangle, Droplet, Sparkles, Plus, Image as ImageIcon } from 'lucide-react';
+import { Camera, RefreshCw, CheckCircle, AlertTriangle, Droplet, Sparkles, Plus, Image as ImageIcon, Video, RotateCcw, X, Upload } from 'lucide-react';
 
 interface AiCameraModuleProps {
   onProductAddedToCart?: () => void;
@@ -16,7 +16,103 @@ export function AiCameraModule({ onProductAddedToCart }: AiCameraModuleProps) {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<any>(null);
 
+  // Control del Visor de Cámara en Vivo (WebRTC)
+  const [isLiveCameraOpen, setIsLiveCameraOpen] = useState(false);
+  const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment');
+  const [cameraError, setCameraError] = useState<string | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Iniciar transmisión de video en vivo
+  const startLiveCamera = async (facing: 'environment' | 'user' = facingMode) => {
+    setCameraError(null);
+    stopLiveCamera();
+
+    try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('Tu navegador no soporta transmisión WebRTC en vivo. Usa la opción de foto.');
+      }
+
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: facing,
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+        },
+        audio: false,
+      });
+
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.play().catch(() => {});
+      }
+      setIsLiveCameraOpen(true);
+      setImagePreview(null);
+      setAnalysisResult(null);
+    } catch (err: any) {
+      console.warn('Error accediendo a cámara WebRTC:', err);
+      setCameraError(
+        err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError'
+          ? 'Permiso de cámara denegado. Permite el acceso a la cámara o usa la captura de archivo.'
+          : 'No se pudo iniciar el visor en vivo. Puedes tomar foto directa con tu app de cámara.'
+      );
+      setIsLiveCameraOpen(false);
+      // Fallback automático al selector nativo
+      fileInputRef.current?.click();
+    }
+  };
+
+  // Detener cámara en vivo
+  const stopLiveCamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+    setIsLiveCameraOpen(false);
+  };
+
+  // Cambiar entre cámara trasera y delantera
+  const toggleCameraFacing = () => {
+    const nextFacing = facingMode === 'environment' ? 'user' : 'environment';
+    setFacingMode(nextFacing);
+    if (isLiveCameraOpen) {
+      startLiveCamera(nextFacing);
+    }
+  };
+
+  // Capturar fotograma de la cámara en vivo
+  const takeLiveSnapshot = () => {
+    if (!videoRef.current) return;
+
+    const video = videoRef.current;
+    const canvas = canvasRef.current || document.createElement('canvas');
+    canvas.width = video.videoWidth || 640;
+    canvas.height = video.videoHeight || 480;
+
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+      setImagePreview(dataUrl);
+      stopLiveCamera();
+      processImage(dataUrl);
+    }
+  };
+
+  // Limpiar tracks al desmontar
+  React.useEffect(() => {
+    return () => {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, []);
 
   const selectedTank = tanks.find(t => t.id === selectedTankId) || tanks[0];
 
@@ -154,7 +250,7 @@ export function AiCameraModule({ onProductAddedToCart }: AiCameraModuleProps) {
       )}
 
       {/* Área de Captura de Cámara */}
-      <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm text-center mb-5">
+      <div className="bg-white rounded-3xl p-4 sm:p-6 border border-slate-200 shadow-sm text-center mb-5">
         <input
           ref={fileInputRef}
           type="file"
@@ -164,13 +260,80 @@ export function AiCameraModule({ onProductAddedToCart }: AiCameraModuleProps) {
           className="hidden"
         />
 
-        {imagePreview ? (
-          <div className="relative rounded-2xl overflow-hidden mb-4 border border-slate-200 max-h-72 flex items-center justify-center bg-slate-900">
+        {/* 1. VISOR DE VIDEO EN VIVO (WEBRTC) */}
+        {isLiveCameraOpen ? (
+          <div className="relative rounded-2xl overflow-hidden mb-4 bg-slate-950 aspect-4/3 sm:aspect-16/9 flex items-center justify-center border-2 border-sky-500 shadow-xl">
+            <video
+              ref={videoRef}
+              playsInline
+              autoPlay
+              muted
+              className="w-full h-full object-cover"
+            />
+
+            {/* Cuadrícula de Escaneo HUD */}
+            <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-4">
+              <div className="flex justify-between items-center text-white/90 text-xs">
+                <span className="bg-slate-900/80 backdrop-blur-md px-3 py-1 rounded-full font-bold flex items-center space-x-1.5 border border-white/20">
+                  <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                  <span>EN VIVO ({facingMode === 'environment' ? 'Trasera' : 'Frontal'})</span>
+                </span>
+                <span className="bg-slate-900/80 backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] font-semibold border border-white/20">
+                  {activeMode === 'tank' ? 'Medición de Tanque' : 'Sensor de Botellón'}
+                </span>
+              </div>
+
+              {/* Marco de Escaneo con Esquinas */}
+              <div className="relative w-48 h-48 sm:w-64 sm:h-64 mx-auto border-2 border-dashed border-sky-400/70 rounded-2xl flex items-center justify-center">
+                {/* Línea láser de escaneo animada */}
+                <div className="absolute left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-cyan-400 to-transparent animate-bounce shadow-lg shadow-cyan-500/50" />
+                <p className="text-[11px] font-bold text-white/80 bg-slate-900/60 px-2 py-0.5 rounded-md backdrop-blur-xs">
+                  {activeMode === 'tank' ? 'Encuadre el nivel' : 'Centre el botellón'}
+                </p>
+              </div>
+
+              {/* Barra de Controles en Pantalla */}
+              <div className="flex items-center justify-between pointer-events-auto pt-2">
+                <button
+                  type="button"
+                  onClick={toggleCameraFacing}
+                  className="p-3 bg-slate-900/80 hover:bg-slate-800 text-white rounded-full backdrop-blur-md border border-white/20 active:scale-95 transition-all"
+                  title="Girar cámara (Frontal / Trasera)"
+                >
+                  <RotateCcw className="w-5 h-5" />
+                </button>
+
+                {/* Botón Disparador Principal */}
+                <button
+                  type="button"
+                  onClick={takeLiveSnapshot}
+                  className="w-16 h-16 rounded-full bg-white border-4 border-sky-500 shadow-lg shadow-sky-500/50 flex items-center justify-center hover:scale-105 active:scale-95 transition-all cursor-pointer group"
+                  title="Capturar y Analizar"
+                >
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-sky-500 to-cyan-400 group-hover:scale-95 transition-transform flex items-center justify-center">
+                    <Camera className="w-6 h-6 text-white" />
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={stopLiveCamera}
+                  className="p-3 bg-slate-900/80 hover:bg-slate-800 text-white rounded-full backdrop-blur-md border border-white/20 active:scale-95 transition-all"
+                  title="Cerrar cámara"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : imagePreview ? (
+          /* 2. VISTA PREVIA DE CAPTURA CON ANÁLISIS */
+          <div className="relative rounded-2xl overflow-hidden mb-4 border border-slate-200 max-h-80 flex items-center justify-center bg-slate-900">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={imagePreview} alt="Captura" className="max-h-72 object-contain" />
+            <img src={imagePreview} alt="Captura" className="max-h-80 object-contain" />
 
             {isAnalyzing && (
-              <div className="absolute inset-0 bg-slate-900/70 backdrop-blur-xs flex flex-col items-center justify-center text-white">
+              <div className="absolute inset-0 bg-slate-900/75 backdrop-blur-xs flex flex-col items-center justify-center text-white">
                 <RefreshCw className="w-8 h-8 animate-spin text-sky-400 mb-2" />
                 <p className="text-xs font-bold tracking-wider uppercase">Analizando Imagen con IA...</p>
                 <div className="w-48 h-1 bg-white/20 rounded-full mt-2 overflow-hidden">
@@ -180,7 +343,8 @@ export function AiCameraModule({ onProductAddedToCart }: AiCameraModuleProps) {
             )}
           </div>
         ) : (
-          <div className="py-12 border-2 border-dashed border-sky-200 rounded-2xl bg-sky-50/40 mb-4 flex flex-col items-center justify-center">
+          /* 3. ESTADO INICIAL / SELECCIÓN */
+          <div className="py-10 border-2 border-dashed border-sky-200 rounded-2xl bg-sky-50/40 mb-4 flex flex-col items-center justify-center">
             <div className="w-16 h-16 rounded-2xl bg-sky-100 text-sky-600 flex items-center justify-center mb-3">
               <Camera className="w-8 h-8" />
             </div>
@@ -188,20 +352,38 @@ export function AiCameraModule({ onProductAddedToCart }: AiCameraModuleProps) {
               {activeMode === 'tank' ? 'Fotografía la marca de nivel del tanque' : 'Apunta la cámara al botellón'}
             </p>
             <p className="text-xs text-slate-500 mt-1 max-w-xs">
-              Usa la cámara del teléfono o selecciona una foto de la galería
+              Activa el visor en tiempo real o carga una foto desde la galería de tu dispositivo
             </p>
+            {cameraError && (
+              <p className="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-xl mt-3 max-w-sm">
+                ⚠️ {cameraError}
+              </p>
+            )}
           </div>
         )}
 
-        <div className="flex space-x-3 justify-center">
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="bg-gradient-to-r from-sky-600 to-cyan-500 hover:from-sky-700 text-white font-extrabold px-6 py-3 rounded-xl shadow-md shadow-sky-500/20 active:scale-95 transition-all flex items-center space-x-2 text-xs"
-          >
-            <Camera className="w-4 h-4" />
-            <span>{imagePreview ? 'Tomar Otra Foto' : 'Abrir Cámara'}</span>
-          </button>
-        </div>
+        {/* BOTONES DE ACCIÓN */}
+        {!isLiveCameraOpen && (
+          <div className="flex flex-wrap items-center justify-center gap-2.5">
+            <button
+              type="button"
+              onClick={() => startLiveCamera()}
+              className="bg-gradient-to-r from-sky-600 to-cyan-500 hover:from-sky-700 text-white font-extrabold px-5 py-2.5 rounded-xl shadow-md shadow-sky-500/20 active:scale-95 transition-all flex items-center space-x-2 text-xs cursor-pointer"
+            >
+              <Video className="w-4 h-4" />
+              <span>{imagePreview ? 'Reabrir Cámara en Vivo' : 'Iniciar Cámara en Vivo'}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="bg-white hover:bg-slate-50 text-slate-700 font-bold px-4 py-2.5 rounded-xl border border-slate-200 shadow-2xs active:scale-95 transition-all flex items-center space-x-2 text-xs cursor-pointer"
+            >
+              <Upload className="w-4 h-4 text-slate-400" />
+              <span>{imagePreview ? 'Subir Otra Foto' : 'Foto / Galería'}</span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Resultados del Análisis de IA */}
