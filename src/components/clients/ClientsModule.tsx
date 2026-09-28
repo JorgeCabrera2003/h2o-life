@@ -24,6 +24,7 @@ import {
   sanitizeVenezuelanPhoneInput,
   sanitizeCurrencyInput,
   resolveBarquisimetoCoordinates,
+  calculateDeliveryRouteInfo,
   COUNTRY_CODES,
   VENEZUELAN_OPERATORS,
 } from '@/lib/validators';
@@ -150,7 +151,7 @@ export function ClientsModule({ onSelectClientForSale }: ClientsModuleProps) {
       return;
     }
 
-    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${coordinates.lat.toFixed(6)},${coordinates.lng.toFixed(6)}`;
+    const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=10.07125,-69.32705&destination=${coordinates.lat.toFixed(6)},${coordinates.lng.toFixed(6)}&travelmode=driving`;
 
     const clientPayload = {
       name: name.trim(),
@@ -249,6 +250,7 @@ export function ClientsModule({ onSelectClientForSale }: ClientsModuleProps) {
           const isOldDefault = !client.latitude || (Math.abs(client.latitude - 10.0682) < 0.001 && Math.abs((client.longitude ?? 0) - -69.3235) < 0.001);
           const clientLat = (isOldDefault && resolved) ? resolved.lat : (client.latitude || resolved?.lat || 10.07125);
           const clientLng = (isOldDefault && resolved) ? resolved.lng : (client.longitude || resolved?.lng || -69.32535);
+          const routeInfo = calculateDeliveryRouteInfo(clientLat, clientLng);
 
           return (
             <div
@@ -302,6 +304,15 @@ export function ClientsModule({ onSelectClientForSale }: ClientsModuleProps) {
                     </div>
                   )}
 
+                  {client.id !== 'client-mostrador' && (
+                    <div className="flex items-center space-x-1.5 text-[11px] font-bold text-sky-700 bg-sky-50/90 px-2.5 py-1 rounded-xl border border-sky-200/70 mt-1">
+                      <Navigation className="w-3.5 h-3.5 text-sky-600 shrink-0" />
+                      <span className="truncate">
+                        Sede (C. 28 c/ Cra 25) ➔ Cliente: ~{routeInfo.formattedDistance} • ~{routeInfo.estimatedMinutes} min
+                      </span>
+                    </div>
+                  )}
+
                   {client.notes && (
                     <div className="mt-1 pt-1.5 border-t border-slate-200/60 text-[11px] text-slate-600">
                       📝 {client.notes}
@@ -318,10 +329,11 @@ export function ClientsModule({ onSelectClientForSale }: ClientsModuleProps) {
                           updateClient(client.id, {
                             latitude: newLat,
                             longitude: newLng,
-                            maps_url: `https://www.google.com/maps/search/?api=1&query=${newLat.toFixed(6)},${newLng.toFixed(6)}`,
+                            maps_url: `https://www.google.com/maps/dir/?api=1&origin=10.07125,-69.32705&destination=${newLat.toFixed(6)},${newLng.toFixed(6)}&travelmode=driving`,
                           });
                         }}
                         addressLabel={client.address}
+                        showStoreRoute={true}
                       />
                     </div>
                   )}
@@ -341,15 +353,16 @@ export function ClientsModule({ onSelectClientForSale }: ClientsModuleProps) {
                     </button>
                   )}
 
-                  {client.maps_url && (
+                  {client.id !== 'client-mostrador' && (
                     <a
-                      href={client.maps_url}
+                      href={routeInfo.googleMapsDirectionsUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="p-2 rounded-xl bg-sky-50 text-sky-600 hover:bg-sky-100 transition-colors flex items-center space-x-1"
-                      title="Abrir ubicación en Google Maps / Waze"
+                      title="Trazar ruta de despacho desde la Sede (Calle 28 con Carrera 25) en Google Maps / Waze"
                     >
                       <Navigation className="w-4 h-4" />
+                      <span className="text-[10px] font-bold hidden sm:inline">Ruta</span>
                     </a>
                   )}
 

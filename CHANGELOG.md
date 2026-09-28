@@ -4,6 +4,25 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 
 ---
 
+## [1.4.0] - 2026-09-28
+
+### 🚀 Agregado & Optimizado
+* **Geolocalización de la Sede Principal y Trazado de Rutas de Despacho:**
+  * Fijada la ubicación oficial de la tienda **H2O Life** en **Calle 28 con Carrera 25, Barquisimeto** (`lat: 10.07125, lng: -69.32705`).
+  * En el mapa interactivo [`InteractiveMapPicker.tsx`](file:///c:/proyectos/h2o-life/src/components/clients/InteractiveMapPicker.tsx) ahora se renderizan **dos pines simultáneos**: la **Sede H2O Life (`🏪`)** como punto de origen y el **Punto de Entrega del Cliente (`💧`)**.
+  * Trazo de ruta visual dinámica (`L.polyline`) con estilo discontinuo azul que une la tienda con la dirección del cliente.
+  * Autoencuadre inteligente (`fitBounds`) para abarcar todo el trayecto entre la tienda y el cliente en una sola vista.
+  * Banner superior flotante que calcula y muestra la distancia real estimada en cuadrícula urbana y los minutos de despacho (ej. `~1.2 km • ~5 min en despacho`).
+  * Botón directo **`🚗 Cómo llegar`** que genera la ruta paso a paso en **Google Maps** y **Waze** teniendo como origen fijado la sede de la Calle 28.
+  * Insignia informativa de despacho en cada tarjeta de cliente en [`ClientsModule.tsx`](file:///c:/proyectos/h2o-life/src/components/clients/ClientsModule.tsx).
+* **Corrección de Identidad y Canales de Notificación para Freyeliz:**
+  * Actualizado el nombre de la Administradora a **Freyeliz** en todo el sistema (`INITIAL_USERS`, variables de configuración, WhatsApp y botones de notificación).
+  * Canal de alerta de WhatsApp sincronizado para que los reportes de ventas, arqueos de caja y alertas de tanques vacíos se dirijan formalmente a Freyeliz.
+* **Suite de Pruebas Extendida a 12 Validaciones:**
+  * Añadida la prueba 12 en [`scripts/test-system.js`](file:///c:/proyectos/h2o-life/scripts/test-system.js) para certificar matemáticamente el origen en Calle 28 con Carrera 25 y la generación de la URL de navegación.
+
+---
+
 ## [1.3.1] - 2026-09-27
 
 ### 🚀 Agregado & Optimizado

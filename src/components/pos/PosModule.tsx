@@ -921,13 +921,13 @@ export function PosModule({
             <div className="space-y-2">
               <button
                 onClick={() => {
-                  const url = getWhatsAppSaleUrl(completedSale, systemSettings.freyeli_phone);
+                  const url = getWhatsAppSaleUrl(completedSale, systemSettings.freyeliz_phone || systemSettings.freyeli_phone);
                   window.open(url, '_blank');
                 }}
                 className="w-full bg-sky-600 hover:bg-sky-700 text-white font-extrabold py-3 rounded-xl shadow-md flex items-center justify-center space-x-2 text-xs"
               >
                 <Share2 className="w-4 h-4" />
-                <span>📲 Notificar a Freyeli (WhatsApp Admin)</span>
+                <span>📲 Notificar a Freyeliz (WhatsApp Admin)</span>
               </button>
 
               <button

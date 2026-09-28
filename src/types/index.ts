@@ -150,7 +150,11 @@ export interface ExchangeRateInfo {
 export interface SystemSettings {
   business_name: string;
   business_rif: string;
-  freyeli_phone: string; // WhatsApp de Freyeli para notificaciones inmediatas
+  store_address: string; // Calle 28 con Carrera 25, Barquisimeto
+  store_lat: number;     // 10.07125
+  store_lng: number;     // -69.32705
+  freyeliz_phone: string; // WhatsApp de Freyeliz para notificaciones inmediatas
+  freyeli_phone?: string; // Compatibilidad de acceso
   jorge_phone: string;   // WhatsApp de TSU Jorge Cabrera
   tank_low_threshold_pct: number;
   auto_notify_sales: boolean;

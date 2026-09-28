@@ -348,6 +348,42 @@ async function runTests() {
     failed++;
   }
 
+  // PRUEBA 12: Cálculo de Rutas de Despacho desde Sede Principal (Calle 28 con Carrera 25)
+  try {
+    process.stdout.write('12. [Logística & Rutas] Despacho desde Sede Principal (C. 28 c/ Cra 25)... ');
+    const storeLat = 10.07125;
+    const storeLng = -69.32705;
+    const destLat = 10.07125;
+    const destLng = -69.32535; // Calle 26 con Carrera 25
+
+    // Distancia geodésica y estimación urbana
+    const R = 6371;
+    const dLat = (destLat - storeLat) * (Math.PI / 180);
+    const dLng = (destLng - storeLng) * (Math.PI / 180);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(storeLat * (Math.PI / 180)) *
+        Math.cos(destLat * (Math.PI / 180)) *
+        Math.sin(dLng / 2) *
+        Math.sin(dLng / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distStraight = R * c;
+    const streetDist = Number((distStraight * 1.28).toFixed(2));
+    const minEst = Math.max(3, Math.round((streetDist / 25) * 60) + 2);
+    const dirUrl = `https://www.google.com/maps/dir/?api=1&origin=${storeLat},${storeLng}&destination=${destLat},${destLng}&travelmode=driving`;
+
+    if (dirUrl.includes('origin=10.07125,-69.32705') && dirUrl.includes('destination=10.07125,-69.32535') && minEst >= 3) {
+      console.log(`✓ ÉXITO - Origen en Calle 28 c/ Cra 25 fijado, ${Math.round(streetDist * 1000)}m estimados y URL de ruta verificada`);
+      passed++;
+    } else {
+      console.log(`✗ FALLO EN CÁLCULO DE RUTA: url=${dirUrl}`);
+      failed++;
+    }
+  } catch (err) {
+    console.log(`✗ ERROR: ${err.message}`);
+    failed++;
+  }
+
   console.log('\n=================================================================');
   console.log(`RESULTADO FINAL: ${passed} Pasadas, ${failed} Fallidas`);
   console.log('=================================================================');

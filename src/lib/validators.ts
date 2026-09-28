@@ -141,6 +141,63 @@ export function resolveBarquisimetoCoordinates(query: string): { lat: number; ln
 }
 
 /**
+ * Ubicación oficial de la Sede Principal H2O Life
+ * Calle 28 con Carrera 25, Barquisimeto, Estado Lara
+ */
+export const H2O_STORE_LOCATION = {
+  name: 'H2O Life (Sede Principal)',
+  address: 'Calle 28 con Carrera 25, Barquisimeto',
+  lat: 10.07125,
+  lng: -69.32705,
+};
+
+/**
+ * Calcula la distancia en la cuadrícula urbana y el tiempo estimado de entrega
+ * desde la sede principal (Calle 28 con Carrera 25) hasta el destino del cliente.
+ */
+export function calculateDeliveryRouteInfo(
+  destLat: number,
+  destLng: number,
+  originLat: number = H2O_STORE_LOCATION.lat,
+  originLng: number = H2O_STORE_LOCATION.lng
+): {
+  distanceKm: number;
+  formattedDistance: string;
+  estimatedMinutes: number;
+  googleMapsDirectionsUrl: string;
+  wazeDirectionsUrl: string;
+} {
+  // Fórmula de Haversine
+  const R = 6371; // Radio de la Tierra en km
+  const dLat = (destLat - originLat) * (Math.PI / 180);
+  const dLng = (destLng - originLng) * (Math.PI / 180);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(originLat * (Math.PI / 180)) *
+      Math.cos(destLat * (Math.PI / 180)) *
+      Math.sin(dLng / 2) *
+      Math.sin(dLng / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const straightLineDistance = R * c;
+
+  // En la retícula urbana de Barquisimeto (calles y carreras), la distancia real por manzanas es ~1.28x
+  const streetDistanceKm = Number((straightLineDistance * 1.28).toFixed(2));
+  // Tiempo promedio en vehículo/moto de reparto (25 km/h + 2 min de preparación)
+  const estimatedMinutes = Math.max(3, Math.round((streetDistanceKm / 25) * 60) + 2);
+
+  const googleMapsDirectionsUrl = `https://www.google.com/maps/dir/?api=1&origin=${originLat},${originLng}&destination=${destLat},${destLng}&travelmode=driving`;
+  const wazeDirectionsUrl = `https://waze.com/ul?ll=${destLat},${destLng}&navigate=yes`;
+
+  return {
+    distanceKm: streetDistanceKm,
+    formattedDistance: streetDistanceKm < 1 ? `${Math.round(streetDistanceKm * 1000)} m` : `${streetDistanceKm} km`,
+    estimatedMinutes,
+    googleMapsDirectionsUrl,
+    wazeDirectionsUrl,
+  };
+}
+
+/**
  * Generador inteligente de sugerencias dinámicas de direcciones para Venezuela
  * Maneja cuadrículas de Calles y Carreras (como Barquisimeto, Lara) y sectores.
  */

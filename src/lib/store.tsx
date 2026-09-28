@@ -26,10 +26,10 @@ export const INITIAL_USERS: UserProfile[] = [
     phone: '+584147654321',
   },
   {
-    id: 'user-freyeli',
-    name: 'Freyeli',
+    id: 'user-freyeliz',
+    name: 'Freyeliz',
     role: 'admin',
-    email: 'freyeli@h2olife.com',
+    email: 'freyeliz@h2olife.com',
     avatar: '👩‍💼',
     phone: '+584121234567',
   },
@@ -46,6 +46,10 @@ export const INITIAL_USERS: UserProfile[] = [
 export const INITIAL_SETTINGS: SystemSettings = {
   business_name: 'H2O Life Purified Water',
   business_rif: 'J-50982341-2',
+  store_address: 'Calle 28 con Carrera 25, Barquisimeto',
+  store_lat: 10.07125,
+  store_lng: -69.32705,
+  freyeliz_phone: '+58 412 1234567',
   freyeli_phone: '+58 412 1234567',
   jorge_phone: '+58 414 7654321',
   tank_low_threshold_pct: 30,
@@ -719,9 +723,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     return closure;
   };
 
-  // Generador de enlaces para WhatsApp a Freyeli (Administradora)
+  // Generador de enlaces para WhatsApp a Freyeliz (Administradora)
   const getWhatsAppSaleUrl = (sale: Sale, targetPhone?: string) => {
-    const phone = (targetPhone || systemSettings.freyeli_phone).replace(/\D/g, '');
+    const phone = (targetPhone || systemSettings.freyeliz_phone || systemSettings.freyeli_phone || '').replace(/\D/g, '');
     const itemsList = sale.items
       .map(i => `• ${i.quantity}x ${i.product_name} ($${i.subtotal_usd.toFixed(2)})`)
       .join('%0A');
@@ -732,7 +736,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   };
 
   const getWhatsAppTankAlertUrl = (tank: WaterTank, targetPhone?: string) => {
-    const phone = (targetPhone || systemSettings.freyeli_phone).replace(/\D/g, '');
+    const phone = (targetPhone || systemSettings.freyeliz_phone || systemSettings.freyeli_phone || '').replace(/\D/g, '');
     const msg = `⚠️ *ALERTA DE SUMINISTRO - H2O LIFE*%0A-----------------------------%0AEl *${tank.name}* está al *${tank.percentage}%* (${tank.current_liters.toLocaleString()} Litros restantes).%0A%0A*Capacidad Total:* ${tank.capacity_liters.toLocaleString()} L%0ASe requiere solicitar un camión cisterna para reabastecimiento.%0A%0A_Notificación automática del Sistema H2O Life POS_`;
 
     return `https://wa.me/${phone}?text=${msg}`;

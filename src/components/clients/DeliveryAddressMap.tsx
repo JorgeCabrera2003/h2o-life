@@ -33,8 +33,8 @@ interface DeliveryAddressMapProps {
   setCoordinates?: (coords: { lat: number; lng: number }) => void;
 }
 
-// Coordenadas base (Barquisimeto / Centro de Lara, Venezuela)
-const DEFAULT_COORDS = { lat: 10.07125, lng: -69.32535 }; // Calle 26 con Carrera 25 Barquisimeto
+// Coordenadas base: Sede Principal H2O Life (Calle 28 con Carrera 25, Barquisimeto)
+const DEFAULT_COORDS = { lat: 10.07125, lng: -69.32705 };
 
 export function DeliveryAddressMap({
   address,

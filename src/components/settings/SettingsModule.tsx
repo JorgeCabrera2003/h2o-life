@@ -20,7 +20,8 @@ export function SettingsModule() {
 
   const [businessName, setBusinessName] = useState(systemSettings.business_name);
   const [businessRif, setBusinessRif] = useState(systemSettings.business_rif);
-  const [freyeliPhone, setFreyeliPhone] = useState(systemSettings.freyeli_phone);
+  const [storeAddress, setStoreAddress] = useState(systemSettings.store_address || 'Calle 28 con Carrera 25, Barquisimeto');
+  const [freyelizPhone, setFreyelizPhone] = useState(systemSettings.freyeliz_phone || systemSettings.freyeli_phone || '');
   const [jorgePhone, setJorgePhone] = useState(systemSettings.jorge_phone);
   const [tankLowThreshold, setTankLowThreshold] = useState(systemSettings.tank_low_threshold_pct);
   const [autoNotifySales, setAutoNotifySales] = useState(systemSettings.auto_notify_sales);
@@ -35,7 +36,11 @@ export function SettingsModule() {
     updateSystemSettings({
       business_name: businessName,
       business_rif: businessRif,
-      freyeli_phone: freyeliPhone,
+      store_address: storeAddress,
+      store_lat: 10.07125,
+      store_lng: -69.32705,
+      freyeliz_phone: freyelizPhone,
+      freyeli_phone: freyelizPhone,
       jorge_phone: jorgePhone,
       tank_low_threshold_pct: tankLowThreshold,
       auto_notify_sales: autoNotifySales,
@@ -50,7 +55,7 @@ export function SettingsModule() {
 
   const handleTestWhatsAppNotification = (phone: string, roleName: string) => {
     const cleanPhone = phone.replace(/\D/g, '');
-    const msg = `🔔 *H2O LIFE - PRUEBA DE CONEXIÓN*%0AEsta es una prueba de notificación para la administradora (${roleName}).%0AEl sistema POS está configurado para enviar reportes automáticos de ventas y tanques.`;
+    const msg = `🔔 *H2O LIFE - PRUEBA DE CONEXIÓN*%0AEsta es una prueba de notificación para la administradora (${roleName}).%0AEl sistema POS está configurado para enviar reportes automáticos de ventas y tanques desde la sede en Calle 28 con Carrera 25.`;
     window.open(`https://wa.me/${cleanPhone}?text=${msg}`, '_blank');
   };
 
@@ -64,7 +69,7 @@ export function SettingsModule() {
             <span>Configuración General del Sistema</span>
           </h2>
           <p className="text-xs text-slate-500">
-            Parámetros administrativos, números de notificación para Freyeli y alertas de tanques
+            Parámetros administrativos, ubicación de la sede física, números de notificación para Freyeliz y alertas
           </p>
         </div>
 
@@ -81,28 +86,28 @@ export function SettingsModule() {
         <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-2xs">
           <div className="flex items-center space-x-2 text-xs font-bold text-sky-700 uppercase tracking-wider mb-4">
             <Bell className="w-4 h-4 text-sky-600" />
-            <span>Canales de Notificación por WhatsApp (Freyeli & Jorge)</span>
+            <span>Canales de Notificación por WhatsApp (Freyeliz & Jorge)</span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
             <div>
               <label className="text-xs font-bold text-slate-800 block mb-1">
-                WhatsApp de Freyeli (Administradora Principal):
+                WhatsApp de Freyeliz (Administradora Principal):
               </label>
               <div className="flex space-x-2">
                 <input
                   type="text"
-                  value={freyeliPhone}
-                  onChange={e => setFreyeliPhone(e.target.value)}
+                  value={freyelizPhone}
+                  onChange={e => setFreyelizPhone(e.target.value)}
                   placeholder="+58 412 1234567"
                   className="flex-1 text-xs font-bold p-2.5 bg-slate-50 border border-slate-200 rounded-xl"
                   required
                 />
                 <button
                   type="button"
-                  onClick={() => handleTestWhatsAppNotification(freyeliPhone, 'Freyeli')}
-                  className="px-3 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-xs font-bold rounded-xl border border-emerald-200 flex items-center space-x-1"
-                  title="Enviar mensaje de prueba a Freyeli"
+                  onClick={() => handleTestWhatsAppNotification(freyelizPhone, 'Freyeliz')}
+                  className="px-3 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-xs font-bold rounded-xl border border-emerald-200 flex items-center space-x-1 cursor-pointer"
+                  title="Enviar mensaje de prueba a Freyeliz"
                 >
                   <MessageCircle className="w-3.5 h-3.5" />
                   <span>Probar</span>
@@ -147,7 +152,7 @@ export function SettingsModule() {
             <label className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 cursor-pointer transition-colors">
               <div>
                 <span className="text-xs font-bold text-slate-800 block">
-                  Notificar a Freyeli cada venta realizada
+                  Notificar a Freyeliz cada venta realizada
                 </span>
                 <span className="text-[11px] text-slate-400">
                   Genera el mensaje con monto en $ y Bs, cliente y productos vendidos
@@ -221,19 +226,19 @@ export function SettingsModule() {
               className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer"
             />
             <p className="text-[10px] text-slate-400 mt-1.5">
-              Si el volumen de agua en el tanque es inferior al {tankLowThreshold}%, el sistema activará la alerta visual y sugerirá el pedido de cisterna a Freyeli.
+              Si el volumen de agua en el tanque es inferior al {tankLowThreshold}%, el sistema activará la alerta visual y sugerirá el pedido de cisterna a Freyeliz.
             </p>
           </div>
         </div>
 
-        {/* 3. DATOS DE LA EMPRESA */}
+        {/* 3. DATOS DE LA EMPRESA & SEDE FÍSICA */}
         <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-2xs">
           <div className="flex items-center space-x-2 text-xs font-bold text-sky-700 uppercase tracking-wider mb-4">
             <Shield className="w-4 h-4 text-sky-600" />
-            <span>Datos Fiscales & Nombre del Negocio</span>
+            <span>Datos Fiscales & Sede Principal del Negocio</span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="text-xs font-bold text-slate-800 block mb-1">Nombre Comercial:</label>
               <input
@@ -250,6 +255,15 @@ export function SettingsModule() {
                 value={businessRif}
                 onChange={e => setBusinessRif(e.target.value)}
                 className="w-full text-xs font-semibold p-2.5 bg-slate-50 border border-slate-200 rounded-xl"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-bold text-slate-800 block mb-1">Ubicación del Local:</label>
+              <input
+                type="text"
+                value={storeAddress}
+                onChange={e => setStoreAddress(e.target.value)}
+                className="w-full text-xs font-semibold p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-sky-800"
               />
             </div>
           </div>
