@@ -546,43 +546,53 @@ export function PosModule({
       </div>
 
       {/* 4. GRID DE PRODUCTOS & PANEL LATERAL DE CARRITO */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         {/* Catálogo de Productos */}
-        <div className="lg:col-span-2 grid grid-cols-2 sm:grid-cols-3 gap-3">
-          {filteredProducts.map(product => {
-            const priceBs = (product.price_usd * exchangeRate.rate).toFixed(2);
-            return (
-              <div
-                key={product.id}
-                onClick={() => addToCart(product)}
-                className="bg-white rounded-2xl p-4 border border-slate-200/80 hover:border-sky-400 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between group active:scale-[0.98]"
-              >
-                <div>
-                  <div className="text-3xl mb-2">{product.icon || '📦'}</div>
-                  <h3 className="text-xs font-bold text-slate-900 line-clamp-2 mb-1 group-hover:text-sky-600 transition-colors">
-                    {product.name}
-                  </h3>
-                  <span className="text-[10px] text-slate-400 capitalize">{product.category}</span>
-                </div>
-                <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between">
+        <div className="lg:col-span-2 grid grid-cols-2 sm:grid-cols-3 gap-3 content-start">
+          {filteredProducts.length === 0 ? (
+            <div className="col-span-full py-12 text-center text-slate-400 bg-white rounded-2xl border border-dashed border-slate-200">
+              <span className="text-3xl mb-2 block">🔍</span>
+              <p className="text-xs font-bold text-slate-700">No se encontraron productos</p>
+              <p className="text-[11px] text-slate-400 mt-1">
+                Prueba con otra palabra clave o selecciona otra categoría
+              </p>
+            </div>
+          ) : (
+            filteredProducts.map(product => {
+              const priceBs = (product.price_usd * exchangeRate.rate).toFixed(2);
+              return (
+                <div
+                  key={product.id}
+                  onClick={() => addToCart(product)}
+                  className="bg-white rounded-2xl p-4 border border-slate-200/80 hover:border-sky-400 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between group active:scale-[0.98] min-h-[160px]"
+                >
                   <div>
-                    <span className="text-base font-extrabold text-slate-900">
-                      ${product.price_usd.toFixed(2)}
-                    </span>
-                    <span className="text-[10px] text-slate-500 block">Bs. {priceBs}</span>
+                    <div className="text-3xl mb-2">{product.icon || '📦'}</div>
+                    <h3 className="text-xs font-bold text-slate-900 line-clamp-2 mb-1 group-hover:text-sky-600 transition-colors">
+                      {product.name}
+                    </h3>
+                    <span className="text-[10px] text-slate-400 capitalize">{product.category}</span>
                   </div>
-                  <span className="w-7 h-7 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center font-bold text-sm group-hover:bg-sky-600 group-hover:text-white transition-colors">
-                    +
-                  </span>
+                  <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between">
+                    <div>
+                      <span className="text-base font-extrabold text-slate-900">
+                        ${product.price_usd.toFixed(2)}
+                      </span>
+                      <span className="text-[10px] text-slate-500 block">Bs. {priceBs}</span>
+                    </div>
+                    <span className="w-7 h-7 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center font-bold text-sm group-hover:bg-sky-600 group-hover:text-white transition-colors">
+                      +
+                    </span>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })
+          )}
         </div>
 
         {/* Panel del Carrito de Ventas (Visible en Desktop y Bottom Sheet en Mobile) */}
         <div
-          className={`fixed inset-y-0 right-0 z-40 w-full sm:w-96 bg-white shadow-2xl p-5 transform transition-transform duration-200 lg:static lg:z-auto lg:w-auto lg:h-auto lg:shadow-none lg:border lg:border-slate-200/80 lg:rounded-2xl lg:p-5 flex flex-col justify-between ${
+          className={`fixed inset-y-0 right-0 z-40 w-full sm:w-96 bg-white shadow-2xl p-5 transform transition-transform duration-200 lg:static lg:z-auto lg:w-auto lg:h-auto lg:shadow-none lg:border lg:border-slate-200/80 lg:rounded-2xl lg:p-5 flex flex-col justify-between lg:sticky lg:top-4 ${
             isCartDrawerOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'
           }`}
         >
