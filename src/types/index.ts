@@ -9,7 +9,7 @@ export interface UserProfile {
   phone?: string;
 }
 
-export type ProductCategory = 'agua' | 'botellon' | 'helado' | 'snack' | 'insumo';
+export type ProductCategory = 'agua' | 'botellon' | 'helado' | 'snack' | 'insumo' | 'servicio';
 
 export interface Product {
   id: string;
@@ -21,6 +21,9 @@ export interface Product {
   unit: string;
   icon?: string;
   quick_select?: boolean;
+  is_service?: boolean;
+  active?: boolean;
+  description?: string;
 }
 
 export interface Client {
@@ -153,9 +156,10 @@ export interface SystemSettings {
   store_address: string; // Calle 28 con Carrera 25, Barquisimeto
   store_lat: number;     // 10.07125
   store_lng: number;     // -69.32705
-  freyeliz_phone: string; // WhatsApp de Freyeliz para notificaciones inmediatas
+  freyeliz_phone: string; // WhatsApp de Freyeliz (+58 424-5658068)
   freyeli_phone?: string; // Compatibilidad de acceso
-  jorge_phone: string;   // WhatsApp de TSU Jorge Cabrera
+  jorge_phone: string;   // WhatsApp de TSU Jorge Cabrera (+58 424-5567016)
+  karla_phone: string;   // WhatsApp de Karla (+58 424-5717589)
   tank_low_threshold_pct: number;
   auto_notify_sales: boolean;
   auto_notify_tank_alerts: boolean;

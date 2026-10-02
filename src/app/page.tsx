@@ -13,6 +13,7 @@ import { TankModule } from '@/components/tanks/TankModule';
 import { FinanceModule } from '@/components/finance/FinanceModule';
 import { Client } from '@/types';
 import { SettingsModule } from '@/components/settings/SettingsModule';
+import { ProductsServicesModule } from '@/components/products/ProductsServicesModule';
 
 function H2OLifeAppContent() {
   const searchParams = useSearchParams();
@@ -23,7 +24,7 @@ function H2OLifeAppContent() {
 
   useEffect(() => {
     const tabParam = searchParams.get('tab') as ActiveTab;
-    if (tabParam && ['pos', 'clients', 'camera', 'closure', 'tanks', 'finance', 'settings'].includes(tabParam)) {
+    if (tabParam && ['pos', 'products', 'clients', 'camera', 'closure', 'tanks', 'finance', 'settings'].includes(tabParam)) {
       setActiveTab(tabParam);
     }
   }, [searchParams]);
@@ -38,8 +39,11 @@ function H2OLifeAppContent() {
             isCartDrawerOpen={isCartDrawerOpen}
             setIsCartDrawerOpen={setIsCartDrawerOpen}
             preselectedClient={selectedClientForSale}
+            onNavigateToProducts={() => setActiveTab('products')}
           />
         )}
+
+        {activeTab === 'products' && <ProductsServicesModule />}
 
         {activeTab === 'clients' && (
           <ClientsModule

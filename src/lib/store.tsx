@@ -15,6 +15,11 @@ import {
   PaymentLine,
   SystemSettings,
 } from '@/types';
+import {
+  DEMO_TEST_CLIENTS,
+  DEMO_TEST_SALES,
+  DEMO_TEST_EXPENSES,
+} from '@/lib/demoData';
 
 export const INITIAL_USERS: UserProfile[] = [
   {
@@ -23,7 +28,7 @@ export const INITIAL_USERS: UserProfile[] = [
     role: 'superadmin',
     email: 'jorge@h2olife.com',
     avatar: '👨‍💼',
-    phone: '+584147654321',
+    phone: '+58 424-5567016',
   },
   {
     id: 'user-freyeliz',
@@ -31,7 +36,7 @@ export const INITIAL_USERS: UserProfile[] = [
     role: 'admin',
     email: 'freyeliz@h2olife.com',
     avatar: '👩‍💼',
-    phone: '+584121234567',
+    phone: '+58 424-5658068',
   },
   {
     id: 'user-karla',
@@ -39,7 +44,7 @@ export const INITIAL_USERS: UserProfile[] = [
     role: 'worker',
     email: 'karla@h2olife.com',
     avatar: '👩‍🔧',
-    phone: '+584249998877',
+    phone: '+58 424-5717589',
   },
 ];
 
@@ -49,9 +54,10 @@ export const INITIAL_SETTINGS: SystemSettings = {
   store_address: 'Calle 28 con Carrera 25, Barquisimeto',
   store_lat: 10.07125,
   store_lng: -69.32705,
-  freyeliz_phone: '+58 412 1234567',
-  freyeli_phone: '+58 412 1234567',
-  jorge_phone: '+58 414 7654321',
+  jorge_phone: '+58 424-5567016',
+  freyeliz_phone: '+58 424-5658068',
+  freyeli_phone: '+58 424-5658068',
+  karla_phone: '+58 424-5717589',
   tank_low_threshold_pct: 30,
   auto_notify_sales: true,
   auto_notify_tank_alerts: true,
@@ -159,71 +165,48 @@ export const INITIAL_PRODUCTS: Product[] = [
     icon: '🥟',
     quick_select: false,
   },
+  {
+    id: 'prod-servicio-desinfeccion',
+    name: 'Lavado y Desinfección con Ozono',
+    category: 'servicio',
+    price_usd: 0.50,
+    cost_usd: 0.05,
+    stock: 9999,
+    unit: 'servicio',
+    icon: '✨',
+    quick_select: true,
+    is_service: true,
+    active: true,
+    description: 'Sanitización profunda bactericida y enjuague interno con agua ozonizada',
+  },
+  {
+    id: 'prod-servicio-delivery',
+    name: 'Servicio de Despacho / Delivery Express',
+    category: 'servicio',
+    price_usd: 1.00,
+    cost_usd: 0.30,
+    stock: 9999,
+    unit: 'despacho',
+    icon: '🛵',
+    quick_select: true,
+    is_service: true,
+    active: true,
+    description: 'Despacho a domicilio en Barquisimeto desde sede Calle 28 con Carrera 25',
+  },
 ];
 
+// CLIENTE BASE DE SEMILLA REAL (Mostrador)
 export const INITIAL_CLIENTS: Client[] = [
-  {
-    id: 'client-doraida',
-    name: 'Doraida Mendoza',
-    phone: '+58 412 1234567',
-    address: 'Calle Los Samanes, Casa #42, Sector Central',
-    reference_point: 'Frente a la panadería El Manantial',
-    maps_url: 'https://www.google.com/maps/search/?api=1&query=Calle+Los+Samanes+Sector+Central',
-    notes: 'Cliente fija de 2 a 4 recargas semanales. Paga con Pago Móvil o Efectivo.',
-    balance_usd: 0,
-    total_orders: 14,
-    favorite_product: 'Recarga de Agua 20L',
-    created_at: '2026-09-01T10:00:00Z',
-  },
-  {
-    id: 'client-carlos',
-    name: 'Carlos Mendoza (Panadería)',
-    phone: '+58 414 7654321',
-    address: 'Av. Bolívar, Local #12, Zona Comercial',
-    reference_point: 'Al lado de la farmacia SAAS',
-    maps_url: 'https://www.google.com/maps/search/?api=1&query=Av+Bolivar+Zona+Comercial',
-    notes: 'Pide 5 a 8 botellones cada martes para producción de panadería.',
-    balance_usd: 0,
-    total_orders: 22,
-    favorite_product: 'Botellón Nuevo 20L',
-    created_at: '2026-09-05T11:00:00Z',
-  },
-  {
-    id: 'client-maria',
-    name: 'Sra. María González',
-    phone: '+58 424 5558899',
-    address: 'Urb. La Esmeralda, Manzana 4, Casa #15',
-    reference_point: 'Casa de portón azul cerca del ambulatorio',
-    maps_url: 'https://www.google.com/maps/search/?api=1&query=Urb+La+Esmeralda',
-    notes: 'Tiene saldo pendiente de $1.00 de la semana pasada.',
-    balance_usd: -1.00, // Deuda pendiente
-    total_orders: 8,
-    favorite_product: 'Recarga de Agua 20L',
-    created_at: '2026-09-12T09:30:00Z',
-  },
-  {
-    id: 'client-pedro',
-    name: 'Pedro Ramírez (Taller)',
-    phone: '+58 416 3332211',
-    address: 'Callejón Industrial, Galpón #3',
-    reference_point: 'Detrás de la estación de servicio',
-    maps_url: 'https://www.google.com/maps/search/?api=1&query=Callejon+Industrial',
-    notes: 'Paga puntual por transferencia bancaria.',
-    balance_usd: 0,
-    total_orders: 5,
-    favorite_product: 'Recarga de Agua 20L',
-    created_at: '2026-09-18T14:15:00Z',
-  },
   {
     id: 'client-mostrador',
     name: 'Cliente Mostrador / Transeúnte',
     phone: 'N/A',
-    address: 'Venta directa en tienda',
+    address: 'Calle 28 con Carrera 25, Barquisimeto (Tienda H2O Life)',
     reference_point: 'Mostrador H2O Life',
-    notes: 'Público general sin registro de entrega',
+    notes: 'Venta presencial al detal en tienda sin registro telefónico previo',
     balance_usd: 0,
-    total_orders: 80,
-    favorite_product: 'Recarga de Agua 20L / Helados',
+    total_orders: 1,
+    favorite_product: 'Recarga de Agua 20L',
     created_at: '2026-09-01T08:00:00Z',
   },
 ];
@@ -249,136 +232,9 @@ export const INITIAL_TANKS: WaterTank[] = [
   },
 ];
 
-export const INITIAL_SALES: Sale[] = [
-  {
-    id: 'sale-001',
-    folio: 'H2O-2026-001',
-    created_at: '2026-09-23T09:15:00Z',
-    client_id: 'client-doraida',
-    client_name: 'Doraida Mendoza',
-    worker_id: 'user-karla',
-    worker_name: 'Karla',
-    total_usd: 1.00,
-    total_bs: 45.50,
-    exchange_rate: 45.50,
-    items: [
-      {
-        product_id: 'prod-recarga-20',
-        product_name: 'Recarga de Agua 20L / 18L',
-        quantity: 2,
-        price_usd: 0.50,
-        subtotal_usd: 1.00,
-      },
-    ],
-    payments: [
-      {
-        method: 'pago_movil',
-        amount_usd: 1.00,
-        amount_bs: 45.50,
-        reference: '3062',
-        bank: 'Banesco',
-      },
-    ],
-    status: 'completada',
-    notes: '2 recargas anotadas en libreta',
-    notified_to_admin: true,
-  },
-  {
-    id: 'sale-002',
-    folio: 'H2O-2026-002',
-    created_at: '2026-09-23T10:30:00Z',
-    client_name: 'Cliente Mostrador / Transeúnte',
-    worker_id: 'user-karla',
-    worker_name: 'Karla',
-    total_usd: 2.00,
-    total_bs: 91.00,
-    exchange_rate: 45.50,
-    items: [
-      {
-        product_id: 'prod-recarga-20',
-        product_name: 'Recarga de Agua 20L / 18L',
-        quantity: 4,
-        price_usd: 0.50,
-        subtotal_usd: 2.00,
-      },
-    ],
-    payments: [
-      {
-        method: 'punto',
-        amount_usd: 2.00,
-        amount_bs: 91.00,
-        reference: '8841',
-        bank: 'Punto de Venta Banesco',
-      },
-    ],
-    status: 'completada',
-    notes: '4 recargas pagadas por punto',
-    notified_to_admin: true,
-  },
-  {
-    id: 'sale-003',
-    folio: 'H2O-2026-003',
-    created_at: '2026-09-23T11:45:00Z',
-    client_name: 'Cliente Mostrador / Transeúnte',
-    worker_id: 'user-karla',
-    worker_name: 'Karla',
-    total_usd: 1.50,
-    total_bs: 68.25,
-    exchange_rate: 45.50,
-    items: [
-      {
-        product_id: 'prod-recarga-20',
-        product_name: 'Recarga de Agua 20L / 18L',
-        quantity: 1,
-        price_usd: 0.50,
-        subtotal_usd: 0.50,
-      },
-      {
-        product_id: 'prod-helado-artesanal',
-        product_name: 'Helado Tío Rico / Artesanal',
-        quantity: 1,
-        price_usd: 1.00,
-        subtotal_usd: 1.00,
-      },
-    ],
-    payments: [
-      {
-        method: 'efectivo_usd',
-        amount_usd: 2.00,
-        amount_bs: 91.00,
-      },
-    ],
-    change_usd: 0.50,
-    change_bs: 22.75,
-    status: 'completada',
-    notes: 'Pagó con billete de $2, vuelto $0.50 anotado',
-    notified_to_admin: true,
-  },
-];
-
-export const INITIAL_EXPENSES: Expense[] = [
-  {
-    id: 'exp-001',
-    created_at: '2026-09-22T14:00:00Z',
-    description: 'Recarga de Camión Cisterna 10.000 Litros',
-    category: 'cisterna',
-    amount_usd: 50.00,
-    amount_bs: 2275.00,
-    payment_method: 'transferencia',
-    recorded_by: 'TSU Jorge Cabrera',
-    notes: 'Proveedor Cisterna Los Andes',
-  },
-  {
-    id: 'exp-002',
-    created_at: '2026-09-23T08:30:00Z',
-    description: 'Compra de bolsas para tostones e insumos',
-    category: 'insumos',
-    amount_usd: 5.00,
-    amount_bs: 227.50,
-    payment_method: 'efectivo_bs',
-    recorded_by: 'Karla',
-  },
-];
+// Ventas y Gastos Semilla Limpios (Modo Producción)
+export const INITIAL_SALES: Sale[] = [];
+export const INITIAL_EXPENSES: Expense[] = [];
 
 interface StoreContextType {
   currentUser: UserProfile;
@@ -414,6 +270,15 @@ interface StoreContextType {
   cashClosures: CashClosure[];
   getWhatsAppSaleUrl: (sale: Sale, targetPhone?: string) => string;
   getWhatsAppTankAlertUrl: (tank: WaterTank, targetPhone?: string) => string;
+  // Gestión de Productos y Servicios
+  addProduct: (product: Omit<Product, 'id'>) => Product;
+  updateProduct: (id: string, productData: Partial<Product>) => void;
+  deleteProduct: (id: string) => void;
+  updateRefillPrice: (newPriceUsd: number) => void;
+  // Separación de Semilla Real y Datos de Demostración
+  loadDemoData: () => void;
+  clearDemoData: () => void;
+  isDemoModeActive: boolean;
 }
 
 const StoreContext = createContext<StoreContextType | null>(null);
@@ -421,13 +286,14 @@ const StoreContext = createContext<StoreContextType | null>(null);
 export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [currentUser, setCurrentUser] = useState<UserProfile>(INITIAL_USERS[2]); // Karla (Worker)
   const [systemSettings, setSystemSettings] = useState<SystemSettings>(INITIAL_SETTINGS);
-  const [products] = useState<Product[]>(INITIAL_PRODUCTS);
+  const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
   const [clients, setClients] = useState<Client[]>(INITIAL_CLIENTS);
   const [tanks, setTanks] = useState<WaterTank[]>(INITIAL_TANKS);
   const [sales, setSales] = useState<Sale[]>(INITIAL_SALES);
   const [expenses, setExpenses] = useState<Expense[]>(INITIAL_EXPENSES);
   const [cashClosures, setCashClosures] = useState<CashClosure[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [isDemoModeActive, setIsDemoModeActive] = useState<boolean>(false);
   const [exchangeRate, setExchangeRate] = useState<ExchangeRateInfo>({
     rate: 45.50,
     source: 'BCV Oficial',
@@ -462,6 +328,131 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const updateSystemSettings = (newSettings: Partial<SystemSettings>) => {
     setSystemSettings(prev => ({ ...prev, ...newSettings }));
+  };
+
+  // Cargar productos y modo demo persistidos de localStorage
+  useEffect(() => {
+    try {
+      const savedProducts = localStorage.getItem('h2o_custom_products');
+      if (savedProducts) {
+        const parsed = JSON.parse(savedProducts);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setProducts(parsed);
+        }
+      }
+      const savedDemo = localStorage.getItem('h2o_demo_mode');
+      if (savedDemo === 'true') {
+        setSales(DEMO_TEST_SALES);
+        setExpenses(DEMO_TEST_EXPENSES);
+        setClients([...INITIAL_CLIENTS, ...DEMO_TEST_CLIENTS]);
+        setIsDemoModeActive(true);
+      }
+    } catch {}
+  }, []);
+
+  const saveProductsToStorage = (updatedProducts: Product[]) => {
+    try {
+      localStorage.setItem('h2o_custom_products', JSON.stringify(updatedProducts));
+    } catch {}
+  };
+
+  // Crear y registrar nuevos productos o servicios
+  const addProduct = (productData: Omit<Product, 'id'>): Product => {
+    const newProduct: Product = {
+      ...productData,
+      id: `prod-${Date.now()}`,
+      active: productData.active !== undefined ? productData.active : true,
+      is_service: productData.is_service !== undefined ? productData.is_service : productData.category === 'servicio',
+    };
+    setProducts(prev => {
+      const updated = [newProduct, ...prev];
+      saveProductsToStorage(updated);
+      return updated;
+    });
+    return newProduct;
+  };
+
+  // Actualizar producto o servicio existente
+  const updateProduct = (id: string, productData: Partial<Product>) => {
+    setProducts(prev => {
+      const updated = prev.map(p => (p.id === id ? { ...p, ...productData } : p));
+      saveProductsToStorage(updated);
+      return updated;
+    });
+
+    setCart(prev =>
+      prev.map(item =>
+        item.product.id === id
+          ? {
+              ...item,
+              product: { ...item.product, ...productData },
+              unit_price_usd: productData.price_usd !== undefined ? productData.price_usd : item.unit_price_usd,
+              subtotal_usd: Number(
+                (item.quantity * (productData.price_usd !== undefined ? productData.price_usd : item.unit_price_usd)).toFixed(2)
+              ),
+            }
+          : item
+      )
+    );
+  };
+
+  // Eliminar producto o servicio
+  const deleteProduct = (id: string) => {
+    setProducts(prev => {
+      const updated = prev.filter(p => p.id !== id);
+      saveProductsToStorage(updated);
+      return updated;
+    });
+    removeFromCart(id);
+  };
+
+  // Cambiar el precio de cada recarga de agua (y actualizar en todo el POS)
+  const updateRefillPrice = (newPriceUsd: number) => {
+    if (newPriceUsd <= 0) return;
+    setProducts(prev => {
+      const updated = prev.map(p =>
+        p.id === 'prod-recarga-20' || p.category === 'agua'
+          ? { ...p, price_usd: newPriceUsd }
+          : p
+      );
+      saveProductsToStorage(updated);
+      return updated;
+    });
+
+    setCart(prev =>
+      prev.map(item =>
+        item.product.id === 'prod-recarga-20' || item.product.category === 'agua'
+          ? {
+              ...item,
+              unit_price_usd: newPriceUsd,
+              subtotal_usd: Number((item.quantity * newPriceUsd).toFixed(2)),
+            }
+          : item
+      )
+    );
+  };
+
+  // Cargar datos de prueba y demostración (separados de los reales)
+  const loadDemoData = () => {
+    setSales(DEMO_TEST_SALES);
+    setExpenses(DEMO_TEST_EXPENSES);
+    setClients([...INITIAL_CLIENTS, ...DEMO_TEST_CLIENTS]);
+    setIsDemoModeActive(true);
+    try {
+      localStorage.setItem('h2o_demo_mode', 'true');
+    } catch {}
+  };
+
+  // Limpiar datos de prueba y volver al estado semilla de producción
+  const clearDemoData = () => {
+    setSales([]);
+    setExpenses([]);
+    setClients(INITIAL_CLIENTS);
+    setCashClosures([]);
+    setIsDemoModeActive(false);
+    try {
+      localStorage.removeItem('h2o_demo_mode');
+    } catch {}
   };
 
   // Carrito de compras
@@ -772,6 +763,13 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         cashClosures,
         getWhatsAppSaleUrl,
         getWhatsAppTankAlertUrl,
+        addProduct,
+        updateProduct,
+        deleteProduct,
+        updateRefillPrice,
+        loadDemoData,
+        clearDemoData,
+        isDemoModeActive,
       }}
     >
       {children}

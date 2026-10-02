@@ -22,12 +22,14 @@ import {
   ExternalLink,
   MapPin,
   Lock,
+  Sparkles,
+  RefreshCw,
 } from 'lucide-react';
 import { GoogleBusinessBadge } from '@/components/common/GoogleBusinessBadge';
 import { analytics, TelemetryEvent } from '@/lib/analytics';
 
 export function SettingsModule() {
-  const { systemSettings, updateSystemSettings } = useH2OStore();
+  const { systemSettings, updateSystemSettings, loadDemoData, clearDemoData, isDemoModeActive } = useH2OStore();
 
   const [businessName, setBusinessName] = useState(systemSettings.business_name);
   const [businessRif, setBusinessRif] = useState(systemSettings.business_rif);
@@ -35,9 +37,14 @@ export function SettingsModule() {
     systemSettings.store_address || 'Calle 28 con Carrera 25, Barquisimeto'
   );
   const [freyelizPhone, setFreyelizPhone] = useState(
-    systemSettings.freyeliz_phone || systemSettings.freyeli_phone || ''
+    systemSettings.freyeliz_phone || systemSettings.freyeli_phone || '+58 424-5658068'
   );
-  const [jorgePhone, setJorgePhone] = useState(systemSettings.jorge_phone);
+  const [karlaPhone, setKarlaPhone] = useState(
+    systemSettings.karla_phone || '+58 424-5717589'
+  );
+  const [jorgePhone, setJorgePhone] = useState(
+    systemSettings.jorge_phone || '+58 424-5567016'
+  );
   const [tankLowThreshold, setTankLowThreshold] = useState(systemSettings.tank_low_threshold_pct);
   const [autoNotifySales, setAutoNotifySales] = useState(systemSettings.auto_notify_sales);
   const [autoNotifyTankAlerts, setAutoNotifyTankAlerts] = useState(systemSettings.auto_notify_tank_alerts);
@@ -61,6 +68,7 @@ export function SettingsModule() {
       store_lng: -69.32705,
       freyeliz_phone: freyelizPhone,
       freyeli_phone: freyelizPhone,
+      karla_phone: karlaPhone,
       jorge_phone: jorgePhone,
       tank_low_threshold_pct: tankLowThreshold,
       auto_notify_sales: autoNotifySales,
@@ -136,14 +144,14 @@ export function SettingsModule() {
           <GoogleBusinessBadge />
         </div>
 
-        {/* 2. NOTIFICACIONES DE WHATSAPP PARA ADMINISTRADORES */}
+        {/* 2. NOTIFICACIONES DE WHATSAPP PARA EL EQUIPO (Freyeliz, Karla & Jorge) */}
         <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-2xs">
           <div className="flex items-center space-x-2 text-xs font-bold text-sky-700 uppercase tracking-wider mb-4">
             <Bell className="w-4 h-4 text-sky-600" />
-            <span>Canales de Notificación por WhatsApp (Freyeliz & Jorge)</span>
+            <span>Canales de Notificación por WhatsApp (Freyeliz, Karla & Jorge)</span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
             <div>
               <label className="text-xs font-bold text-slate-800 block mb-1">
                 WhatsApp de Freyeliz (Administradora Principal):
@@ -153,13 +161,13 @@ export function SettingsModule() {
                   type="text"
                   value={freyelizPhone}
                   onChange={e => setFreyelizPhone(e.target.value)}
-                  placeholder="+58 412 1234567"
+                  placeholder="+58 424-5658068"
                   className="flex-1 text-xs font-bold p-2.5 bg-slate-50 border border-slate-200 rounded-xl"
                   required
                 />
                 <button
                   type="button"
-                  onClick={() => handleTestWhatsAppNotification(freyelizPhone, 'Freyeliz')}
+                  onClick={() => handleTestWhatsAppNotification(freyelizPhone, 'Freyeliz (Admin)')}
                   className="px-3 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-xs font-bold rounded-xl border border-emerald-200 flex items-center space-x-1 pressable cursor-pointer min-h-[44px]"
                   title="Enviar mensaje de prueba a Freyeliz"
                 >
@@ -168,7 +176,35 @@ export function SettingsModule() {
                 </button>
               </div>
               <span className="text-[10px] text-slate-400 mt-1 block">
-                Recibirá notificaciones instantáneas de cada venta realizada en el punto de venta.
+                Notificaciones instantáneas de cada venta realizada y alertas de tanques.
+              </span>
+            </div>
+
+            <div>
+              <label className="text-xs font-bold text-slate-800 block mb-1">
+                WhatsApp de Karla (Caja & Mostrador):
+              </label>
+              <div className="flex space-x-2">
+                <input
+                  type="text"
+                  value={karlaPhone}
+                  onChange={e => setKarlaPhone(e.target.value)}
+                  placeholder="+58 424-5717589"
+                  className="flex-1 text-xs font-bold p-2.5 bg-slate-50 border border-slate-200 rounded-xl"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => handleTestWhatsAppNotification(karlaPhone, 'Karla (Caja)')}
+                  className="px-3 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-xs font-bold rounded-xl border border-emerald-200 flex items-center space-x-1 pressable cursor-pointer min-h-[44px]"
+                  title="Enviar mensaje de prueba a Karla"
+                >
+                  <MessageCircle className="w-3.5 h-3.5" />
+                  <span>Probar</span>
+                </button>
+              </div>
+              <span className="text-[10px] text-slate-400 mt-1 block">
+                Canal de atención y soporte en caja para despachos de mostrador.
               </span>
             </div>
 
@@ -181,13 +217,13 @@ export function SettingsModule() {
                   type="text"
                   value={jorgePhone}
                   onChange={e => setJorgePhone(e.target.value)}
-                  placeholder="+58 414 7654321"
+                  placeholder="+58 424-5567016"
                   className="flex-1 text-xs font-bold p-2.5 bg-slate-50 border border-slate-200 rounded-xl"
                   required
                 />
                 <button
                   type="button"
-                  onClick={() => handleTestWhatsAppNotification(jorgePhone, 'Jorge')}
+                  onClick={() => handleTestWhatsAppNotification(jorgePhone, 'Jorge (Superadmin)')}
                   className="px-3 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-xs font-bold rounded-xl border border-emerald-200 flex items-center space-x-1 pressable cursor-pointer min-h-[44px]"
                   title="Enviar mensaje de prueba a Jorge"
                 >
@@ -196,7 +232,7 @@ export function SettingsModule() {
                 </button>
               </div>
               <span className="text-[10px] text-slate-400 mt-1 block">
-                Recibirá cierres diarios de caja y reportes de auditoría financiera.
+                Cierres diarios de caja, auditoría financiera y balances generales.
               </span>
             </div>
           </div>
@@ -340,7 +376,80 @@ export function SettingsModule() {
           </div>
         </div>
 
-        {/* 5. CUMPLIMIENTO LEGAL, PRIVACIDAD & COOKIES (Puntos 1, 2 y 3) */}
+        {/* 5. GESTIÓN DE BASE DE DATOS: SEMILLA REAL vs. DATOS DE PRUEBA */}
+        <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-2xs">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+            <div className="flex items-center space-x-2 text-xs font-bold text-sky-700 uppercase tracking-wider">
+              <Database className="w-4 h-4 text-sky-600" />
+              <span>Gestión de Base de Datos: Semilla Real vs. Datos de Prueba</span>
+            </div>
+            {isDemoModeActive ? (
+              <span className="self-start sm:self-auto px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 text-[10px] font-black border border-amber-300 flex items-center space-x-1.5 shadow-2xs">
+                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                <span>Modo Demostración Activo</span>
+              </span>
+            ) : (
+              <span className="self-start sm:self-auto px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black border border-emerald-300 flex items-center space-x-1.5 shadow-2xs">
+                <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                <span>Semilla de Producción Limpia</span>
+              </span>
+            )}
+          </div>
+
+          <p className="text-xs text-slate-600 leading-relaxed mb-4">
+            Para garantizar que las operaciones reales de la tienda física (Calle 28 con Carrera 25) no se mezclen con pruebas, los datos de demostración (ventas simuladas, clientes de prueba como Carlos o María, y gastos de prueba) están <strong>100% aislados</strong> de la semilla de producción.
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+            <div className={`p-4 rounded-2xl border transition-all ${!isDemoModeActive ? 'bg-emerald-50/70 border-emerald-300 ring-2 ring-emerald-400/20' : 'bg-slate-50 border-slate-200'}`}>
+              <div className="flex items-center space-x-2 mb-1.5">
+                <Shield className="w-4 h-4 text-emerald-600" />
+                <h4 className="text-xs font-bold text-slate-900">Semilla de Producción</h4>
+              </div>
+              <p className="text-[11px] text-slate-500 mb-3">
+                Comienza con libros contables limpios en cero, catálogo oficial y cliente de mostrador para las operaciones reales.
+              </p>
+              <button
+                type="button"
+                onClick={clearDemoData}
+                disabled={!isDemoModeActive}
+                className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-center space-x-1.5 transition-colors cursor-pointer min-h-[44px] ${
+                  !isDemoModeActive
+                    ? 'bg-emerald-600 text-white cursor-default opacity-90'
+                    : 'bg-white hover:bg-emerald-100 text-emerald-800 border border-emerald-300'
+                }`}
+              >
+                <CheckCircle className="w-3.5 h-3.5" />
+                <span>{!isDemoModeActive ? '✓ Activo (Producción Limpia)' : 'Restablecer a Producción Limpia'}</span>
+              </button>
+            </div>
+
+            <div className={`p-4 rounded-2xl border transition-all ${isDemoModeActive ? 'bg-amber-50/70 border-amber-300 ring-2 ring-amber-400/20' : 'bg-slate-50 border-slate-200'}`}>
+              <div className="flex items-center space-x-2 mb-1.5">
+                <Sparkles className="w-4 h-4 text-amber-600" />
+                <h4 className="text-xs font-bold text-slate-900">Modo Demostración / Pruebas</h4>
+              </div>
+              <p className="text-[11px] text-slate-500 mb-3">
+                Inyecta ventas simuladas, clientes de prueba (Carlos, María, Pedro) y gastos para evaluar el POS y reportes.
+              </p>
+              <button
+                type="button"
+                onClick={loadDemoData}
+                disabled={isDemoModeActive}
+                className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-center space-x-1.5 transition-colors cursor-pointer min-h-[44px] ${
+                  isDemoModeActive
+                    ? 'bg-amber-600 text-white cursor-default opacity-90'
+                    : 'bg-white hover:bg-amber-100 text-amber-800 border border-amber-300'
+                }`}
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                <span>{isDemoModeActive ? '✓ Datos de Prueba Activos' : 'Cargar Datos de Prueba (Demo)'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* 6. CUMPLIMIENTO LEGAL, PRIVACIDAD & COOKIES (Puntos 1, 2 y 3) */}
         <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-2xs">
           <div className="flex items-center space-x-2 text-xs font-bold text-sky-700 uppercase tracking-wider mb-4">
             <Lock className="w-4 h-4 text-sky-600" />

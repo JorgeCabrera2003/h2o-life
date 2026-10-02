@@ -38,12 +38,14 @@ interface PosModuleProps {
   isCartDrawerOpen?: boolean;
   setIsCartDrawerOpen?: (open: boolean) => void;
   preselectedClient?: Client | null;
+  onNavigateToProducts?: () => void;
 }
 
 export function PosModule({
   isCartDrawerOpen = false,
   setIsCartDrawerOpen,
   preselectedClient,
+  onNavigateToProducts,
 }: PosModuleProps) {
   const {
     products,
@@ -150,7 +152,8 @@ export function PosModule({
   });
 
   // Botones de acceso rápido para Recargas (Karla notebook workflow)
-  const quickRefillProduct = products.find(p => p.id === 'prod-recarga-20');
+  const quickRefillProduct = products.find(p => p.id === 'prod-recarga-20' || (p.category === 'agua' && p.quick_select));
+  const unitRefillPrice = quickRefillProduct ? quickRefillProduct.price_usd : 0.50;
 
   const handleQuickRefill = (qty: number) => {
     if (quickRefillProduct) {
@@ -237,15 +240,33 @@ export function PosModule({
               <p className="text-[11px] text-sky-100 font-medium">Toque instantáneo para sumar botellones al carrito</p>
             </div>
           </div>
-          <span className="text-xs bg-white/20 font-black px-3 py-1 rounded-full border border-white/25 shadow-xs">
-            $0.50 c/u
-          </span>
+          <div className="flex items-center space-x-2">
+            {onNavigateToProducts && (
+              <button
+                type="button"
+                onClick={onNavigateToProducts}
+                className="text-[10px] font-bold bg-white/15 hover:bg-white/25 text-white px-2.5 py-1 rounded-full border border-white/20 pressable cursor-pointer hidden sm:inline-flex items-center space-x-1"
+                title="Cambiar precio de recarga o registrar productos"
+              >
+                <span>⚙️ Ajustar Precios</span>
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={onNavigateToProducts}
+              className="text-xs bg-white/20 hover:bg-white/30 font-black px-3 py-1 rounded-full border border-white/25 shadow-xs pressable cursor-pointer flex items-center space-x-1"
+              title="Toca para cambiar la tarifa de recarga"
+            >
+              <span>${unitRefillPrice.toFixed(2)} c/u</span>
+              <span className="text-[10px] opacity-80">✏️</span>
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 relative z-10">
           {[1, 2, 3, 4].map(qty => {
-            const costUsd = (qty * 0.5).toFixed(2);
-            const costBs = (qty * 0.5 * exchangeRate.rate).toFixed(2);
+            const costUsd = (qty * unitRefillPrice).toFixed(2);
+            const costBs = (qty * unitRefillPrice * exchangeRate.rate).toFixed(2);
             return (
               <button
                 key={qty}

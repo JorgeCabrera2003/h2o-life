@@ -28,20 +28,21 @@ CREATE TABLE IF NOT EXISTS user_profiles (
     auth_id UUID UNIQUE, -- Enlace con supabase.auth.users
     name VARCHAR(100) NOT NULL,
     email VARCHAR(120) UNIQUE NOT NULL,
+    phone VARCHAR(40),
     role_id INT NOT NULL REFERENCES roles(id) ON DELETE RESTRICT,
     active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Seed de usuarios base
-INSERT INTO user_profiles (name, email, role_id) VALUES
-('TSU Jorge Cabrera', 'jorge@h2olife.com', 1),
-('Freyeliz', 'freyeliz@h2olife.com', 2),
-('Karla', 'karla@h2olife.com', 3)
-ON CONFLICT (email) DO NOTHING;
+-- Seed de usuarios base con teléfonos oficiales
+INSERT INTO user_profiles (name, email, phone, role_id) VALUES
+('TSU Jorge Cabrera', 'jorge@h2olife.com', '+58 424-5567016', 1),
+('Freyeliz', 'freyeliz@h2olife.com', '+58 424-5658068', 2),
+('Karla', 'karla@h2olife.com', '+58 424-5717589', 3)
+ON CONFLICT (email) DO UPDATE SET phone = EXCLUDED.phone;
 
 
--- 3. TABLA DE CLIENTES HABITUALES
+-- 3. TABLA DE CLIENTES (Semilla de Producción Limpia)
 CREATE TABLE IF NOT EXISTS clients (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(120) NOT NULL,
@@ -54,39 +55,64 @@ CREATE TABLE IF NOT EXISTS clients (
 
 CREATE INDEX IF NOT EXISTS idx_clients_name ON clients(name);
 
--- Seed de cliente frecuente
-INSERT INTO clients (name, phone, notes) VALUES
-('Doraida', '+58 412 1234567', 'Cliente habitual de 2 a 4 recargas semanales')
+-- Seed de producción limpio: Cliente Mostrador
+INSERT INTO clients (name, phone, address, notes) VALUES
+('Cliente Mostrador / Transeúnte', 'N/A', 'Calle 28 con Carrera 25, Barquisimeto (Tienda H2O Life)', 'Venta presencial al detal en tienda')
 ON CONFLICT DO NOTHING;
 
--- 4. CATÁLOGO DE PRODUCTOS UNIFICADO
+-- 4. CATÁLOGO DE PRODUCTOS & SERVICIOS UNIFICADO
 CREATE TABLE IF NOT EXISTS products (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(120) NOT NULL,
-    category VARCHAR(50) NOT NULL, -- 'agua', 'botellon', 'helado', 'snack', 'insumo'
+    category VARCHAR(50) NOT NULL, -- 'agua', 'botellon', 'helado', 'snack', 'insumo', 'servicio'
     price_usd DECIMAL(10, 2) NOT NULL,
     cost_usd DECIMAL(10, 2) DEFAULT 0.00,
     stock INT DEFAULT 0,
-    unit VARCHAR(20) DEFAULT 'unidad', -- 'recarga', 'garrafon_20L', 'pote', 'paquete'
+    unit VARCHAR(20) DEFAULT 'unidad', -- 'recarga', 'garrafon_20L', 'pote', 'paquete', 'servicio', 'despacho'
     quick_select BOOLEAN DEFAULT FALSE,
+    is_service BOOLEAN DEFAULT FALSE,
+    description TEXT,
     active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 CREATE INDEX IF NOT EXISTS idx_products_category ON products(category);
 
--- Seed de productos de H2O Life
-INSERT INTO products (name, category, price_usd, cost_usd, stock, unit, quick_select) VALUES
-('Recarga de Agua (20L / 18L)', 'agua', 0.50, 0.10, 9999, 'recarga', TRUE),
-('Botellón Nuevo 20L (con agua)', 'botellon', 7.00, 4.50, 30, 'unidad', TRUE),
-('Botellón Vacío 20L', 'botellon', 6.50, 4.00, 20, 'unidad', FALSE),
-('Botellón 5L (Nuevo con agua)', 'botellon', 2.50, 1.20, 25, 'unidad', TRUE),
-('Tapa / Precinto de Seguridad', 'insumo', 0.20, 0.05, 200, 'unidad', FALSE),
-('Helado Tío Rico / Artesanal', 'helado', 1.00, 0.60, 50, 'unidad', TRUE),
-('Helado Premium Paleta', 'helado', 1.50, 0.90, 40, 'unidad', FALSE),
-('Tostones Caseros', 'snack', 1.00, 0.50, 20, 'bolsa', FALSE),
-('Empanadas Chilenas', 'snack', 1.50, 0.80, 15, 'unidad', FALSE)
+-- Seed de productos y servicios oficiales de H2O Life
+INSERT INTO products (name, category, price_usd, cost_usd, stock, unit, quick_select, is_service, description) VALUES
+('Recarga de Agua (20L / 18L)', 'agua', 0.50, 0.10, 9999, 'recarga', TRUE, FALSE, 'Agua purificada por ósmosis inversa, ozono y luz ultravioleta'),
+('Botellón Nuevo 20L (con agua)', 'botellon', 7.00, 4.50, 30, 'unidad', TRUE, FALSE, 'Botellón nuevo de policarbonato grado alimenticio con agua purificada'),
+('Botellón Vacío 20L', 'botellon', 6.50, 4.00, 20, 'unidad', FALSE, FALSE, 'Envase vacío de 20L virgen de alta durabilidad'),
+('Botellón 5L (Nuevo con agua)', 'botellon', 2.50, 1.20, 25, 'unidad', TRUE, FALSE, 'Botellón compacto de 5 litros fácil de transportar'),
+('Tapa / Precinto de Seguridad', 'insumo', 0.20, 0.05, 200, 'unidad', FALSE, FALSE, 'Precinto termoencogible anti-derrame y esterilizado'),
+('Helado Tío Rico / Artesanal', 'helado', 1.00, 0.60, 50, 'unidad', TRUE, FALSE, 'Helados variados en cono y vasito'),
+('Helado Premium Paleta', 'helado', 1.50, 0.90, 40, 'unidad', FALSE, FALSE, 'Paletas artesanales rellenas de frutas naturales'),
+('Tostones Caseros', 'snack', 1.00, 0.50, 20, 'bolsa', FALSE, FALSE, 'Plátano verde crujiente con sal marina'),
+('Empanadas Chilenas', 'snack', 1.50, 0.80, 15, 'unidad', FALSE, FALSE, 'Empanadas horneadas de carne y queso'),
+('Lavado y Desinfección con Ozono', 'servicio', 0.50, 0.05, 9999, 'servicio', TRUE, TRUE, 'Sanitización profunda bactericida y enjuague interno con agua ozonizada'),
+('Servicio de Despacho / Delivery Express', 'servicio', 1.00, 0.30, 9999, 'despacho', TRUE, TRUE, 'Despacho a domicilio en Barquisimeto desde sede Calle 28 con Carrera 25')
 ON CONFLICT DO NOTHING;
+
+-- 4.1. CONFIGURACIÓN DEL SISTEMA & WHATSAPP
+CREATE TABLE IF NOT EXISTS system_settings (
+    id SERIAL PRIMARY KEY,
+    business_name VARCHAR(120) NOT NULL DEFAULT 'H2O Life',
+    business_rif VARCHAR(50) NOT NULL DEFAULT 'J-50982341-2',
+    store_address TEXT NOT NULL DEFAULT 'Calle 28 con Carrera 25, Barquisimeto',
+    jorge_phone VARCHAR(40) NOT NULL DEFAULT '+58 424-5567016',
+    freyeliz_phone VARCHAR(40) NOT NULL DEFAULT '+58 424-5658068',
+    karla_phone VARCHAR(40) NOT NULL DEFAULT '+58 424-5717589',
+    tank_low_threshold_pct INT DEFAULT 20,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+INSERT INTO system_settings (id, business_name, business_rif, store_address, jorge_phone, freyeliz_phone, karla_phone, tank_low_threshold_pct)
+VALUES (1, 'H2O Life', 'J-50982341-2', 'Calle 28 con Carrera 25, Barquisimeto', '+58 424-5567016', '+58 424-5658068', '+58 424-5717589', 20)
+ON CONFLICT (id) DO UPDATE SET
+    jorge_phone = EXCLUDED.jorge_phone,
+    freyeliz_phone = EXCLUDED.freyeliz_phone,
+    karla_phone = EXCLUDED.karla_phone,
+    store_address = EXCLUDED.store_address;
 
 -- 5. TABLA DE TANQUES DE AGUA Y MONITOREO
 CREATE TABLE IF NOT EXISTS water_tanks (

@@ -4,6 +4,29 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 
 ---
 
+## [1.6.0] - 2026-10-02
+
+### 📦 Módulo de Catálogo, Precios Dinámicos de Recarga y Desacoplamiento de Semilla / Demo
+* **Controlador Rápido de Precio de Recargas de Agua:**
+  * Modificador interactivo en vivo del precio unitario de recarga ($0.40, $0.50, $0.60, $0.75, $1.00 o valor libre personalizado).
+  * Matriz multiplicadora en tiempo real en dólares ($) y bolívares (Bs. BCV oficial) para 1, 2, 3, 4 y 5 botellones.
+  * Sincronización instantánea con el módulo POS: los botones rápidos y carritos abiertos actualizan inmediatamente sus precios sin necesidad de recargar la aplicación.
+* **Creación y Registro de Productos Físicos y Servicios Intangibles:**
+  * Nuevo módulo dedicado de **Catálogo (`ProductsServicesModule.tsx`)** accesible desde la barra superior y navegación inferior (`BottomNav`).
+  * Soporte diferenciado para **Servicios** (ej. Lavado y Desinfección con Ozono, Servicio de Delivery Express) con inventario continuo ilimitado y métricas de margen de ganancia.
+  * Modal ergonómico para crear y editar productos físicos y servicios, con selección de categoría, costos, precios, unidades e iconos.
+* **Aislamiento Estricto entre Semilla de Producción y Capa de Pruebas (Demo Data):**
+  * Desacoplados todos los datos simulados a [`src/lib/demoData.ts`](file:///c:/proyectos/h2o-life/src/lib/demoData.ts).
+  * La base de datos y almacén en producción inician limpios en cero (0 ventas, 0 gastos ficticios, solo catálogo oficial y cliente de mostrador presencial).
+  * Panel de control de datos en Configuración y Catálogo para activar o limpiar los datos de prueba con un solo clic.
+* **Fijación de Teléfonos Oficiales del Equipo:**
+  * TSU Jorge Cabrera (Superadmin): `+58 424-5567016`
+  * Freyeliz (Administradora): `+58 424-5658068`
+  * Karla (Cajera / Mostrador): `+58 424-5717589`
+  * Integrados canales de contacto directo y botones de prueba en Configuración, Almacén Reactivo, Botón Flotante de WhatsApp y Esquema SQL (`supabase_schema.sql`).
+
+---
+
 ## [1.5.1] - 2026-10-02
 
 ### 💎 Excelencia Frontend Psicológica, Técnica & Estandarización de Nombre

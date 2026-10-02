@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useH2OStore, INITIAL_USERS } from '@/lib/store';
 import { ActiveTab } from '@/components/BottomNav';
-import { Droplet, Edit3, Check, Settings, Sparkles, ChevronDown } from 'lucide-react';
+import { Droplet, Edit3, Check, Settings, Sparkles, ChevronDown, Package } from 'lucide-react';
 
 interface NavbarProps {
   onNavigate?: (tab: ActiveTab) => void;
@@ -128,6 +128,21 @@ export function Navbar({ onNavigate, activeTab }: NavbarProps) {
                 </div>
               </div>
             </div>
+          )}
+
+          {/* Botón de Catálogo de Productos & Precios de Recarga */}
+          {onNavigate && (
+            <button
+              onClick={() => onNavigate('products')}
+              className={`p-2 sm:p-2.5 rounded-2xl border transition-all shrink-0 pressable cursor-pointer ${
+                activeTab === 'products'
+                  ? 'bg-sky-100 text-sky-800 border-sky-300 shadow-2xs'
+                  : 'bg-white/80 text-slate-500 hover:text-slate-800 border-slate-200/80 hover:bg-white hover:border-sky-200'
+              }`}
+              title="Catálogo de Productos & Precios de Recarga"
+            >
+              <Package className="w-4 h-4" />
+            </button>
           )}
 
           {/* Botón de Configuración del Sistema (Ajustes) */}

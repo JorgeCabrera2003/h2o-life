@@ -8,9 +8,10 @@ import { analytics } from '@/lib/analytics';
 export function FloatingWhatsAppButton() {
   const store = useH2OStoreSafe();
   const systemSettings = store?.systemSettings || {
-    freyeliz_phone: '+58 412 1234567',
-    freyeli_phone: '+58 412 1234567',
-    jorge_phone: '+58 414 7654321',
+    jorge_phone: '+58 424-5567016',
+    freyeliz_phone: '+58 424-5658068',
+    freyeli_phone: '+58 424-5658068',
+    karla_phone: '+58 424-5717589',
   };
   const exchangeRate = store?.exchangeRate || { rate: 866.56 };
   const [isOpen, setIsOpen] = useState(false);
@@ -31,8 +32,9 @@ export function FloatingWhatsAppButton() {
     };
   }, [isOpen]);
 
-  const freyelizNumber = (systemSettings.freyeliz_phone || systemSettings.freyeli_phone || '+58 412 1234567').replace(/\D/g, '');
-  const jorgeNumber = (systemSettings.jorge_phone || '+58 414 7654321').replace(/\D/g, '');
+  const freyelizNumber = (systemSettings.freyeliz_phone || systemSettings.freyeli_phone || '+58 424-5658068').replace(/\D/g, '');
+  const jorgeNumber = (systemSettings.jorge_phone || '+58 424-5567016').replace(/\D/g, '');
+  const karlaNumber = (systemSettings.karla_phone || '+58 424-5717589').replace(/\D/g, '');
 
   const openWhatsApp = (phone: string, text: string, targetRole: string) => {
     analytics.logEvent('whatsapp_click', 'pos', { targetRole, phone });
@@ -68,7 +70,7 @@ export function FloatingWhatsAppButton() {
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="text-slate-400 hover:text-slate-700 p-1 rounded-lg"
+              className="text-slate-400 hover:text-slate-700 p-1 rounded-lg pressable cursor-pointer"
               aria-label="Cerrar opciones de WhatsApp"
             >
               <X className="w-4 h-4" />
@@ -76,7 +78,7 @@ export function FloatingWhatsAppButton() {
           </div>
 
           <div className="space-y-2">
-            {/* Opción 1: Freyeliz (Atención en Tienda) */}
+            {/* Opción 1: Freyeliz (Administradora / Tienda) */}
             <button
               type="button"
               onClick={() =>
@@ -86,7 +88,7 @@ export function FloatingWhatsAppButton() {
                   'Freyeliz (Tienda)'
                 )
               }
-              className="w-full text-left p-3 rounded-2xl bg-emerald-50/60 hover:bg-emerald-100/70 border border-emerald-100 flex items-center justify-between transition-colors group cursor-pointer"
+              className="w-full text-left p-2.5 rounded-2xl bg-emerald-50/60 hover:bg-emerald-100/70 border border-emerald-100 flex items-center justify-between transition-colors group cursor-pointer pressable"
             >
               <div className="flex items-center space-x-2.5">
                 <div className="w-7 h-7 rounded-xl bg-white text-emerald-700 flex items-center justify-center font-bold text-xs shadow-2xs">
@@ -94,7 +96,7 @@ export function FloatingWhatsAppButton() {
                 </div>
                 <div>
                   <span className="text-xs font-bold text-slate-900 block group-hover:text-emerald-800">
-                    Freyeliz (Atención en Tienda)
+                    Freyeliz (Administración)
                   </span>
                   <span className="text-[10px] text-slate-500">
                     Recargas, pedidos a domicilio y despacho
@@ -104,7 +106,35 @@ export function FloatingWhatsAppButton() {
               <ChevronRight className="w-4 h-4 text-emerald-600 group-hover:translate-x-0.5 transition-transform" />
             </button>
 
-            {/* Opción 2: Consultar Precios y Tasa BCV */}
+            {/* Opción 2: Karla (Caja & Mostrador) */}
+            <button
+              type="button"
+              onClick={() =>
+                openWhatsApp(
+                  karlaNumber,
+                  `Hola Karla, me comunico desde H2O Life. Quisiera consultar sobre la atención en caja y pedidos en mostrador.`,
+                  'Karla (Cajera / Mostrador)'
+                )
+              }
+              className="w-full text-left p-2.5 rounded-2xl bg-cyan-50/60 hover:bg-cyan-100/70 border border-cyan-100 flex items-center justify-between transition-colors group cursor-pointer pressable"
+            >
+              <div className="flex items-center space-x-2.5">
+                <div className="w-7 h-7 rounded-xl bg-white text-cyan-700 flex items-center justify-center font-bold text-xs shadow-2xs">
+                  <User className="w-3.5 h-3.5 text-cyan-600" />
+                </div>
+                <div>
+                  <span className="text-xs font-bold text-slate-900 block group-hover:text-cyan-800">
+                    Karla (Caja & Mostrador)
+                  </span>
+                  <span className="text-[10px] text-slate-500">
+                    Cobros, cambio de botellones y atención rápida
+                  </span>
+                </div>
+              </div>
+              <ChevronRight className="w-4 h-4 text-cyan-600 group-hover:translate-x-0.5 transition-transform" />
+            </button>
+
+            {/* Opción 3: Consultar Precios y Tasa BCV */}
             <button
               type="button"
               onClick={() =>
@@ -116,7 +146,7 @@ export function FloatingWhatsAppButton() {
                   'Consulta Precios'
                 )
               }
-              className="w-full text-left p-3 rounded-2xl bg-sky-50/60 hover:bg-sky-100/70 border border-sky-100 flex items-center justify-between transition-colors group cursor-pointer"
+              className="w-full text-left p-2.5 rounded-2xl bg-sky-50/60 hover:bg-sky-100/70 border border-sky-100 flex items-center justify-between transition-colors group cursor-pointer pressable"
             >
               <div className="flex items-center space-x-2.5">
                 <div className="w-7 h-7 rounded-xl bg-white text-sky-700 flex items-center justify-center font-bold text-xs shadow-2xs">
@@ -134,7 +164,7 @@ export function FloatingWhatsAppButton() {
               <ChevronRight className="w-4 h-4 text-sky-600 group-hover:translate-x-0.5 transition-transform" />
             </button>
 
-            {/* Opción 3: TSU Jorge Cabrera (Soporte Técnico) */}
+            {/* Opción 4: TSU Jorge Cabrera (Soporte Técnico) */}
             <button
               type="button"
               onClick={() =>
@@ -144,7 +174,7 @@ export function FloatingWhatsAppButton() {
                   'Jorge (Soporte Técnico)'
                 )
               }
-              className="w-full text-left p-2.5 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200 flex items-center justify-between transition-colors group cursor-pointer"
+              className="w-full text-left p-2.5 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200 flex items-center justify-between transition-colors group cursor-pointer pressable"
             >
               <div className="flex items-center space-x-2.5">
                 <div className="w-7 h-7 rounded-xl bg-white text-slate-700 flex items-center justify-center font-bold text-xs shadow-2xs">

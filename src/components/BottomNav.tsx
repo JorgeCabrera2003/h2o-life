@@ -1,10 +1,10 @@
 'use client';
 
 import React from 'react';
-import { ShoppingCart, Users, Camera, Lock, Database, BarChart3 } from 'lucide-react';
+import { ShoppingCart, Package, Users, Camera, Lock, Database, BarChart3 } from 'lucide-react';
 import { useH2OStore } from '@/lib/store';
 
-export type ActiveTab = 'pos' | 'clients' | 'camera' | 'closure' | 'tanks' | 'finance' | 'settings';
+export type ActiveTab = 'pos' | 'products' | 'clients' | 'camera' | 'closure' | 'tanks' | 'finance' | 'settings';
 
 interface BottomNavProps {
   activeTab: ActiveTab;
@@ -23,6 +23,11 @@ export function BottomNav({ activeTab, setActiveTab, onOpenCart }: BottomNavProp
       id: 'pos',
       label: 'Ventas',
       icon: <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />,
+    },
+    {
+      id: 'products',
+      label: 'Catálogo',
+      icon: <Package className="w-4 h-4 sm:w-5 sm:h-5" />,
     },
     {
       id: 'clients',
