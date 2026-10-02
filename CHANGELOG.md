@@ -4,6 +4,28 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 
 ---
 
+## [1.9.1] - 2026-10-02
+
+### 💧 Actualización Oficial de Tarifa de Recargas a $0.70 USD
+* **Precio Unitario Oficial Actualizado en Todo el Ecosistema (`src/lib/store.tsx`):**
+  * Tarifa base de la recarga de 20L / 18L (`prod-recarga-20`) ajustada de `$0.50` a **`$0.70 USD`**.
+  * **Auto-migración transparente de almacenamiento local (`localStorage`):** Si un dispositivo (teléfono o laptop) tenía guardada la tarifa anterior de `$0.50`, el store detecta y actualiza automáticamente a `$0.70` en tiempo real.
+* **Ajuste en Botones de Recarga Rápida del POS (`PosModule.tsx`):**
+  * Los cálculos de recarga rápida ahora reflejan fielmente:
+    * **1 Botellón (20L):** `$0.70 USD`
+    * **2 Botellones (20L):** `$1.40 USD`
+    * **3 Botellones (20L):** `$2.10 USD`
+    * **4 Botellones (20L):** `$2.80 USD`
+  * Conversión automática a Bolívares (Bs.) según la tasa oficial del día del BCV.
+* **Módulo de Catálogo y Presets de Precios (`ProductsServicesModule.tsx`):**
+  * Incluido el preset de `$0.70` como tarifa sugerida directa y configurado como valor por defecto.
+* **Cámara Inteligente & Detección por IA (`AiCameraModule.tsx` & `api/ai-vision`):**
+  * La detección de garrafones por visión artificial sugiere y carga automáticamente `$0.70 USD`.
+* **Respuestas Automatizadas de WhatsApp (`WhatsAppHubModal.tsx`):**
+  * El comando `!recarga` ahora informa el precio oficial de `$0.70 USD` con su equivalente en Bolívares.
+
+---
+
 ## [1.9.0] - 2026-10-02
 
 ### 📱 Resolución Definitiva de Descarga de Bundles JS y Descongelamiento en Dispositivos Móviles

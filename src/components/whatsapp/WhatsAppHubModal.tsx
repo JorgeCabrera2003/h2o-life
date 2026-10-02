@@ -107,7 +107,7 @@ export function WhatsAppHubModal({ isOpen, onClose, defaultTab = 'catalog' }: Wh
       setSimulatedBotResponse(catalogMessage);
     } else if (cmd === '!recarga' || cmd === '2') {
       const recarga = products.find(p => p.id === 'prod-recarga-20' || p.category === 'agua');
-      const priceUsd = recarga ? recarga.price_usd : 0.50;
+      const priceUsd = recarga ? recarga.price_usd : 0.70;
       const priceBs = (priceUsd * exchangeRate.rate).toFixed(2);
       setSimulatedBotResponse(
         `💧 *RECARGA DE AGUA PURIFICADA 20L / 18L*\nPrecio: *$${priceUsd.toFixed(2)} USD* (Bs. ${Number(priceBs).toLocaleString('es-VE', { minimumFractionDigits: 2 })})\n\nProceso de purificación:\n✔ Filtros de sedimentos y carbón activado\n✔ Membranas de Ósmosis Inversa\n✔ Desinfección con Ozono bactericida\n✔ Lámpara de Luz Ultravioleta UV\n\n📍 Calle 28 con Carrera 25, Barquisimeto\nEscribe *!pagos* para datos de pago o *!menu* para volver.`

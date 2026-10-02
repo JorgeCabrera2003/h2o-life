@@ -70,7 +70,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     id: 'prod-recarga-20',
     name: 'Recarga de Agua 20L / 18L',
     category: 'agua',
-    price_usd: 0.50,
+    price_usd: 0.70,
     cost_usd: 0.10,
     stock: 9999,
     unit: 'recarga',
@@ -337,7 +337,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       if (savedProducts) {
         const parsed = JSON.parse(savedProducts);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          setProducts(parsed);
+          // Migración automática: Si la recarga de 20L estaba en $0.50, actualizar a la tarifa vigente $0.70
+          const migrated = parsed.map((p: Product) =>
+            p.id === 'prod-recarga-20' && p.price_usd === 0.50
+              ? { ...p, price_usd: 0.70 }
+              : p
+          );
+          setProducts(migrated);
+          localStorage.setItem('h2o_custom_products', JSON.stringify(migrated));
         }
       }
       const savedDemo = localStorage.getItem('h2o_demo_mode');

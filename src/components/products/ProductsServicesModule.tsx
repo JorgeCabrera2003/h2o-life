@@ -63,7 +63,7 @@ export function ProductsServicesModule() {
   // Campos del Formulario
   const [name, setName] = useState('');
   const [category, setCategory] = useState<ProductCategory>('agua');
-  const [priceUsd, setPriceUsd] = useState('0.50');
+  const [priceUsd, setPriceUsd] = useState('0.70');
   const [costUsd, setCostUsd] = useState('0.10');
   const [stock, setStock] = useState('9999');
   const [unit, setUnit] = useState('recarga');
@@ -75,7 +75,7 @@ export function ProductsServicesModule() {
   // Controlador Rápido de Precio de Recargas
   const refillProduct = products.find(p => p.id === 'prod-recarga-20' || (p.category === 'agua' && p.quick_select)) || products[0];
   const [refillPriceInput, setRefillPriceInput] = useState<string>(
-    refillProduct ? refillProduct.price_usd.toString() : '0.50'
+    refillProduct ? refillProduct.price_usd.toString() : '0.70'
   );
   const [refillSavedToast, setRefillSavedToast] = useState(false);
 
@@ -183,7 +183,7 @@ export function ProductsServicesModule() {
     setIsModalOpen(false);
   };
 
-  const currentRefillPrice = parseFloat(refillPriceInput) || (refillProduct ? refillProduct.price_usd : 0.50);
+  const currentRefillPrice = parseFloat(refillPriceInput) || (refillProduct ? refillProduct.price_usd : 0.70);
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-4 pb-40 md:pb-36 animate-in fade-in duration-200">
@@ -263,7 +263,7 @@ export function ProductsServicesModule() {
                 Selecciona una tarifa rápida o ingresa un valor:
               </span>
               <div className="flex flex-wrap items-center gap-2">
-                {[0.40, 0.50, 0.60, 0.75, 1.00].map(val => (
+                {[0.50, 0.60, 0.70, 0.75, 1.00].map(val => (
                   <button
                     key={val}
                     type="button"

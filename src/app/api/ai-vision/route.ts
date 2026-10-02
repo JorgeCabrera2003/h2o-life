@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
                 bottleName: parsed.name || 'Garrafón 20 Litros Estándar',
                 confidence: parsed.confidence || 0.94,
                 suggestedProductId: 'prod-recarga-20',
-                suggestedPriceUsd: 0.5,
+                suggestedPriceUsd: 0.70,
               });
             }
           }
@@ -97,7 +97,7 @@ export async function POST(req: NextRequest) {
         bottleName: 'Garrafón Estándar de 20 Litros',
         confidence: 0.96,
         suggestedProductId: 'prod-recarga-20',
-        suggestedPriceUsd: 0.5,
+        suggestedPriceUsd: 0.70,
         observation: 'Geometría cilíndrica de cuello estrecho compatible con dispensador 20L.',
         aiModel: 'H2O-Vision Edge Heuristic v1.2',
       });

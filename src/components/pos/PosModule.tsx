@@ -179,7 +179,7 @@ export function PosModule({
 
   // Botones de acceso rápido para Recargas (Karla notebook workflow)
   const quickRefillProduct = products.find(p => p.id === 'prod-recarga-20' || (p.category === 'agua' && p.quick_select));
-  const unitRefillPrice = quickRefillProduct ? quickRefillProduct.price_usd : 0.50;
+  const unitRefillPrice = quickRefillProduct ? quickRefillProduct.price_usd : 0.70;
 
   const handleQuickRefill = (qty: number) => {
     if (quickRefillProduct) {

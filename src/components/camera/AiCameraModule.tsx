@@ -165,7 +165,7 @@ export function AiCameraModule({ onProductAddedToCart }: AiCameraModuleProps) {
           bottleName: 'Garrafón Estándar de 20 Litros',
           confidence: 0.95,
           suggestedProductId: 'prod-recarga-20',
-          suggestedPriceUsd: 0.5,
+          suggestedPriceUsd: 0.70,
         });
       }
     } finally {
@@ -464,7 +464,9 @@ export function AiCameraModule({ onProductAddedToCart }: AiCameraModuleProps) {
                   className="w-full bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-700 text-white font-black py-3.5 rounded-xl shadow-md text-xs flex items-center justify-center space-x-2 pressable cursor-pointer min-h-[44px]"
                 >
                   <Plus className="w-4 h-4" />
-                  <span>Agregar Directo al Carrito ($0.50)</span>
+                  <span>
+                    Agregar Directo al Carrito ({analysisResult.suggestedPriceUsd ? `$${analysisResult.suggestedPriceUsd.toFixed(2)}` : '$0.70'})
+                  </span>
                 </button>
               </div>
             )}
