@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test:perf": "node scripts/test-system.js"
+    "test:perf": "node scripts/test-system.js",
+    "bot": "node scripts/whatsapp-bot.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",

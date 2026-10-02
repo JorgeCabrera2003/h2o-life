@@ -3,7 +3,9 @@
 import React, { useState } from 'react';
 import { useH2OStore, INITIAL_USERS } from '@/lib/store';
 import { ActiveTab } from '@/components/BottomNav';
-import { Droplet, Edit3, Check, Settings, Sparkles, ChevronDown, Package } from 'lucide-react';
+import { Droplet, Edit3, Check, Settings, Sparkles, ChevronDown, Package, MessageSquare, Smartphone } from 'lucide-react';
+import { WhatsAppHubModal } from '@/components/whatsapp/WhatsAppHubModal';
+import { ConnectMobileModal } from '@/components/common/ConnectMobileModal';
 
 interface NavbarProps {
   onNavigate?: (tab: ActiveTab) => void;
@@ -15,6 +17,8 @@ export function Navbar({ onNavigate, activeTab }: NavbarProps) {
   const [isEditingRate, setIsEditingRate] = useState(false);
   const [customRate, setCustomRate] = useState(exchangeRate.rate.toString());
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showWhatsAppHub, setShowWhatsAppHub] = useState(false);
+  const [showMobileConnect, setShowMobileConnect] = useState(false);
 
   const handleSaveRate = () => {
     const parsed = parseFloat(customRate);
@@ -160,6 +164,28 @@ export function Navbar({ onNavigate, activeTab }: NavbarProps) {
             </button>
           )}
 
+          {/* Botón de Conectar Teléfono Móvil (Wi-Fi Local & QR) */}
+          <button
+            type="button"
+            onClick={() => setShowMobileConnect(true)}
+            className="p-2 sm:p-2.5 rounded-2xl border transition-all shrink-0 pressable cursor-pointer bg-white/80 text-sky-600 hover:text-sky-800 border-slate-200/80 hover:bg-sky-50 hover:border-sky-200"
+            title="Conectar Teléfono Móvil (Wi-Fi Local & Código QR)"
+          >
+            <Smartphone className="w-4 h-4" />
+          </button>
+
+          {/* Botón de WhatsApp Hub (Catálogo, Reportes & Bot) */}
+          <button
+            type="button"
+            onClick={() => setShowWhatsAppHub(true)}
+            className="px-2.5 sm:px-3 py-1.5 rounded-2xl border transition-all shrink-0 pressable cursor-pointer bg-gradient-to-r from-emerald-50 to-teal-50 hover:from-emerald-100 hover:to-teal-100 text-emerald-800 border-emerald-300/80 flex items-center space-x-1.5 shadow-2xs"
+            title="WhatsApp Hub: Catálogo al Día, Reportes Administrativos & Bot"
+          >
+            <MessageSquare className="w-4 h-4 text-emerald-600" />
+            <span className="hidden sm:inline text-xs font-black text-emerald-950">WhatsApp</span>
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          </button>
+
           {/* Selector de Rol / Operador Activo (Karla, Freyeliz, Jorge) */}
           <div className="relative">
             <button
@@ -214,6 +240,18 @@ export function Navbar({ onNavigate, activeTab }: NavbarProps) {
           </div>
         </div>
       </div>
+
+      {/* Modal de Conexión Móvil */}
+      <ConnectMobileModal
+        isOpen={showMobileConnect}
+        onClose={() => setShowMobileConnect(false)}
+      />
+
+      {/* Modal de WhatsApp Hub */}
+      <WhatsAppHubModal
+        isOpen={showWhatsAppHub}
+        onClose={() => setShowWhatsAppHub(false)}
+      />
     </header>
   );
 }

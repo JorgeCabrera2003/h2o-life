@@ -22,7 +22,9 @@ import {
   RotateCcw,
   FlaskConical,
   ShieldCheck,
+  MessageSquare,
 } from 'lucide-react';
+import { WhatsAppHubModal } from '@/components/whatsapp/WhatsAppHubModal';
 
 const CATEGORY_LABELS: Record<ProductCategory, { label: string; icon: string; badgeColor: string }> = {
   agua: { label: 'Agua & Recargas', icon: '💧', badgeColor: 'bg-sky-50 text-sky-700 border-sky-200' },
@@ -55,6 +57,7 @@ export function ProductsServicesModule() {
 
   // Modal Crear / Editar
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isWhatsAppHubOpen, setIsWhatsAppHubOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
   // Campos del Formulario
@@ -199,13 +202,26 @@ export function ProductsServicesModule() {
           </p>
         </div>
 
-        <button
-          onClick={handleOpenAdd}
-          className="bg-gradient-to-r from-sky-600 via-sky-500 to-cyan-500 hover:from-sky-700 text-white font-black px-4 py-2.5 rounded-2xl shadow-md shadow-sky-500/20 text-xs flex items-center space-x-2 pressable cursor-pointer min-h-[44px]"
-        >
-          <Plus className="w-4 h-4" />
-          <span>+ Crear Producto o Servicio</span>
-        </button>
+        <div className="flex items-center space-x-2 w-full sm:w-auto">
+          <button
+            type="button"
+            onClick={() => setIsWhatsAppHubOpen(true)}
+            className="flex-1 sm:flex-initial bg-gradient-to-r from-emerald-50 to-teal-50 hover:from-emerald-100 text-emerald-800 border border-emerald-300 font-bold px-3.5 py-2.5 rounded-2xl text-xs flex items-center justify-center space-x-1.5 pressable cursor-pointer min-h-[44px] shadow-2xs"
+            title="Compartir Catálogo Oficial por WhatsApp"
+          >
+            <MessageSquare className="w-4 h-4 text-emerald-600" />
+            <span>Compartir Catálogo WhatsApp</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleOpenAdd}
+            className="flex-1 sm:flex-initial bg-gradient-to-r from-sky-600 via-sky-500 to-cyan-500 hover:from-sky-700 text-white font-black px-4 py-2.5 rounded-2xl shadow-md shadow-sky-500/20 text-xs flex items-center justify-center space-x-2 pressable cursor-pointer min-h-[44px]"
+          >
+            <Plus className="w-4 h-4" />
+            <span>+ Crear Ítem</span>
+          </button>
+        </div>
       </div>
 
       {/* 2. CONTROLADOR DESTACADO: AJUSTE RÁPIDO DE PRECIO DE RECARGA DE AGUA */}
@@ -784,6 +800,13 @@ export function ProductsServicesModule() {
           </div>
         </div>
       )}
+
+      {/* Modal de WhatsApp Hub para Catálogo y Precios */}
+      <WhatsAppHubModal
+        isOpen={isWhatsAppHubOpen}
+        onClose={() => setIsWhatsAppHubOpen(false)}
+        defaultTab="catalog"
+      />
     </div>
   );
 }

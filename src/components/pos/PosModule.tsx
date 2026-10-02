@@ -991,16 +991,33 @@ export function PosModule({
             </div>
 
             <div className="space-y-2">
-              <button
-                onClick={() => {
-                  const url = getWhatsAppSaleUrl(completedSale, systemSettings.freyeliz_phone || systemSettings.freyeli_phone);
-                  window.open(url, '_blank');
-                }}
-                className="w-full bg-sky-600 hover:bg-sky-700 text-white font-extrabold py-3 rounded-xl shadow-md flex items-center justify-center space-x-2 text-xs"
-              >
-                <Share2 className="w-4 h-4" />
-                <span>📲 Notificar a Freyeliz (WhatsApp Admin)</span>
-              </button>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const url = getWhatsAppSaleUrl(completedSale, systemSettings.freyeliz_phone || '+58 424-5658068');
+                    window.open(url, '_blank');
+                  }}
+                  className="bg-sky-600 hover:bg-sky-700 text-white font-bold py-2.5 px-2 rounded-xl shadow-md flex items-center justify-center space-x-1.5 text-xs pressable cursor-pointer min-h-[44px]"
+                  title="Enviar notificación a Freyeliz"
+                >
+                  <Share2 className="w-3.5 h-3.5" />
+                  <span>👩‍💼 A Freyeliz</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const url = getWhatsAppSaleUrl(completedSale, systemSettings.jorge_phone || '+58 424-5567016');
+                    window.open(url, '_blank');
+                  }}
+                  className="bg-sky-800 hover:bg-sky-900 text-white font-bold py-2.5 px-2 rounded-xl shadow-md flex items-center justify-center space-x-1.5 text-xs pressable cursor-pointer min-h-[44px]"
+                  title="Enviar notificación a Jorge"
+                >
+                  <Share2 className="w-3.5 h-3.5" />
+                  <span>👨‍💼 A Jorge</span>
+                </button>
+              </div>
 
               <button
                 onClick={handleShareWhatsApp}

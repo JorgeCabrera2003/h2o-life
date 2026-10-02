@@ -4,6 +4,31 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 
 ---
 
+## [1.7.0] - 2026-10-02
+
+### 💬 Optimización Total de WhatsApp, Catálogo en Vivo, Reportes Administrativos & Bot Gratuito
+* **Centro de Control WhatsApp Hub (`WhatsAppHubModal.tsx`):**
+  * Acceso directo desde la barra superior (`Navbar.tsx`), el Catálogo y la finalización de ventas en el POS.
+  * Generador de Catálogo con precios en vivo en USD ($) y Bolívares (Bs. según tasa oficial BCV), categorizado con emojis y datos fiscales de H2O Life (Calle 28 con Carrera 25, RIF J-50982341-2).
+  * Opciones de 1 toque: *Copiar Catálogo Completo*, *Compartir en cualquier chat/grupo*, o *Enviar a cliente específico*.
+* **Notificaciones Administrativas para Freyeliz y Jorge:**
+  * **Reporte Ejecutivo para Freyeliz (`+58 424-5658068`):** Resumen consolidado del turno con recaudación total ($ y Bs), métodos de pago, botellones despachados y porcentaje de agua en tanques.
+  * **Cierre y Arqueo de Caja para TSU Jorge Cabrera (`+58 424-5567016`):** Desglose para auditoría de fondos físicos (Efectivo $, Efectivo Bs) y cuentas bancarias (Punto de Venta, Pago Móvil).
+* **Bot de WhatsApp Autónomo y Gratuito (Cero Costos de Meta / Twilio):**
+  * Arquitectura en Node.js creada en [`scripts/whatsapp-bot.js`](file:///c:/proyectos/h2o-life/scripts/whatsapp-bot.js) y comando npm: `npm run bot`.
+  * Endpoint backend dedicado en [`src/app/api/whatsapp/route.ts`](file:///c:/proyectos/h2o-life/src/app/api/whatsapp/route.ts) para auto-responder comandos:
+    * `1` / `!catalogo`: Lista completa con precios al día.
+    * `2` / `!recarga`: Información de recargas 20L y proceso de purificación.
+    * `3` / `!ubicacion`: Dirección en Calle 28 con Carrera 25 y enlace de Google Maps.
+    * `4` / `!pagos`: Cuentas bancarias y teléfono de Pago Móvil.
+    * `5` / `!humano`: Transferencia de conversación a Freyeliz o Karla.
+  * Simulador de chat interactivo en el modal web para probar comandos antes de enviarlos.
+* **Solución de Conexión Móvil Local Wi-Fi & Código QR (`ConnectMobileModal.tsx`):**
+  * Solucionado el error de resolución DNS (`DNS_PROBE_POSSIBLE`) que ocurre con túneles públicos en proveedores venezolanos (CANTV/Digitel).
+  * Modal interactivo en la barra superior con la IP local directa: **`http://192.168.31.101:3000`** y Código QR escaneable con la cámara del celular para conexión instantánea, segura y con cero latencia dentro de la red Wi-Fi de la tienda.
+
+---
+
 ## [1.6.0] - 2026-10-02
 
 ### 📦 Módulo de Catálogo, Precios Dinámicos de Recarga y Desacoplamiento de Semilla / Demo
