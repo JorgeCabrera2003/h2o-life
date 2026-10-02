@@ -4,6 +4,25 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 
 ---
 
+## [1.9.0] - 2026-10-02
+
+### 📱 Resolución Definitiva de Descarga de Bundles JS y Descongelamiento en Dispositivos Móviles
+* **Eliminación del Encabezado HSTS Forzoso en Red Local Wi-Fi (`src/middleware.ts` & `next.config.ts`):**
+  * Se identificó que el middleware enviaba `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload` a todos los dispositivos en red local (`http://192.168.31.101:3000`).
+  * Los navegadores móviles (Chrome / Android) guardaban este encabezado en caché y forzaban la descarga de los scripts de React (`/_next/static/chunks/...`) por `https://192.168.31.101:3000`, provocando `ERR_SSL_PROTOCOL_ERROR` y bloqueando la ejecución del código JavaScript.
+  * Solución: El encabezado HSTS ahora se restringe estrictamente a producción con protocolo HTTPS activo (`process.env.NODE_ENV === 'production' && proto === 'https'`). En entorno de desarrollo y Wi-Fi local se emite `Strict-Transport-Security: max-age=0` para limpiar la caché HSTS de los teléfonos.
+* **Habilitación de Orígenes de Desarrollo en Red Móvil (`next.config.ts`):**
+  * Se configuró `allowedDevOrigins: ['192.168.31.101', '172.21.144.1', 'localhost', '127.0.0.1']` para evitar que el servidor Turbopack de Next.js bloquee las conexiones WebSocket de HMR hacia el teléfono.
+* **Descarte de la Pantalla de Bloqueo `if (!mounted)` (`src/app/page.tsx`):**
+  * Se retiró el guardia condicional que mantenía la vista congelada en *"Iniciando sistema de ventas..."* cuando el cliente no lograba completar la hidratación de React.
+  * La aplicación ahora renderiza directamente todo el entorno POS mediante Server-Side Rendering (SSR) con `suppressHydrationWarning`.
+* **Consolidación de Contexto Global (`StoreProvider`):**
+  * Eliminado el `StoreProvider` duplicado en `page.tsx`; el contexto global de datos ahora reside de forma única en `src/app/layout.tsx`.
+* **Batería de Pruebas de Red Wi-Fi (`scripts/test-mobile-endpoint.js`):**
+  * Verificados 24/24 bundles JavaScript servidos con código HTTP 200 directo a través de la IP `http://192.168.31.101:3000`.
+
+---
+
 ## [1.8.0] - 2026-10-02
 
 ### 📱 Optimización Móvil Completa, Feedback Táctil Háptico & Carrito Desplegable Ergonómico

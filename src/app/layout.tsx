@@ -220,7 +220,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
       </head>
-      <body className="min-h-full flex flex-col bg-slate-50 text-slate-900 overflow-x-hidden">
+      <body className="min-h-full flex flex-col bg-slate-50 text-slate-900 overflow-x-hidden" suppressHydrationWarning>
         <StoreProvider>
           {/* Telemetría y Analítica */}
           <AnalyticsTracker />

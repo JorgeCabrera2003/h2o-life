@@ -12,8 +12,13 @@ export function middleware(request: NextRequest) {
   }
 
   const response = NextResponse.next();
-  // Aplicar encabezado HSTS a la respuesta
-  response.headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
+  // Aplicar HSTS SOLO en producción cuando la conexión es efectivamente HTTPS
+  if (process.env.NODE_ENV === 'production' && proto === 'https') {
+    response.headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
+  } else {
+    // En desarrollo local o Wi-Fi deshabilitar HSTS explícitamente para permitir descargas HTTP de scripts
+    response.headers.set('Strict-Transport-Security', 'max-age=0');
+  }
   return response;
 }
 

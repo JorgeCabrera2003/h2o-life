@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { StoreProvider } from '@/lib/store';
 import { Navbar } from '@/components/Navbar';
 import { BottomNav, ActiveTab } from '@/components/BottomNav';
 import { PosModule } from '@/components/pos/PosModule';
@@ -15,19 +14,12 @@ import { Client } from '@/types';
 import { SettingsModule } from '@/components/settings/SettingsModule';
 import { ProductsServicesModule } from '@/components/products/ProductsServicesModule';
 
-import { Droplet } from 'lucide-react';
-
 function H2OLifeAppContent() {
-  const [mounted, setMounted] = useState(false);
   const searchParams = useSearchParams();
   const initialTab = (searchParams.get('tab') as ActiveTab) || 'pos';
   const [activeTab, setActiveTab] = useState<ActiveTab>(initialTab);
   const [isCartDrawerOpen, setIsCartDrawerOpen] = useState(false);
   const [selectedClientForSale, setSelectedClientForSale] = useState<Client | null>(null);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   useEffect(() => {
     const tabParam = searchParams.get('tab') as ActiveTab;
@@ -36,20 +28,11 @@ function H2OLifeAppContent() {
     }
   }, [searchParams]);
 
-  if (!mounted) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 text-slate-800">
-        <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-sky-600 to-cyan-400 flex items-center justify-center text-white shadow-xl shadow-sky-500/30 mb-3 animate-pulse">
-          <Droplet className="w-7 h-7 fill-white text-transparent" />
-        </div>
-        <p className="text-sm font-black text-slate-900 tracking-tight">H2O LIFE POS</p>
-        <p className="text-xs text-sky-600 font-bold mt-1">Iniciando sistema de ventas...</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 bg-mesh-water text-slate-900 selection:bg-sky-500 selection:text-white">
+    <div
+      suppressHydrationWarning
+      className="min-h-screen flex flex-col bg-slate-50 bg-mesh-water text-slate-900 selection:bg-sky-500 selection:text-white"
+    >
       <Navbar onNavigate={setActiveTab} activeTab={activeTab} />
 
       <main className="flex-1 w-full pb-36 sm:pb-40">
@@ -102,17 +85,15 @@ function H2OLifeAppContent() {
 
 export default function Page() {
   return (
-    <StoreProvider>
-      <Suspense
-        fallback={
-          <div className="min-h-screen flex items-center justify-center bg-slate-50 text-sky-700 font-bold text-xs">
-            Cargando H2O Life POS...
-          </div>
-        }
-      >
-        <H2OLifeAppContent />
-      </Suspense>
-    </StoreProvider>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-slate-50 text-sky-700 font-bold text-xs">
+          Cargando H2O Life POS...
+        </div>
+      }
+    >
+      <H2OLifeAppContent />
+    </Suspense>
   );
 }
 
