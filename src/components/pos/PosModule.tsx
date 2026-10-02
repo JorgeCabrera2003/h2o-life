@@ -328,7 +328,7 @@ export function PosModule({
                 key={qty}
                 type="button"
                 onClick={() => handleQuickRefill(qty)}
-                className={`border backdrop-blur-md rounded-2xl p-3.5 text-left transition-all flex flex-col justify-between group pressable min-h-[96px] cursor-pointer shadow-sm relative overflow-hidden select-none ${
+                className={`border backdrop-blur-md rounded-2xl p-3.5 text-left transition-all flex flex-col justify-between group pressable min-h-[96px] cursor-pointer shadow-sm relative overflow-hidden ${
                   isJustAdded
                     ? 'bg-white/35 border-emerald-300 ring-2 ring-emerald-300 scale-[1.02]'
                     : 'bg-white/15 hover:bg-white/25 active:scale-[0.96] border-white/30'
@@ -679,8 +679,16 @@ export function PosModule({
               return (
                 <div
                   key={product.id}
+                  role="button"
+                  tabIndex={0}
                   onClick={() => addToCartWithFeedback(product, 1)}
-                  className={`bg-white rounded-3xl p-3.5 sm:p-5 border transition-all cursor-pointer flex flex-col justify-between group pressable active:scale-[0.98] min-h-[175px] relative select-none ${
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      addToCartWithFeedback(product, 1);
+                    }
+                  }}
+                  className={`bg-white rounded-3xl p-3.5 sm:p-5 border transition-all cursor-pointer flex flex-col justify-between group pressable active:scale-[0.98] min-h-[175px] relative ${
                     isInCart
                       ? 'border-sky-400 bg-sky-50/20 ring-2 ring-sky-400/20 shadow-md shadow-sky-500/10'
                       : 'border-slate-200/80 hover:border-sky-300 hover:shadow-xl hover:shadow-sky-500/10'

@@ -203,6 +203,8 @@ const structuredData = {
   ],
 };
 
+import { StoreProvider } from '@/lib/store';
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -218,18 +220,20 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
       </head>
-      <body className="min-h-full flex flex-col bg-slate-50 text-slate-900 select-none overflow-x-hidden">
-        {/* Telemetría y Analítica */}
-        <AnalyticsTracker />
+      <body className="min-h-full flex flex-col bg-slate-50 text-slate-900 overflow-x-hidden">
+        <StoreProvider>
+          {/* Telemetría y Analítica */}
+          <AnalyticsTracker />
 
-        {/* Contenido principal de la aplicación */}
-        {children}
+          {/* Contenido principal de la aplicación */}
+          {children}
 
-        {/* Concierge flotante de WhatsApp permanente */}
-        <FloatingWhatsAppButton />
+          {/* Concierge flotante de WhatsApp permanente */}
+          <FloatingWhatsAppButton />
 
-        {/* Banner de consentimiento de cookies y almacenamiento local */}
-        <CookieConsentBanner />
+          {/* Banner de consentimiento de cookies y almacenamiento local */}
+          <CookieConsentBanner />
+        </StoreProvider>
       </body>
     </html>
   );

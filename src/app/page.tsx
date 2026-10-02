@@ -15,7 +15,10 @@ import { Client } from '@/types';
 import { SettingsModule } from '@/components/settings/SettingsModule';
 import { ProductsServicesModule } from '@/components/products/ProductsServicesModule';
 
+import { Droplet } from 'lucide-react';
+
 function H2OLifeAppContent() {
+  const [mounted, setMounted] = useState(false);
   const searchParams = useSearchParams();
   const initialTab = (searchParams.get('tab') as ActiveTab) || 'pos';
   const [activeTab, setActiveTab] = useState<ActiveTab>(initialTab);
@@ -23,11 +26,27 @@ function H2OLifeAppContent() {
   const [selectedClientForSale, setSelectedClientForSale] = useState<Client | null>(null);
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
     const tabParam = searchParams.get('tab') as ActiveTab;
     if (tabParam && ['pos', 'products', 'clients', 'camera', 'closure', 'tanks', 'finance', 'settings'].includes(tabParam)) {
       setActiveTab(tabParam);
     }
   }, [searchParams]);
+
+  if (!mounted) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 text-slate-800">
+        <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-sky-600 to-cyan-400 flex items-center justify-center text-white shadow-xl shadow-sky-500/30 mb-3 animate-pulse">
+          <Droplet className="w-7 h-7 fill-white text-transparent" />
+        </div>
+        <p className="text-sm font-black text-slate-900 tracking-tight">H2O LIFE POS</p>
+        <p className="text-xs text-sky-600 font-bold mt-1">Iniciando sistema de ventas...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 bg-mesh-water text-slate-900 selection:bg-sky-500 selection:text-white">

@@ -35,12 +35,15 @@ body {
 }
 
 /* Touch Ergonomics per Mobile Native Standard */
-button, a, [role="button"], .pressable, .tappable {
+button, a, [role="button"], .tappable {
   touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+}
+
+button {
   user-select: none;
   -webkit-user-select: none;
-  -webkit-touch-callout: none;
-  cursor: pointer;
 }
 
 input, textarea, select {
