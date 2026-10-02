@@ -183,16 +183,25 @@ export function Navbar({ onNavigate, activeTab }: NavbarProps) {
             <Smartphone className="w-4 h-4" />
           </button>
 
-          {/* Botón de WhatsApp Hub (Desktop/Tablet) */}
+          {/* Botón de WhatsApp Hub & Bot de Freyeliz (Super Premium) */}
           <button
             type="button"
             onClick={() => setShowWhatsAppHub(true)}
-            className="hidden sm:inline-flex px-2.5 sm:px-3 py-1.5 rounded-2xl border transition-all shrink-0 pressable cursor-pointer bg-gradient-to-r from-emerald-50 to-teal-50 hover:from-emerald-100 hover:to-teal-100 text-emerald-800 border-emerald-300/80 items-center space-x-1.5 shadow-2xs"
-            title="WhatsApp Hub: Catálogo al Día, Reportes Administrativos & Bot"
+            className="inline-flex items-center space-x-2 px-3 py-1.5 sm:py-2 rounded-2xl bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 hover:from-emerald-700 hover:to-teal-600 text-white font-extrabold text-xs shadow-md shadow-emerald-500/25 border border-emerald-400/40 hover:shadow-lg hover:shadow-emerald-500/35 active:scale-95 transition-all cursor-pointer group shrink-0"
+            title="Canal WhatsApp Oficial de Freyeliz (+58 424-5658068) • Bot Activo y Catálogo al Día"
           >
-            <MessageSquare className="w-4 h-4 text-emerald-600" />
-            <span className="hidden sm:inline text-xs font-black text-emerald-950">WhatsApp</span>
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <div className="relative flex items-center justify-center">
+              <MessageSquare className="w-4 h-4 fill-white text-transparent group-hover:scale-110 transition-transform" />
+              <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-emerald-200 ring-2 ring-emerald-600 animate-ping" />
+            </div>
+            <div className="text-left hidden sm:block">
+              <span className="block leading-none text-[11px] font-black tracking-tight">WhatsApp Bot</span>
+              <span className="text-[9px] font-semibold text-emerald-100 flex items-center gap-1 mt-0.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-300 animate-pulse" />
+                <span>Freyeliz Activa</span>
+              </span>
+            </div>
+            <span className="sm:hidden text-[11px] font-bold">Bot</span>
           </button>
 
           {/* Selector de Rol / Operador Activo (Karla, Freyeliz, Jorge) */}

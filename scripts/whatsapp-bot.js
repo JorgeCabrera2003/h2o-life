@@ -42,7 +42,7 @@ async function getLiveBCVRate() {
 }
 
 function generateCatalogText(rate) {
-  const r = (usd) => (usd * rate).toLocaleString('es-VE', { minimumFractionDigits: 2 });
+  const r = (usd) => (usd * rate).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   return `💧 *H2O LIFE - CATÁLOGO Y PRECIOS AL DÍA*
 📍 *Ubicación:* Calle 28 con Carrera 25, Barquisimeto
 🏢 *RIF:* J-50982341-2
@@ -50,7 +50,7 @@ function generateCatalogText(rate) {
 ━━━━━━━━━━━━━━━━━━━━━━
 
 💧 *RECARGAS DE AGUA:*
-• Recarga 20L / 18L: *$0.50* (Bs. ${r(0.50)})
+• Recarga 20L / 18L: *$0.70* (Bs. ${r(0.70)})
 *(Ósmosis Inversa, Ozono y Luz UV)*
 
 🧴 *BOTELLONES Y ENVASES:*
@@ -86,9 +86,9 @@ function processIncomingMessage(incomingText, rate) {
   }
 
   if (text === '2' || text === '!recarga' || text.includes('recarga') || text.includes('agua')) {
-    const bs = (0.50 * rate).toFixed(2);
+    const bs = (0.70 * rate).toFixed(2);
     return `💧 *RECARGA DE AGUA PURIFICADA (20L / 18L)*
-Precio: *$0.50 USD* (Bs. ${Number(bs).toLocaleString('es-VE', { minimumFractionDigits: 2 })})
+Precio: *$0.70 USD* (Bs. ${Number(bs).toLocaleString('es-VE', { minimumFractionDigits: 2 })})
 
 Proceso certificado:
 ✔ Filtro de carbón activado y lecho mixto
@@ -155,29 +155,48 @@ const server = http.createServer(async (req, res) => {
     return res.end(JSON.stringify({ status: 'ok', service: 'H2O Life WhatsApp Bot' }));
   }
 
-  if (req.method === 'POST' && req.url === '/webhook') {
-    let body = '';
-    req.on('data', chunk => body += chunk);
-    req.on('end', async () => {
-      try {
-        const payload = JSON.parse(body || '{}');
-        const rate = await getLiveBCVRate();
-        const reply = processIncomingMessage(payload.message, rate);
+  // Soporte GET y POST para webhook (compatible con AutoResponder, Tasker, cURL y Navegador)
+  if (req.url.startsWith('/webhook')) {
+    const urlObj = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+    
+    if (req.method === 'GET') {
+      const msg = urlObj.searchParams.get('message') || urlObj.searchParams.get('query') || '';
+      const rate = await getLiveBCVRate();
+      const reply = processIncomingMessage(msg, rate);
+      res.writeHead(200);
+      return res.end(JSON.stringify({
+        success: true,
+        incoming: msg,
+        reply: reply,
+        timestamp: new Date().toISOString()
+      }));
+    }
 
-        res.writeHead(200);
-        res.end(JSON.stringify({
-          success: true,
-          from: payload.from || 'test_user',
-          incoming: payload.message,
-          reply: reply,
-          timestamp: new Date().toISOString(),
-        }));
-      } catch (err) {
-        res.writeHead(400);
-        res.end(JSON.stringify({ error: err.message }));
-      }
-    });
-    return;
+    if (req.method === 'POST') {
+      let body = '';
+      req.on('data', chunk => body += chunk);
+      req.on('end', async () => {
+        try {
+          const payload = JSON.parse(body || '{}');
+          const incomingText = payload.message || payload.query?.message || (payload.data && payload.data.message) || '';
+          const rate = await getLiveBCVRate();
+          const reply = processIncomingMessage(incomingText, rate);
+
+          res.writeHead(200);
+          res.end(JSON.stringify({
+            success: true,
+            from: payload.from || payload.sender || 'test_user',
+            incoming: incomingText,
+            reply: reply,
+            timestamp: new Date().toISOString(),
+          }));
+        } catch (err) {
+          res.writeHead(400);
+          res.end(JSON.stringify({ error: err.message }));
+        }
+      });
+      return;
+    }
   }
 
   res.writeHead(404);

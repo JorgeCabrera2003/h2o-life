@@ -25,7 +25,7 @@ export async function GET() {
     }
 
     const catalogItems = [
-      { name: 'Recarga de Agua 20L / 18L', category: 'agua', price_usd: 0.50, price_bs: Number((0.50 * bcvRate).toFixed(2)) },
+      { name: 'Recarga de Agua 20L / 18L', category: 'agua', price_usd: 0.70, price_bs: Number((0.70 * bcvRate).toFixed(2)) },
       { name: 'Botellón Nuevo 20L (Lleno)', category: 'botellon', price_usd: 7.00, price_bs: Number((7.00 * bcvRate).toFixed(2)) },
       { name: 'Botellón Vacío 20L', category: 'botellon', price_usd: 6.50, price_bs: Number((6.50 * bcvRate).toFixed(2)) },
       { name: 'Botellón 5L (Lleno)', category: 'botellon', price_usd: 2.50, price_bs: Number((2.50 * bcvRate).toFixed(2)) },
@@ -88,9 +88,9 @@ export async function POST(req: Request) {
       if (cmd === '!menu' || cmd === 'menu' || cmd === 'hola') {
         responseText = `🤖 *MENÚ PRINCIPAL H2O LIFE*\n¡Hola! Bienvenido a nuestra línea de atención. Responde con tu opción:\n\n1️⃣ *!catalogo* - Lista completa con precios al día\n2️⃣ *!recarga* - Precios y proceso de recarga 20L\n3️⃣ *!ubicacion* - Cómo llegar a Calle 28 con Cra 25\n4️⃣ *!pagos* - Cuentas para Pago Móvil\n5️⃣ *!humano* - Hablar con un operador`;
       } else if (cmd === '!catalogo' || cmd === '1') {
-        responseText = `💧 *H2O LIFE - CATÁLOGO AL DÍA*\n• Recarga 20L: $0.50\n• Botellón Nuevo 20L: $7.00\n• Botellón Vacío 20L: $6.50\n• Botellón 5L: $2.50\n• Lavado con Ozono: $0.50\n• Delivery Express: $1.00\n• Helados: $1.00 - $1.50\n• Snacks: $1.00 - $1.50\n\nCalle 28 con Carrera 25, Barquisimeto.`;
+        responseText = `💧 *H2O LIFE - CATÁLOGO AL DÍA*\n• Recarga 20L: $0.70\n• Botellón Nuevo 20L: $7.00\n• Botellón Vacío 20L: $6.50\n• Botellón 5L: $2.50\n• Lavado con Ozono: $0.50\n• Delivery Express: $1.00\n• Helados: $1.00 - $1.50\n• Snacks: $1.00 - $1.50\n\nCalle 28 con Carrera 25, Barquisimeto.`;
       } else if (cmd === '!recarga' || cmd === '2') {
-        responseText = `💧 *RECARGA DE AGUA 20L - $0.50 USD*\nPurificada con 10 etapas: Ósmosis Inversa, Ozono bactericida y Luz UV.\nTrae tu botellón a Calle 28 con Carrera 25.`;
+        responseText = `💧 *RECARGA DE AGUA 20L - $0.70 USD*\nPurificada con 10 etapas: Ósmosis Inversa, Ozono bactericida y Luz UV.\nTrae tu botellón a Calle 28 con Carrera 25.`;
       } else if (cmd === '!ubicacion' || cmd === '3') {
         responseText = `📍 *H2O LIFE - SEDE PRINCIPAL*\nCalle 28 con Carrera 25, Barquisimeto.\nGoogle Maps: https://maps.google.com/?q=10.07125,-69.32705`;
       } else if (cmd === '!pagos' || cmd === '4') {

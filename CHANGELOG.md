@@ -4,6 +4,33 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 
 ---
 
+## [1.11.0] - 2026-10-02
+
+### 💬 Rediseño de Botón WhatsApp & Activación del Bot Autónomo con Freyeliz (+58 424-5658068)
+* **Rediseño Premium de Botones WhatsApp (Apple Tier):**
+  * **Botón Flotante (`FloatingWhatsAppButton.tsx`):**
+    * Elevado a `z-50` (evitando que la barra inferior `BottomNav` con `z-40` lo tape o corte).
+    * Ajuste de posición adaptativa (`bottom-22 sm:bottom-24 lg:bottom-8 right-3 sm:right-6 lg:right-8`) para visibilidad perfecta en móviles, tablets y laptops.
+    * Estilo píldora de vidrio con gradiente esmeralda (`from-emerald-600 via-emerald-500 to-teal-500`), halo de pulso dinámico y subetiqueta *"Freyeliz • En Línea"*.
+    * Desplegable Concierge con accesos rápidos directos:
+      * 1️⃣ Pedir Catálogo en Vivo ($ y Bs. BCV)
+      * 2️⃣ Recargas de Agua ($0.70 USD)
+      * 3️⃣ Ubicación & Cómo Llegar (Calle 28 con Carrera 25)
+      * 4️⃣ Datos de Pago Móvil & Cuentas
+      * Botón de copiado inmediato al portapapeles del catálogo oficial.
+      * Enlace directo de respaldo con Karla (Caja) y TSU Jorge Cabrera (Soporte).
+  * **Botón de Barra Superior (`Navbar.tsx`):**
+    * Rediseñado de un botón plano tenue a una píldora viva con gradiente esmeralda, punto de actividad verde pulsante y subtítulo *"Freyeliz Activa"*, visible en todos los anchos de pantalla.
+* **Activación y Automatización del Bot Autónomo Gratuito (`scripts/whatsapp-bot.js`):**
+  * Servidor daemon en segundo plano escuchando en puerto `3005` (`task-2611`).
+  * Integración con la tasa oficial BCV del día (`Bs. 866.56 / USD`) y tarifa oficial de recargas a **$0.70 USD** (Bs. 606,59).
+  * Soporte dual GET y POST en `/webhook` para compatibilidad directa con aplicaciones de automatización gratuitas para Android (*AutoResponder para WA*, *Tasker*) y llamadas HTTP directas.
+  * Formato de moneda en Bolívares calibrado a exactamente 2 decimales (`es-VE`).
+* **Sincronización de API Route (`src/app/api/whatsapp/route.ts`):**
+  * Catálogo sincronizado con la tarifa oficial de `$0.70 USD` para recargas de 20L y contactos del equipo H2O Life.
+
+---
+
 ## [1.10.0] - 2026-10-02
 
 ### ⚡ Optimización de Rendimiento de Alto Nivel, Code-Splitting Dinámico & Animaciones Fluidas (Emil Kowalski Standard)
