@@ -134,11 +134,11 @@ export function Navbar({ onNavigate, activeTab }: NavbarProps) {
             </div>
           )}
 
-          {/* Botón de Catálogo de Productos & Precios de Recarga */}
+          {/* Botón de Catálogo de Productos & Precios de Recarga (Desktop/Tablet) */}
           {onNavigate && (
             <button
               onClick={() => onNavigate('products')}
-              className={`p-2 sm:p-2.5 rounded-2xl border transition-all shrink-0 pressable cursor-pointer ${
+              className={`hidden sm:inline-flex p-2 sm:p-2.5 rounded-2xl border transition-all shrink-0 pressable cursor-pointer ${
                 activeTab === 'products'
                   ? 'bg-sky-100 text-sky-800 border-sky-300 shadow-2xs'
                   : 'bg-white/80 text-slate-500 hover:text-slate-800 border-slate-200/80 hover:bg-white hover:border-sky-200'
@@ -149,11 +149,11 @@ export function Navbar({ onNavigate, activeTab }: NavbarProps) {
             </button>
           )}
 
-          {/* Botón de Configuración del Sistema (Ajustes) */}
+          {/* Botón de Configuración del Sistema (Desktop/Tablet) */}
           {onNavigate && (
             <button
               onClick={() => onNavigate('settings')}
-              className={`p-2 sm:p-2.5 rounded-2xl border transition-all shrink-0 pressable cursor-pointer ${
+              className={`hidden sm:inline-flex p-2 sm:p-2.5 rounded-2xl border transition-all shrink-0 pressable cursor-pointer ${
                 activeTab === 'settings'
                   ? 'bg-sky-100 text-sky-800 border-sky-300 shadow-2xs'
                   : 'bg-white/80 text-slate-500 hover:text-slate-800 border-slate-200/80 hover:bg-white hover:border-sky-200'
@@ -164,21 +164,21 @@ export function Navbar({ onNavigate, activeTab }: NavbarProps) {
             </button>
           )}
 
-          {/* Botón de Conectar Teléfono Móvil (Wi-Fi Local & QR) */}
+          {/* Botón de Conectar Teléfono Móvil (Wi-Fi Local & QR - Desktop) */}
           <button
             type="button"
             onClick={() => setShowMobileConnect(true)}
-            className="p-2 sm:p-2.5 rounded-2xl border transition-all shrink-0 pressable cursor-pointer bg-white/80 text-sky-600 hover:text-sky-800 border-slate-200/80 hover:bg-sky-50 hover:border-sky-200"
+            className="hidden md:inline-flex p-2 sm:p-2.5 rounded-2xl border transition-all shrink-0 pressable cursor-pointer bg-white/80 text-sky-600 hover:text-sky-800 border-slate-200/80 hover:bg-sky-50 hover:border-sky-200"
             title="Conectar Teléfono Móvil (Wi-Fi Local & Código QR)"
           >
             <Smartphone className="w-4 h-4" />
           </button>
 
-          {/* Botón de WhatsApp Hub (Catálogo, Reportes & Bot) */}
+          {/* Botón de WhatsApp Hub (Desktop/Tablet) */}
           <button
             type="button"
             onClick={() => setShowWhatsAppHub(true)}
-            className="px-2.5 sm:px-3 py-1.5 rounded-2xl border transition-all shrink-0 pressable cursor-pointer bg-gradient-to-r from-emerald-50 to-teal-50 hover:from-emerald-100 hover:to-teal-100 text-emerald-800 border-emerald-300/80 flex items-center space-x-1.5 shadow-2xs"
+            className="hidden sm:inline-flex px-2.5 sm:px-3 py-1.5 rounded-2xl border transition-all shrink-0 pressable cursor-pointer bg-gradient-to-r from-emerald-50 to-teal-50 hover:from-emerald-100 hover:to-teal-100 text-emerald-800 border-emerald-300/80 items-center space-x-1.5 shadow-2xs"
             title="WhatsApp Hub: Catálogo al Día, Reportes Administrativos & Bot"
           >
             <MessageSquare className="w-4 h-4 text-emerald-600" />

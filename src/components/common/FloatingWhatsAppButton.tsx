@@ -14,6 +14,7 @@ export function FloatingWhatsAppButton() {
     karla_phone: '+58 424-5717589',
   };
   const exchangeRate = store?.exchangeRate || { rate: 866.56 };
+  const cartCount = store?.cart?.length || 0;
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -47,12 +48,14 @@ export function FloatingWhatsAppButton() {
   return (
     <div
       ref={containerRef}
-      className="fixed bottom-24 md:bottom-8 right-4 md:right-8 z-40 flex flex-col items-end"
+      className={`fixed ${
+        cartCount > 0 ? 'bottom-36 sm:bottom-28' : 'bottom-20 sm:bottom-22'
+      } md:bottom-8 right-3 md:right-8 z-30 flex flex-col items-end pointer-events-none transition-all duration-200`}
       aria-label="Atención al Cliente por WhatsApp"
     >
       {/* Menú Desplegable con Opciones de Contacto */}
       {isOpen && (
-        <div className="mb-3 w-80 bg-white/95 backdrop-blur-xl border border-emerald-100 rounded-3xl p-4 shadow-2xl shadow-emerald-950/20 animate-in zoom-in-95 duration-200">
+        <div className="mb-3 w-76 sm:w-80 bg-white/95 backdrop-blur-xl border border-emerald-100 rounded-3xl p-4 shadow-2xl shadow-emerald-950/20 animate-in zoom-in-95 duration-200 pointer-events-auto">
           <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center shadow-xs">
@@ -199,7 +202,7 @@ export function FloatingWhatsAppButton() {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-13 h-13 sm:w-14 sm:h-14 rounded-full bg-gradient-to-tr from-emerald-600 to-green-500 hover:from-emerald-500 hover:to-green-400 text-white flex items-center justify-center shadow-lg shadow-emerald-600/40 active:scale-95 transition-all group cursor-pointer relative"
+        className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-tr from-emerald-600 to-green-500 hover:from-emerald-500 hover:to-green-400 text-white flex items-center justify-center shadow-lg shadow-emerald-600/40 active:scale-95 transition-all group cursor-pointer relative pointer-events-auto"
         aria-label="Abrir chat de WhatsApp de H2O Life"
         title="Contactar por WhatsApp a Freyeliz o Jorge"
       >

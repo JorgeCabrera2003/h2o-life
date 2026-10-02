@@ -4,6 +4,27 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 
 ---
 
+## [1.8.0] - 2026-10-02
+
+### 📱 Optimización Móvil Completa, Feedback Táctil Háptico & Carrito Desplegable Ergonómico
+* **Causa Raíz de "Los botones no hacen nada" Resuelta:**
+  * **Feedback Táctil Inmediato:** Se implementó vibración háptica (`navigator.vibrate(35ms)`) y banner flotante instantáneo de confirmación (`✓ Agregado: +1 Botellón 20L ($0.50)`) cada vez que se presiona cualquier botón de recarga o producto.
+  * **Stepper Directo en Tarjetas de Catálogo:** Al agregar cualquier producto, la tarjeta resalta con borde celeste activo, insignia de cantidad (`🛒 X en pedido`) y controles directos `[-] X [+]` que permiten sumar o restar unidades sin tener que buscar el carrito.
+  * **Animación en Botones de Recarga Rápida (1, 2, 3, 4 Botellones):** Cada botón parpadea en verde esmeralda con la insignia `✓ ¡Sumado!` y muestra la cantidad total en pedido.
+* **Carrito Desplegable Ergonómico en Móviles (`PosModule.tsx` & `BottomNav.tsx`):**
+  * Se resolvió el conflicto de capa `z-index`: el cajón del carrito ahora opera en `z-55` con fondo oscurecido translúcido (`backdrop-blur-xs`), garantizando que la barra de navegación inferior (`z-40`) nunca oculte ni bloquee el botón de cobro.
+  * Botón de cierre grande y accesible (`✕ Cerrar`) en la esquina superior del carrito móvil.
+  * Botón flotante inferior (`BottomNav`) tipo píldora de alta gama que muestra ítems, monto total en $ y Bs., y acceso directo con un solo toque a "Cobrar →".
+  * Al presionar la pestaña "Ventas" en la barra inferior teniendo productos en el carrito, se abre o cierra directamente el pedido.
+* **Barra de Navegación Superior (`Navbar.tsx`) Adaptada a Pantallas Angostas:**
+  * En dispositivos móviles (< 640px), se ocultaron los accesos redundantes de Catálogo y Ajustes (que ya están en la barra inferior) para evitar el desbordamiento horizontal (`overflow-x: hidden`).
+  * Vista limpia y nítida en pantallas de 360px a 412px con Logo POS, Tasa Oficial BCV interactiva y selector de operador de turno.
+* **Ergonomía de Toque Nativas en CSS (`globals.css`):**
+  * Removido el bloqueo global de gestos en `body`.
+  * Aplicado `touch-action: manipulation`, `-webkit-tap-highlight-color: transparent` y `user-select: none` de forma quirúrgica en botones, tarjetas y enlaces.
+
+---
+
 ## [1.7.0] - 2026-10-02
 
 ### 💬 Optimización Total de WhatsApp, Catálogo en Vivo, Reportes Administrativos & Bot Gratuito

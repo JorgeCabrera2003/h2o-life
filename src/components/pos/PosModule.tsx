@@ -151,6 +151,32 @@ export function PosModule({
     return matchesCategory && matchesSearch;
   });
 
+  // Estados para feedback táctil e instantáneo en móvil
+  const [justAddedRefill, setJustAddedRefill] = useState<number | null>(null);
+  const [lastAddedNotice, setLastAddedNotice] = useState<{ name: string; detail: string } | null>(null);
+  const noticeTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  const triggerFeedback = (name: string, detail: string) => {
+    if (typeof window !== 'undefined' && 'vibrate' in navigator) {
+      try {
+        navigator.vibrate(35);
+      } catch {}
+    }
+    setLastAddedNotice({ name, detail });
+    if (noticeTimeoutRef.current) clearTimeout(noticeTimeoutRef.current);
+    noticeTimeoutRef.current = setTimeout(() => {
+      setLastAddedNotice(null);
+    }, 2400);
+  };
+
+  const addToCartWithFeedback = (product: Product, qty = 1) => {
+    addToCart(product, qty);
+    triggerFeedback(
+      `+${qty} ${product.name}`,
+      `$${(product.price_usd * qty).toFixed(2)} • En pedido actual`
+    );
+  };
+
   // Botones de acceso rápido para Recargas (Karla notebook workflow)
   const quickRefillProduct = products.find(p => p.id === 'prod-recarga-20' || (p.category === 'agua' && p.quick_select));
   const unitRefillPrice = quickRefillProduct ? quickRefillProduct.price_usd : 0.50;
@@ -158,6 +184,13 @@ export function PosModule({
   const handleQuickRefill = (qty: number) => {
     if (quickRefillProduct) {
       addToCart(quickRefillProduct, qty);
+      setJustAddedRefill(qty);
+      setTimeout(() => setJustAddedRefill(null), 1200);
+      const costUsd = (qty * unitRefillPrice).toFixed(2);
+      triggerFeedback(
+        `+${qty} ${qty === 1 ? 'Botellón (20L)' : 'Botellones (20L)'}`,
+        `$${costUsd} • Recarga sumada al pedido`
+      );
     }
   };
 
@@ -225,9 +258,31 @@ export function PosModule({
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-4 pb-40 md:pb-36">
+    <div className="max-w-7xl mx-auto px-3 sm:px-4 py-3 sm:py-4 pb-40 md:pb-36 relative">
+      {/* Toast Flotante de Confirmación Táctil Inmediata */}
+      {lastAddedNotice && (
+        <div className="fixed top-18 left-3 right-3 sm:left-auto sm:right-6 sm:w-96 z-50 bg-slate-900/95 text-white backdrop-blur-md px-4 py-3 rounded-2xl shadow-2xl border border-sky-400/40 flex items-center justify-between animate-in slide-in-from-top-3 duration-200">
+          <div className="flex items-center space-x-2.5 truncate mr-2">
+            <span className="w-7 h-7 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0">
+              ✓
+            </span>
+            <div className="truncate">
+              <p className="text-xs font-black truncate">{lastAddedNotice.name}</p>
+              <p className="text-[10px] text-sky-300 font-semibold">{lastAddedNotice.detail}</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsCartDrawerOpen && setIsCartDrawerOpen(true)}
+            className="text-[11px] font-black bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-600 hover:to-cyan-600 text-white px-3 py-1.5 rounded-xl shrink-0 pressable shadow-xs cursor-pointer"
+          >
+            Ver Pedido →
+          </button>
+        </div>
+      )}
+
       {/* 1. SECCIÓN RÁPIDA: RECARGAS (Atajo instantáneo de libreta) */}
-      <div className="bg-gradient-to-r from-sky-600 via-sky-500 to-cyan-500 rounded-3xl p-5 text-white shadow-xl shadow-sky-500/20 mb-6 border border-sky-400/30 relative overflow-hidden">
+      <div className="bg-gradient-to-r from-sky-600 via-sky-500 to-cyan-500 rounded-3xl p-4 sm:p-5 text-white shadow-xl shadow-sky-500/20 mb-5 border border-sky-400/30 relative overflow-hidden">
         {/* Ambient water crystal shine */}
         <div className="absolute -top-12 -right-12 w-48 h-48 bg-white/10 rounded-full blur-2xl pointer-events-none" />
         <div className="flex items-center justify-between mb-3.5 relative z-10">
@@ -267,18 +322,30 @@ export function PosModule({
           {[1, 2, 3, 4].map(qty => {
             const costUsd = (qty * unitRefillPrice).toFixed(2);
             const costBs = (qty * unitRefillPrice * exchangeRate.rate).toFixed(2);
+            const isJustAdded = justAddedRefill === qty;
             return (
               <button
                 key={qty}
                 type="button"
                 onClick={() => handleQuickRefill(qty)}
-                className="bg-white/15 hover:bg-white/25 active:scale-[0.96] border border-white/30 backdrop-blur-md rounded-2xl p-3.5 text-left transition-all flex flex-col justify-between group pressable min-h-[96px] cursor-pointer shadow-sm"
+                className={`border backdrop-blur-md rounded-2xl p-3.5 text-left transition-all flex flex-col justify-between group pressable min-h-[96px] cursor-pointer shadow-sm relative overflow-hidden select-none ${
+                  isJustAdded
+                    ? 'bg-white/35 border-emerald-300 ring-2 ring-emerald-300 scale-[1.02]'
+                    : 'bg-white/15 hover:bg-white/25 active:scale-[0.96] border-white/30'
+                }`}
               >
+                {isJustAdded && (
+                  <span className="absolute top-1.5 right-1.5 bg-emerald-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full shadow-xs animate-in zoom-in-75 duration-150">
+                    ✓ ¡Sumado!
+                  </span>
+                )}
                 <div className="flex items-center justify-between">
                   <span className="text-xs sm:text-sm font-black block tracking-tight">
                     {qty} {qty === 1 ? 'Botellón (20L)' : 'Botellones'}
                   </span>
-                  <span className="text-xs opacity-75 group-hover:scale-110 transition-transform">💧</span>
+                  {!isJustAdded && (
+                    <span className="text-xs opacity-75 group-hover:scale-110 transition-transform">💧</span>
+                  )}
                 </div>
                 <div className="mt-2 flex items-baseline justify-between pt-1.5 border-t border-white/15">
                   <span className="text-[11px] text-sky-100 font-bold block">Bs. {costBs}</span>
@@ -605,15 +672,30 @@ export function PosModule({
           ) : (
             filteredProducts.map(product => {
               const priceBs = (product.price_usd * exchangeRate.rate).toFixed(2);
+              const inCartItem = cart.find(i => i.product.id === product.id);
+              const inCartQty = inCartItem?.quantity || 0;
+              const isInCart = inCartQty > 0;
+
               return (
                 <div
                   key={product.id}
-                  onClick={() => addToCart(product)}
-                  className="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200/80 hover:border-sky-300 hover:shadow-xl hover:shadow-sky-500/10 transition-all cursor-pointer flex flex-col justify-between group pressable active:scale-[0.97] min-h-[175px] relative"
+                  onClick={() => addToCartWithFeedback(product, 1)}
+                  className={`bg-white rounded-3xl p-3.5 sm:p-5 border transition-all cursor-pointer flex flex-col justify-between group pressable active:scale-[0.98] min-h-[175px] relative select-none ${
+                    isInCart
+                      ? 'border-sky-400 bg-sky-50/20 ring-2 ring-sky-400/20 shadow-md shadow-sky-500/10'
+                      : 'border-slate-200/80 hover:border-sky-300 hover:shadow-xl hover:shadow-sky-500/10'
+                  }`}
                 >
+                  {isInCart && (
+                    <div className="absolute -top-2 -right-2 bg-gradient-to-r from-sky-600 to-cyan-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-md flex items-center space-x-1 animate-in zoom-in-75 duration-150 z-10">
+                      <span>🛒</span>
+                      <span>{inCartQty} en pedido</span>
+                    </div>
+                  )}
+
                   <div>
-                    <div className="flex items-start justify-between mb-2.5">
-                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-sky-50 to-cyan-50 border border-sky-100/80 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shadow-2xs">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-tr from-sky-50 to-cyan-50 border border-sky-100/80 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shadow-2xs">
                         {product.icon || '📦'}
                       </div>
                       <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
@@ -628,20 +710,52 @@ export function PosModule({
 
                   <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between">
                     <div>
-                      <span className="text-base sm:text-lg font-black text-slate-900">
+                      <span className="text-sm sm:text-base font-black text-slate-900">
                         ${product.price_usd.toFixed(2)}
                       </span>
-                      <span className="text-[10px] font-extrabold text-sky-700 bg-sky-50 px-1.5 py-0.5 rounded-md border border-sky-100/80 block mt-0.5">
+                      <span className="text-[9px] sm:text-[10px] font-extrabold text-sky-700 bg-sky-50 px-1.5 py-0.5 rounded-md border border-sky-100/80 block mt-0.5">
                         Bs. {priceBs}
                       </span>
                     </div>
-                    <button
-                      type="button"
-                      className="w-8 h-8 rounded-xl bg-sky-50 text-sky-600 group-hover:bg-gradient-to-r group-hover:from-sky-600 group-hover:to-cyan-500 group-hover:text-white flex items-center justify-center shadow-2xs transition-all pressable font-black text-sm"
-                      aria-label={`Agregar ${product.name} al carrito`}
-                    >
-                      +
-                    </button>
+
+                    {isInCart ? (
+                      <div
+                        className="flex items-center bg-white border border-sky-300 rounded-xl p-0.5 shadow-2xs"
+                        onClick={e => e.stopPropagation()}
+                      >
+                        <button
+                          type="button"
+                          onClick={() => updateCartQuantity(product.id, inCartQty - 1)}
+                          className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 active:scale-90 font-black text-sm pressable cursor-pointer"
+                          aria-label="Restar uno"
+                        >
+                          -
+                        </button>
+                        <span className="w-6 text-center text-xs font-black text-sky-900">
+                          {inCartQty}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => addToCartWithFeedback(product, 1)}
+                          className="w-7 h-7 flex items-center justify-center rounded-lg bg-sky-600 text-white hover:bg-sky-700 active:scale-90 font-black text-sm shadow-xs pressable cursor-pointer"
+                          aria-label="Sumar uno"
+                        >
+                          +
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={e => {
+                          e.stopPropagation();
+                          addToCartWithFeedback(product, 1);
+                        }}
+                        className="w-8 h-8 rounded-xl bg-sky-50 text-sky-600 hover:bg-gradient-to-r hover:from-sky-600 hover:to-cyan-500 hover:text-white flex items-center justify-center shadow-2xs transition-all pressable font-black text-sm cursor-pointer"
+                        aria-label={`Agregar ${product.name} al carrito`}
+                      >
+                        +
+                      </button>
+                    )}
                   </div>
                 </div>
               );
@@ -649,9 +763,17 @@ export function PosModule({
           )}
         </div>
 
-        {/* Panel del Carrito de Ventas (Visible en Desktop y Bottom Sheet en Mobile) */}
+        {/* Backdrop Oscuro para Mobile */}
+        {isCartDrawerOpen && (
+          <div
+            className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs lg:hidden animate-in fade-in duration-150"
+            onClick={() => setIsCartDrawerOpen && setIsCartDrawerOpen(false)}
+          />
+        )}
+
+        {/* Panel del Carrito de Ventas (Visible en Desktop y Drawer en Mobile con z-55) */}
         <div
-          className={`fixed inset-y-0 right-0 z-40 w-full sm:w-96 bg-white shadow-2xl p-5 transform transition-transform duration-200 lg:static lg:z-auto lg:w-auto lg:h-auto lg:shadow-none lg:border lg:border-slate-200/80 lg:rounded-2xl lg:p-5 flex flex-col justify-between lg:sticky lg:top-4 ${
+          className={`fixed inset-y-0 right-0 z-55 w-full sm:w-96 bg-white shadow-2xl p-5 transform transition-transform duration-200 lg:static lg:z-auto lg:w-auto lg:h-auto lg:shadow-none lg:border lg:border-slate-200/80 lg:rounded-2xl lg:p-5 flex flex-col justify-between lg:sticky lg:top-4 pb-10 lg:pb-5 ${
             isCartDrawerOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'
           }`}
         >
@@ -689,10 +811,13 @@ export function PosModule({
                 )}
                 {setIsCartDrawerOpen && (
                   <button
+                    type="button"
                     onClick={() => setIsCartDrawerOpen(false)}
-                    className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg lg:hidden"
+                    className="p-2 sm:p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl lg:hidden pressable cursor-pointer flex items-center space-x-1"
+                    aria-label="Cerrar pedido"
                   >
                     <X className="w-5 h-5" />
+                    <span className="text-xs font-bold sm:hidden pr-1">Cerrar</span>
                   </button>
                 )}
               </div>
