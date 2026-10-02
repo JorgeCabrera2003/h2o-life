@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useH2OStore } from '@/lib/store';
 import { Product, Client, ProductCategory, PaymentMethod, PaymentLine, Sale } from '@/types';
 import {
@@ -137,19 +137,22 @@ export function PosModule({
   // Venta completada con éxito
   const [completedSale, setCompletedSale] = useState<Sale | null>(null);
 
-  // Totales del carrito
-  const totalUsd = cart.reduce((acc, item) => acc + item.subtotal_usd, 0);
-  const totalBs = Number((totalUsd * exchangeRate.rate).toFixed(2));
+  // Totales del carrito memoizados para máximo rendimiento de render
+  const totalUsd = useMemo(() => cart.reduce((acc, item) => acc + item.subtotal_usd, 0), [cart]);
+  const totalBs = useMemo(() => Number((totalUsd * exchangeRate.rate).toFixed(2)), [totalUsd, exchangeRate.rate]);
 
-  // Filtrado de productos
-  const filteredProducts = products.filter(p => {
-    const matchesCategory =
-      selectedCategory === 'todos' ||
-      (selectedCategory === 'agua_botellon' && (p.category === 'agua' || p.category === 'botellon')) ||
-      p.category === selectedCategory;
-    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+  // Filtrado de productos altamente reactivo y optimizado
+  const filteredProducts = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
+    return products.filter(p => {
+      const matchesCategory =
+        selectedCategory === 'todos' ||
+        (selectedCategory === 'agua_botellon' && (p.category === 'agua' || p.category === 'botellon')) ||
+        p.category === selectedCategory;
+      const matchesSearch = !q || p.name.toLowerCase().includes(q);
+      return matchesCategory && matchesSearch;
+    });
+  }, [products, selectedCategory, searchQuery]);
 
   // Estados para feedback táctil e instantáneo en móvil
   const [justAddedRefill, setJustAddedRefill] = useState<number | null>(null);
@@ -688,7 +691,7 @@ export function PosModule({
                       addToCartWithFeedback(product, 1);
                     }
                   }}
-                  className={`bg-white rounded-3xl p-3.5 sm:p-5 border transition-all cursor-pointer flex flex-col justify-between group pressable active:scale-[0.98] min-h-[175px] relative ${
+                  className={`bg-white rounded-3xl p-3.5 sm:p-5 border transition-all cursor-pointer flex flex-col justify-between group pressable active:scale-[0.98] min-h-[175px] relative cv-auto gpu-accelerated ${
                     isInCart
                       ? 'border-sky-400 bg-sky-50/20 ring-2 ring-sky-400/20 shadow-md shadow-sky-500/10'
                       : 'border-slate-200/80 hover:border-sky-300 hover:shadow-xl hover:shadow-sky-500/10'
@@ -781,7 +784,7 @@ export function PosModule({
 
         {/* Panel del Carrito de Ventas (Visible en Desktop y Drawer en Mobile con z-55) */}
         <div
-          className={`fixed inset-y-0 right-0 z-55 w-full sm:w-96 bg-white shadow-2xl p-5 transform transition-transform duration-200 lg:static lg:z-auto lg:w-auto lg:h-auto lg:shadow-none lg:border lg:border-slate-200/80 lg:rounded-2xl lg:p-5 flex flex-col justify-between lg:sticky lg:top-4 pb-10 lg:pb-5 ${
+          className={`fixed inset-y-0 right-0 z-55 w-full sm:w-96 bg-white shadow-2xl p-5 transform transition-transform duration-250 ease-out gpu-accelerated lg:static lg:z-auto lg:w-auto lg:h-auto lg:shadow-none lg:border lg:border-slate-200/80 lg:rounded-2xl lg:p-5 flex flex-col justify-between lg:sticky lg:top-4 pb-10 lg:pb-5 ${
             isCartDrawerOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'
           }`}
         >

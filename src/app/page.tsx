@@ -1,18 +1,95 @@
 'use client';
 
 import React, { useState, useEffect, Suspense } from 'react';
+import dynamic from 'next/dynamic';
 import { useSearchParams } from 'next/navigation';
 import { Navbar } from '@/components/Navbar';
 import { BottomNav, ActiveTab } from '@/components/BottomNav';
 import { PosModule } from '@/components/pos/PosModule';
-import { ClientsModule } from '@/components/clients/ClientsModule';
-import { AiCameraModule } from '@/components/camera/AiCameraModule';
-import { CashClosureModule } from '@/components/closure/CashClosureModule';
-import { TankModule } from '@/components/tanks/TankModule';
-import { FinanceModule } from '@/components/finance/FinanceModule';
 import { Client } from '@/types';
-import { SettingsModule } from '@/components/settings/SettingsModule';
-import { ProductsServicesModule } from '@/components/products/ProductsServicesModule';
+
+// Componente visual de carga suave para transiciones fluidas de pestañas
+function TabLoadingSkeleton({ title, subtitle }: { title: string; subtitle: string }) {
+  return (
+    <div className="max-w-6xl mx-auto px-4 py-6 animate-in fade-in duration-150">
+      <div className="flex items-center space-x-3 mb-6">
+        <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sky-100 to-cyan-50 flex items-center justify-center border border-sky-200/60 shadow-2xs">
+          <div className="w-4 h-4 rounded-full bg-sky-500 animate-pulse" />
+        </div>
+        <div>
+          <h2 className="text-lg font-black text-slate-900 tracking-tight">{title}</h2>
+          <p className="text-xs text-sky-600 font-semibold">{subtitle}</p>
+        </div>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+          <div key={i} className="h-32 rounded-2xl bg-white/80 border border-slate-200/70 p-4 shadow-2xs animate-pulse">
+            <div className="w-1/2 h-4 bg-slate-200 rounded-lg mb-3" />
+            <div className="w-3/4 h-3 bg-slate-100 rounded-md mb-2" />
+            <div className="w-1/3 h-5 bg-sky-100/70 rounded-md mt-6" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Carga Dinámica Optimizada: Reduce drásticamente el bundle JS inicial de 8 módulos a solo el POS principal
+const ProductsServicesModule = dynamic(
+  () => import('@/components/products/ProductsServicesModule').then((m) => m.ProductsServicesModule),
+  {
+    loading: () => <TabLoadingSkeleton title="Catálogo de Productos & Servicios" subtitle="Cargando inventario y tarifas..." />,
+    ssr: false,
+  }
+);
+
+const ClientsModule = dynamic(
+  () => import('@/components/clients/ClientsModule').then((m) => m.ClientsModule),
+  {
+    loading: () => <TabLoadingSkeleton title="Directorio de Clientes" subtitle="Cargando rutas y geolocalización..." />,
+    ssr: false,
+  }
+);
+
+const AiCameraModule = dynamic(
+  () => import('@/components/camera/AiCameraModule').then((m) => m.AiCameraModule),
+  {
+    loading: () => <TabLoadingSkeleton title="Cámara Inteligente" subtitle="Inicializando sensor de visión por IA..." />,
+    ssr: false,
+  }
+);
+
+const CashClosureModule = dynamic(
+  () => import('@/components/closure/CashClosureModule').then((m) => m.CashClosureModule),
+  {
+    loading: () => <TabLoadingSkeleton title="Cierre de Caja" subtitle="Calculando balance y arqueo del turno..." />,
+    ssr: false,
+  }
+);
+
+const TankModule = dynamic(
+  () => import('@/components/tanks/TankModule').then((m) => m.TankModule),
+  {
+    loading: () => <TabLoadingSkeleton title="Monitoreo de Tanques" subtitle="Cargando niveles de agua y telemetría..." />,
+    ssr: false,
+  }
+);
+
+const FinanceModule = dynamic(
+  () => import('@/components/finance/FinanceModule').then((m) => m.FinanceModule),
+  {
+    loading: () => <TabLoadingSkeleton title="Métricas Financieras" subtitle="Consolidando ingresos y gastos..." />,
+    ssr: false,
+  }
+);
+
+const SettingsModule = dynamic(
+  () => import('@/components/settings/SettingsModule').then((m) => m.SettingsModule),
+  {
+    loading: () => <TabLoadingSkeleton title="Configuración H2O Life" subtitle="Cargando opciones del sistema..." />,
+    ssr: false,
+  }
+);
 
 function H2OLifeAppContent() {
   const searchParams = useSearchParams();
@@ -27,6 +104,33 @@ function H2OLifeAppContent() {
       setActiveTab(tabParam);
     }
   }, [searchParams]);
+
+  // Precarga inteligente en segundo plano durante momentos ociosos del navegador (Idle-Time Prefetching)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const prefetchSecondaryChunks = () => {
+      import('@/components/products/ProductsServicesModule');
+      import('@/components/clients/ClientsModule');
+      import('@/components/closure/CashClosureModule');
+      import('@/components/tanks/TankModule');
+    };
+
+    if ('requestIdleCallback' in window) {
+      const handle = (window as unknown as { requestIdleCallback: (cb: () => void, opt: { timeout: number }) => number }).requestIdleCallback(
+        prefetchSecondaryChunks,
+        { timeout: 2500 }
+      );
+      return () => {
+        if ('cancelIdleCallback' in window) {
+          (window as unknown as { cancelIdleCallback: (id: number) => void }).cancelIdleCallback(handle);
+        }
+      };
+    } else {
+      const timer = setTimeout(prefetchSecondaryChunks, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   return (
     <div
@@ -96,4 +200,3 @@ export default function Page() {
     </Suspense>
   );
 }
-

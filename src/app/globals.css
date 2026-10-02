@@ -7,6 +7,7 @@
   --ease-spring: cubic-bezier(0.32, 0.72, 0, 1);
   --ease-out-quint: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out-smooth: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 @theme inline {
@@ -23,6 +24,7 @@ html {
   text-rendering: optimizeLegibility;
   scroll-behavior: smooth;
   height: 100%;
+  overscroll-behavior-y: none;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -31,6 +33,8 @@ body {
   color: var(--foreground);
   font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   overflow-x: hidden;
+  overscroll-behavior-y: none;
+  -webkit-overflow-scrolling: touch;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -67,6 +71,19 @@ input, textarea, select {
 
 .pressable:active {
   transform: scale(0.96);
+}
+
+/* GPU Hardware Acceleration (Prevents Main-Thread Frame Drops) */
+.gpu-accelerated {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: transform, opacity;
+}
+
+/* Virtualized Off-Screen Rendering (Massive FPS boost for catalog lists) */
+.cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 120px;
 }
 
 /* Glassmorphism Floating Shell */

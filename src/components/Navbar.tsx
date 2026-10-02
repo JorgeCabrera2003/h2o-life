@@ -3,9 +3,18 @@
 import React, { useState } from 'react';
 import { useH2OStore, INITIAL_USERS } from '@/lib/store';
 import { ActiveTab } from '@/components/BottomNav';
+import dynamic from 'next/dynamic';
 import { Droplet, Edit3, Check, Settings, Sparkles, ChevronDown, Package, MessageSquare, Smartphone } from 'lucide-react';
-import { WhatsAppHubModal } from '@/components/whatsapp/WhatsAppHubModal';
-import { ConnectMobileModal } from '@/components/common/ConnectMobileModal';
+
+const ConnectMobileModal = dynamic(
+  () => import('@/components/common/ConnectMobileModal').then((m) => m.ConnectMobileModal),
+  { ssr: false }
+);
+
+const WhatsAppHubModal = dynamic(
+  () => import('@/components/whatsapp/WhatsAppHubModal').then((m) => m.WhatsAppHubModal),
+  { ssr: false }
+);
 
 interface NavbarProps {
   onNavigate?: (tab: ActiveTab) => void;
@@ -242,16 +251,20 @@ export function Navbar({ onNavigate, activeTab }: NavbarProps) {
       </div>
 
       {/* Modal de Conexión Móvil */}
-      <ConnectMobileModal
-        isOpen={showMobileConnect}
-        onClose={() => setShowMobileConnect(false)}
-      />
+      {showMobileConnect && (
+        <ConnectMobileModal
+          isOpen={showMobileConnect}
+          onClose={() => setShowMobileConnect(false)}
+        />
+      )}
 
       {/* Modal de WhatsApp Hub */}
-      <WhatsAppHubModal
-        isOpen={showWhatsAppHub}
-        onClose={() => setShowWhatsAppHub(false)}
-      />
+      {showWhatsAppHub && (
+        <WhatsAppHubModal
+          isOpen={showWhatsAppHub}
+          onClose={() => setShowWhatsAppHub(false)}
+        />
+      )}
     </header>
   );
 }

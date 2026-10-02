@@ -16,11 +16,12 @@ const geistMono = Geist_Mono({
 });
 
 export const viewport: Viewport = {
-  themeColor: '#0284c7',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#0284c7' },
+    { media: '(prefers-color-scheme: dark)', color: '#0369a1' },
+  ],
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
   viewportFit: 'cover',
 };
 

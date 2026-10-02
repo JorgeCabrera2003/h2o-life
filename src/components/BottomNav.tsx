@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   ShoppingCart,
   Package,
@@ -15,9 +15,18 @@ import {
   Smartphone,
   X,
 } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { useH2OStore } from '@/lib/store';
-import { WhatsAppHubModal } from '@/components/whatsapp/WhatsAppHubModal';
-import { ConnectMobileModal } from '@/components/common/ConnectMobileModal';
+
+const WhatsAppHubModal = dynamic(
+  () => import('@/components/whatsapp/WhatsAppHubModal').then((m) => m.WhatsAppHubModal),
+  { ssr: false }
+);
+
+const ConnectMobileModal = dynamic(
+  () => import('@/components/common/ConnectMobileModal').then((m) => m.ConnectMobileModal),
+  { ssr: false }
+);
 
 export type ActiveTab =
   | 'pos'
@@ -41,9 +50,9 @@ export function BottomNav({ activeTab, setActiveTab, onOpenCart }: BottomNavProp
   const [isWhatsAppOpen, setIsWhatsAppOpen] = useState(false);
   const [isMobileConnectOpen, setIsMobileConnectOpen] = useState(false);
 
-  const totalCartItems = cart.reduce((acc, item) => acc + item.quantity, 0);
-  const totalCartUsd = cart.reduce((acc, item) => acc + item.subtotal_usd, 0);
-  const totalCartBs = (totalCartUsd * exchangeRate.rate).toFixed(2);
+  const totalCartItems = useMemo(() => cart.reduce((acc, item) => acc + item.quantity, 0), [cart]);
+  const totalCartUsd = useMemo(() => cart.reduce((acc, item) => acc + item.subtotal_usd, 0), [cart]);
+  const totalCartBs = useMemo(() => (totalCartUsd * exchangeRate.rate).toFixed(2), [totalCartUsd, exchangeRate.rate]);
 
   // 5 Pestañas Principales en Mobile (Elimina el desbordamiento y saltos de fila)
   const mainNavItems = [
@@ -315,15 +324,19 @@ export function BottomNav({ activeTab, setActiveTab, onOpenCart }: BottomNavProp
       </nav>
 
       {/* Modales Compartidos */}
-      <WhatsAppHubModal
-        isOpen={isWhatsAppOpen}
-        onClose={() => setIsWhatsAppOpen(false)}
-      />
+      {isWhatsAppOpen && (
+        <WhatsAppHubModal
+          isOpen={isWhatsAppOpen}
+          onClose={() => setIsWhatsAppOpen(false)}
+        />
+      )}
 
-      <ConnectMobileModal
-        isOpen={isMobileConnectOpen}
-        onClose={() => setIsMobileConnectOpen(false)}
-      />
+      {isMobileConnectOpen && (
+        <ConnectMobileModal
+          isOpen={isMobileConnectOpen}
+          onClose={() => setIsMobileConnectOpen(false)}
+        />
+      )}
     </>
   );
 }

@@ -4,6 +4,9 @@ const nextConfig: NextConfig = {
   compress: true,
   poweredByHeader: false,
   allowedDevOrigins: ['192.168.31.101', '172.21.144.1', 'localhost', '127.0.0.1'],
+  experimental: {
+    optimizePackageImports: ['lucide-react'],
+  },
   images: {
     formats: ['image/avif', 'image/webp'],
     remotePatterns: [
@@ -15,6 +18,15 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [
+      {
+        source: '/_next/static/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
       {
         source: '/:path*',
         headers: [

@@ -24,7 +24,12 @@ import {
   ShieldCheck,
   MessageSquare,
 } from 'lucide-react';
-import { WhatsAppHubModal } from '@/components/whatsapp/WhatsAppHubModal';
+import dynamic from 'next/dynamic';
+
+const WhatsAppHubModal = dynamic(
+  () => import('@/components/whatsapp/WhatsAppHubModal').then((m) => m.WhatsAppHubModal),
+  { ssr: false }
+);
 
 const CATEGORY_LABELS: Record<ProductCategory, { label: string; icon: string; badgeColor: string }> = {
   agua: { label: 'Agua & Recargas', icon: '💧', badgeColor: 'bg-sky-50 text-sky-700 border-sky-200' },
@@ -802,11 +807,13 @@ export function ProductsServicesModule() {
       )}
 
       {/* Modal de WhatsApp Hub para Catálogo y Precios */}
-      <WhatsAppHubModal
-        isOpen={isWhatsAppHubOpen}
-        onClose={() => setIsWhatsAppHubOpen(false)}
-        defaultTab="catalog"
-      />
+      {isWhatsAppHubOpen && (
+        <WhatsAppHubModal
+          isOpen={isWhatsAppHubOpen}
+          onClose={() => setIsWhatsAppHubOpen(false)}
+          defaultTab="catalog"
+        />
+      )}
     </div>
   );
 }
