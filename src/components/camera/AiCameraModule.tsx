@@ -330,7 +330,11 @@ export function AiCameraModule({ onProductAddedToCart }: AiCameraModuleProps) {
           /* 2. VISTA PREVIA DE CAPTURA CON ANÁLISIS */
           <div className="relative rounded-2xl overflow-hidden mb-4 border border-slate-200 max-h-80 flex items-center justify-center bg-slate-900">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={imagePreview} alt="Captura" className="max-h-80 object-contain" />
+            <img
+              src={imagePreview}
+              alt="Fotografía capturada del botellón o producto para análisis computacional inteligente de H2O Life"
+              className="max-h-80 object-contain"
+            />
 
             {isAnalyzing && (
               <div className="absolute inset-0 bg-slate-900/75 backdrop-blur-xs flex flex-col items-center justify-center text-white">

@@ -27,7 +27,10 @@ import {
   calculateDeliveryRouteInfo,
   COUNTRY_CODES,
   VENEZUELAN_OPERATORS,
+  validateAntiSpamSubmission,
 } from '@/lib/validators';
+import { analytics } from '@/lib/analytics';
+import { GoogleBusinessBadge } from '@/components/common/GoogleBusinessBadge';
 import { DeliveryAddressMap } from './DeliveryAddressMap';
 
 // Carga dinámica del mapa interactivo para las tarjetas
@@ -69,6 +72,8 @@ export function ClientsModule({ onSelectClientForSale }: ClientsModuleProps) {
     lat: 10.0682,
     lng: -69.3235,
   });
+  const [honeypot, setHoneypot] = useState('');
+  const formRenderTimeRef = React.useRef<number>(Date.now());
 
   // Tarjeta con mapa expandido interactivo
   const [expandedMapClientId, setExpandedMapClientId] = useState<string | null>(null);
@@ -99,6 +104,8 @@ export function ClientsModule({ onSelectClientForSale }: ClientsModuleProps) {
     setNotes('');
     setBalanceUsd('0');
     setCoordinates({ lat: 10.07125, lng: -69.32535 }); // Barquisimeto Centro
+    setHoneypot('');
+    formRenderTimeRef.current = Date.now();
     setIsModalOpen(true);
   };
 
@@ -146,6 +153,18 @@ export function ClientsModule({ onSelectClientForSale }: ClientsModuleProps) {
 
   const handleSaveClient = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Verificación de seguridad anti-spam
+    const spamCheck = validateAntiSpamSubmission({
+      honeypotValue: honeypot,
+      formRenderTimeMs: formRenderTimeRef.current,
+      minHumanDurationMs: 400,
+    });
+    if (spamCheck.isSpam) {
+      console.warn('Registro de cliente bloqueado por filtro anti-spam:', spamCheck.reason);
+      return;
+    }
+
     if (!name.trim()) {
       alert('Por favor ingresa el nombre del cliente.');
       return;
@@ -167,8 +186,10 @@ export function ClientsModule({ onSelectClientForSale }: ClientsModuleProps) {
 
     if (editingClient) {
       updateClient(editingClient.id, clientPayload);
+      analytics.logEvent('client_updated', 'client', { id: editingClient.id, name: clientPayload.name });
     } else {
-      addClient(clientPayload);
+      const added = addClient(clientPayload);
+      analytics.logEvent('client_created', 'client', { id: added.id, name: added.name });
     }
 
     setIsModalOpen(false);
@@ -186,18 +207,21 @@ export function ClientsModule({ onSelectClientForSale }: ClientsModuleProps) {
       {/* Título & Botón de Nuevo Cliente */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
         <div>
-          <h2 className="text-xl font-black text-slate-900 flex items-center space-x-2">
-            <Users className="w-5 h-5 text-sky-600" />
-            <span>Directorio de Clientes & Entregas</span>
-          </h2>
-          <p className="text-xs text-slate-500">
+          <div className="flex items-center space-x-2">
+            <h2 className="text-xl font-black text-slate-900 flex items-center space-x-2">
+              <Users className="w-5 h-5 text-sky-600" />
+              <span>Directorio de Clientes & Entregas</span>
+            </h2>
+            <GoogleBusinessBadge compact />
+          </div>
+          <p className="text-xs text-slate-500 mt-0.5">
             Control de números telefónicos, direcciones de despacho y geolocalización con Google Maps
           </p>
         </div>
 
         <button
           onClick={handleOpenAdd}
-          className="bg-gradient-to-r from-sky-600 to-cyan-500 hover:from-sky-700 text-white font-extrabold px-4 py-2.5 rounded-xl shadow-md shadow-sky-500/20 text-xs flex items-center space-x-2 active:scale-95 transition-all"
+          className="bg-gradient-to-r from-sky-600 to-cyan-500 hover:from-sky-700 text-white font-extrabold px-4 py-2.5 rounded-xl shadow-md shadow-sky-500/20 text-xs flex items-center space-x-2 active:scale-95 transition-all cursor-pointer min-h-[44px]"
         >
           <Plus className="w-4 h-4" />
           <span>+ Registrar Nuevo Cliente</span>
@@ -557,17 +581,29 @@ export function ClientsModule({ onSelectClientForSale }: ClientsModuleProps) {
                 </div>
               </div>
 
+              {/* Honeypot invisible para protección anti-spam */}
+              <input
+                type="text"
+                name="_hp_security_check"
+                value={honeypot}
+                onChange={e => setHoneypot(e.target.value)}
+                tabIndex={-1}
+                autoComplete="off"
+                className="hidden"
+                aria-hidden="true"
+              />
+
               <div className="flex space-x-2 pt-4">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="flex-1 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl"
+                  className="flex-1 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl cursor-pointer min-h-[44px]"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 text-xs font-bold bg-sky-600 text-white rounded-xl hover:bg-sky-700 shadow-md active:scale-95 transition-all"
+                  className="flex-1 py-2.5 text-xs font-black bg-gradient-to-r from-sky-600 to-cyan-500 text-white rounded-xl hover:from-sky-700 shadow-md active:scale-95 transition-all cursor-pointer min-h-[44px]"
                 >
                   Guardar Cliente con Ubicación
                 </button>

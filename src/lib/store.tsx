@@ -786,3 +786,8 @@ export function useH2OStore() {
   }
   return context;
 }
+
+export function useH2OStoreSafe() {
+  return useContext(StoreContext);
+}
+

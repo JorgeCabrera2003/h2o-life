@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { StoreProvider } from '@/lib/store';
 import { Navbar } from '@/components/Navbar';
 import { BottomNav, ActiveTab } from '@/components/BottomNav';
@@ -13,10 +14,19 @@ import { FinanceModule } from '@/components/finance/FinanceModule';
 import { Client } from '@/types';
 import { SettingsModule } from '@/components/settings/SettingsModule';
 
-function H2OLifeApp() {
-  const [activeTab, setActiveTab] = useState<ActiveTab>('pos');
+function H2OLifeAppContent() {
+  const searchParams = useSearchParams();
+  const initialTab = (searchParams.get('tab') as ActiveTab) || 'pos';
+  const [activeTab, setActiveTab] = useState<ActiveTab>(initialTab);
   const [isCartDrawerOpen, setIsCartDrawerOpen] = useState(false);
   const [selectedClientForSale, setSelectedClientForSale] = useState<Client | null>(null);
+
+  useEffect(() => {
+    const tabParam = searchParams.get('tab') as ActiveTab;
+    if (tabParam && ['pos', 'clients', 'camera', 'closure', 'tanks', 'finance', 'settings'].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [searchParams]);
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900">
@@ -70,7 +80,16 @@ function H2OLifeApp() {
 export default function Page() {
   return (
     <StoreProvider>
-      <H2OLifeApp />
+      <Suspense
+        fallback={
+          <div className="min-h-screen flex items-center justify-center bg-slate-50 text-sky-700 font-bold text-xs">
+            Cargando H2O Life POS...
+          </div>
+        }
+      >
+        <H2OLifeAppContent />
+      </Suspense>
     </StoreProvider>
   );
 }
+

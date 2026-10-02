@@ -30,7 +30,9 @@ import {
   sanitizeAndCapitalizeName,
   sanitizeVenezuelanPhoneInput,
   sanitizeAddressText,
+  validateAntiSpamSubmission,
 } from '@/lib/validators';
+import { analytics } from '@/lib/analytics';
 
 interface PosModuleProps {
   isCartDrawerOpen?: boolean;
@@ -76,6 +78,8 @@ export function PosModule({
   const [newClientName, setNewClientName] = useState('');
   const [newClientPhone, setNewClientPhone] = useState('');
   const [newClientAddress, setNewClientAddress] = useState('');
+  const [honeypot, setHoneypot] = useState('');
+  const formRenderTimeRef = React.useRef<number>(Date.now());
   const [searchQuery, setSearchQuery] = useState('');
 
   // Cerrar el dropdown al hacer clic fuera del combobox
@@ -195,6 +199,13 @@ export function PosModule({
     }
 
     const sale = createSale(selectedClient, finalPayments, fullNotes, changeUsd, changeBs);
+    analytics.logEvent('sale_completed', 'pos', {
+      folio: sale.folio,
+      total_usd: sale.total_usd,
+      total_bs: sale.total_bs,
+      client: sale.client_name,
+      items_count: sale.items.length,
+    });
     setCompletedSale(sale);
     setIsCheckoutOpen(false);
     if (setIsCartDrawerOpen) setIsCartDrawerOpen(false);
@@ -1001,6 +1012,18 @@ export function PosModule({
                   className="w-full text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:border-sky-500 focus:outline-hidden"
                 />
               </div>
+
+              {/* Honeypot invisible para protección anti-spam */}
+              <input
+                type="text"
+                name="_hp_security_check"
+                value={honeypot}
+                onChange={e => setHoneypot(e.target.value)}
+                tabIndex={-1}
+                autoComplete="off"
+                className="hidden"
+                aria-hidden="true"
+              />
             </div>
 
             <div className="flex space-x-2">
@@ -1010,6 +1033,7 @@ export function PosModule({
                   setNewClientName('');
                   setNewClientPhone('');
                   setNewClientAddress('');
+                  setHoneypot('');
                   setIsClientModalOpen(false);
                 }}
                 className="flex-1 py-2.5 text-xs font-semibold text-slate-500 hover:bg-slate-100 rounded-xl cursor-pointer"
@@ -1019,6 +1043,16 @@ export function PosModule({
               <button
                 type="button"
                 onClick={() => {
+                  const spamCheck = validateAntiSpamSubmission({
+                    honeypotValue: honeypot,
+                    formRenderTimeMs: formRenderTimeRef.current,
+                    minHumanDurationMs: 400,
+                  });
+                  if (spamCheck.isSpam) {
+                    console.warn('Envío de formulario bloqueado por seguridad anti-spam:', spamCheck.reason);
+                    return;
+                  }
+
                   if (newClientName.trim()) {
                     const client = addClient({
                       name: newClientName.trim(),
@@ -1026,14 +1060,16 @@ export function PosModule({
                       address: newClientAddress.trim() || 'Entrega en tienda / Mostrador',
                       balance_usd: 0,
                     });
+                    analytics.logEvent('client_created_pos', 'client', { name: client.name });
                     setSelectedClient(client);
                     setNewClientName('');
                     setNewClientPhone('');
                     setNewClientAddress('');
+                    setHoneypot('');
                     setIsClientModalOpen(false);
                   }
                 }}
-                className="flex-1 py-2.5 text-xs font-bold bg-sky-600 text-white rounded-xl hover:bg-sky-700 shadow-md active:scale-95 transition-all cursor-pointer"
+                className="flex-1 py-2.5 text-xs font-extrabold bg-gradient-to-r from-sky-600 to-cyan-500 text-white rounded-xl hover:from-sky-700 shadow-md active:scale-95 transition-all cursor-pointer"
               >
                 Guardar Cliente
               </button>

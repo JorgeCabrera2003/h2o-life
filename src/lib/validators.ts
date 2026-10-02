@@ -322,3 +322,35 @@ export function sanitizeBankReference(value: string): string {
 function toTitleCase(str: string): string {
   return str.replace(/\b\w/g, (c) => c.toUpperCase());
 }
+
+/**
+ * Validación de seguridad anti-spam por técnica Honeypot y detección de tiempo de llenado
+ */
+export function validateAntiSpamSubmission({
+  honeypotValue,
+  formRenderTimeMs,
+  minHumanDurationMs = 500,
+}: {
+  honeypotValue: string;
+  formRenderTimeMs?: number;
+  minHumanDurationMs?: number;
+}): { isSpam: boolean; reason?: string } {
+  // 1. Verificación de Honeypot: los humanos nunca ven ni llenan este campo oculto
+  if (honeypotValue && honeypotValue.trim().length > 0) {
+    return {
+      isSpam: true,
+      reason: 'Honeypot trap detectado (campo oculto completado por bot automatizado)',
+    };
+  }
+
+  // 2. Verificación de velocidad inhumana: un formulario completado en menos de 500ms es un script
+  if (formRenderTimeMs && Date.now() - formRenderTimeMs < minHumanDurationMs) {
+    return {
+      isSpam: true,
+      reason: 'Envío instantáneo detectado (velocidad sobrehumana de formulario)',
+    };
+  }
+
+  return { isSpam: false };
+}
+

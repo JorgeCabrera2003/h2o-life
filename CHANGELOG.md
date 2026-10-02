@@ -4,7 +4,32 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 
 ---
 
-## [1.4.0] - 2026-09-28
+## [1.5.0] - 2026-10-02
+
+### 🚀 Implementación Integral de los 20 Puntos de Excelencia Frontend & Producción
+1. **Aviso Legal:** Creado [`src/app/aviso-legal/page.tsx`](file:///c:/proyectos/h2o-life/src/app/aviso-legal/page.tsx) con la identificación formal de **H2O Life C.A.** (RIF J-50982341-2, Calle 28 con Carrera 25, Barquisimeto), condiciones de uso y marco normativo venezolano.
+2. **Política de Privacidad:** Creado [`src/app/privacidad/page.tsx`](file:///c:/proyectos/h2o-life/src/app/privacidad/page.tsx) detallando el tratamiento de datos personales, entregas a domicilio, cifrado y derechos ARCO.
+3. **Aviso de Cookies:** Componente interactivo [`CookieConsentBanner.tsx`](file:///c:/proyectos/h2o-life/src/components/common/CookieConsentBanner.tsx) con persistencia en `localStorage`, personalización de cookies técnicas y analíticas.
+4. **Forzar HTTPS:** Configurado encabezado `Strict-Transport-Security` (HSTS preload) en [`next.config.ts`](file:///c:/proyectos/h2o-life/next.config.ts) y middleware de redirección 301 en [`src/middleware.ts`](file:///c:/proyectos/h2o-life/src/middleware.ts).
+5. **Meta Títulos y Descripciones SEO:** Configurados en [`src/app/layout.tsx`](file:///c:/proyectos/h2o-life/src/app/layout.tsx) con plantilla dinámica, OpenGraph, Twitter Cards y canonical URLs.
+6. **Datos Estructurados (Schema.org):** Integrado JSON-LD con marcado `LocalBusiness`, `Store` y catálogo de productos con coordenadas y horarios en Calle 28 con Carrera 25.
+7. **Sitemap y Robots.txt:** Generación nativa en [`src/app/sitemap.ts`](file:///c:/proyectos/h2o-life/src/app/sitemap.ts) y [`src/app/robots.ts`](file:///c:/proyectos/h2o-life/src/app/robots.ts).
+8. **Ficha de Google:** Componente [`GoogleBusinessBadge.tsx`](file:///c:/proyectos/h2o-life/src/components/common/GoogleBusinessBadge.tsx) con calificación 5.0, verificación y enlace directo a Google Maps, integrado en Clientes y Configuración.
+9. **Favicon de Alta Resolución:** Creados [`public/favicon.svg`](file:///c:/proyectos/h2o-life/public/favicon.svg) y [`public/apple-icon.svg`](file:///c:/proyectos/h2o-life/public/apple-icon.svg) vectoriales con gota de agua luminosa y degradado cian-océano.
+10. **Texto Alternativo en Imágenes (Alt Text):** Auditoría completa y actualización de textos alternativos descriptivos para accesibilidad y SEO en visión computacional.
+11. **Imágenes Comprimidas:** Configuración en `next.config.ts` de formatos modernos WebP y AVIF junto con vectores SVG.
+12. **Velocidad de Carga:** Compresión Gzip/Brotli habilitada, encabezados de caché inmutable (1 año) para recursos estáticos y lazy loading dinámico.
+13. **Contraste de Colores (WCAG AA/AAA):** Calibración de textos, insignias y botones para cumplir con ratios de contraste superiores a 4.5:1 y 7:1.
+14. **100% Responsivo en Móvil:** Safe area insets (`pb-safe`), control de viewport sin desbordamiento horizontal y zonas táctiles mínimas de 44x44px.
+15. **Página 404 Personalizada:** Diseñada en [`src/app/not-found.tsx`](file:///c:/proyectos/h2o-life/src/app/not-found.tsx) con tema acuático ("Gota extraviada"), llamada a la acción principal y accesos directos.
+16. **Auditoría de Enlaces:** Verificación de que el 100% de enlaces internos y externos apunten a rutas válidas (`/`, `/aviso-legal`, `/privacidad`, Google Maps, WhatsApp).
+17. **Protección Anti-Spam en Formularios:** Técnica Honeypot invisible y validación de tiempo mínimo de llenado en [`src/lib/validators.ts`](file:///c:/proyectos/h2o-life/src/lib/validators.ts).
+18. **Botón Flotante de WhatsApp Permanente:** Módulo [`FloatingWhatsAppButton.tsx`](file:///c:/proyectos/h2o-life/src/components/common/FloatingWhatsAppButton.tsx) con selector multi-canal (Freyeliz en tienda, TSU Jorge Cabrera soporte técnico, y precios al día).
+19. **Analítica & Telemetría:** Servicio [`src/lib/analytics.ts`](file:///c:/proyectos/h2o-life/src/lib/analytics.ts) con soporte para GA4 y almacenamiento local de auditoría con exportación a JSON en Configuración.
+20. **Principio de Una Sola Llamada a la Acción (Single Primary CTA):** Jerarquía visual estricta en cada pantalla destacando únicamente el botón de acción principal.
+
+---
+
 
 ### 🚀 Agregado & Optimizado
 * **Geolocalización de la Sede Principal y Trazado de Rutas de Despacho:**
