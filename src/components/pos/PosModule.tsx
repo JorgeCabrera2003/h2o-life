@@ -149,7 +149,7 @@ export function PosModule({
     return matchesCategory && matchesSearch;
   });
 
-  // Botones de acceso rápido para Recargas (Carla notebook workflow)
+  // Botones de acceso rápido para Recargas (Karla notebook workflow)
   const quickRefillProduct = products.find(p => p.id === 'prod-recarga-20');
 
   const handleQuickRefill = (qty: number) => {
@@ -224,41 +224,47 @@ export function PosModule({
   return (
     <div className="max-w-7xl mx-auto px-4 py-4 pb-40 md:pb-36">
       {/* 1. SECCIÓN RÁPIDA: RECARGAS (Atajo instantáneo de libreta) */}
-      <div className="bg-gradient-to-r from-sky-500 via-sky-600 to-cyan-600 rounded-2xl p-4 text-white shadow-md shadow-sky-500/15 mb-5">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center space-x-2">
-            <span className="p-1.5 rounded-lg bg-white/20">
-              <Droplet className="w-5 h-5 fill-white" />
+      <div className="bg-gradient-to-r from-sky-600 via-sky-500 to-cyan-500 rounded-3xl p-5 text-white shadow-xl shadow-sky-500/20 mb-6 border border-sky-400/30 relative overflow-hidden">
+        {/* Ambient water crystal shine */}
+        <div className="absolute -top-12 -right-12 w-48 h-48 bg-white/10 rounded-full blur-2xl pointer-events-none" />
+        <div className="flex items-center justify-between mb-3.5 relative z-10">
+          <div className="flex items-center space-x-2.5">
+            <span className="p-2 rounded-2xl bg-white/20 backdrop-blur-md shadow-inner flex items-center justify-center">
+              <Droplet className="w-5 h-5 fill-white text-transparent animate-pulse" />
             </span>
             <div>
-              <h2 className="text-sm font-bold tracking-tight">Atajo Rápido de Recargas</h2>
-              <p className="text-[11px] text-sky-100">Presiona para sumar garrafones al instante</p>
+              <h2 className="text-sm sm:text-base font-black tracking-tight">Atajo Rápido de Recargas de Agua</h2>
+              <p className="text-[11px] text-sky-100 font-medium">Toque instantáneo para sumar botellones al carrito</p>
             </div>
           </div>
-          <span className="text-xs bg-white/20 font-bold px-2 py-0.5 rounded-full">
+          <span className="text-xs bg-white/20 font-black px-3 py-1 rounded-full border border-white/25 shadow-xs">
             $0.50 c/u
           </span>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 relative z-10">
           {[1, 2, 3, 4].map(qty => {
             const costUsd = (qty * 0.5).toFixed(2);
             const costBs = (qty * 0.5 * exchangeRate.rate).toFixed(2);
             return (
               <button
                 key={qty}
+                type="button"
                 onClick={() => handleQuickRefill(qty)}
-                className="bg-white/10 hover:bg-white/25 active:scale-95 border border-white/20 rounded-xl py-2.5 px-3 text-left transition-all flex items-center justify-between group"
+                className="bg-white/15 hover:bg-white/25 active:scale-[0.96] border border-white/30 backdrop-blur-md rounded-2xl p-3.5 text-left transition-all flex flex-col justify-between group pressable min-h-[96px] cursor-pointer shadow-sm"
               >
-                <div>
-                  <span className="text-sm font-extrabold block">
-                    {qty} {qty === 1 ? 'Recarga' : 'Recargas'}
+                <div className="flex items-center justify-between">
+                  <span className="text-xs sm:text-sm font-black block tracking-tight">
+                    {qty} {qty === 1 ? 'Botellón (20L)' : 'Botellones'}
                   </span>
-                  <span className="text-[11px] text-sky-100 block">Bs. {costBs}</span>
+                  <span className="text-xs opacity-75 group-hover:scale-110 transition-transform">💧</span>
                 </div>
-                <span className="text-sm font-black bg-white/25 text-white px-2 py-1 rounded-lg">
-                  ${costUsd}
-                </span>
+                <div className="mt-2 flex items-baseline justify-between pt-1.5 border-t border-white/15">
+                  <span className="text-[11px] text-sky-100 font-bold block">Bs. {costBs}</span>
+                  <span className="text-sm font-black bg-white/25 px-2 py-0.5 rounded-lg shadow-inner">
+                    ${costUsd}
+                  </span>
+                </div>
               </button>
             );
           })}
@@ -534,26 +540,33 @@ export function PosModule({
         </div>
       </div>
 
-      {/* 3. FILTROS DE CATEGORÍA */}
-      <div className="flex space-x-2 mb-4 overflow-x-auto pb-1">
-        {[
-          { id: 'todos', label: 'Todos' },
-          { id: 'agua_botellon', label: '💧 Agua & Botellones' },
-          { id: 'helado', label: '🍦 Helados' },
-          { id: 'snack', label: '🥔 Snacks' },
-        ].map(cat => (
-          <button
-            key={cat.id}
-            onClick={() => setSelectedCategory(cat.id)}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
-              selectedCategory === cat.id
-                ? 'bg-slate-900 text-white'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-            }`}
-          >
-            {cat.label}
-          </button>
-        ))}
+      {/* 3. FILTROS DE CATEGORÍA (Capsule Segmented Control) */}
+      <div className="flex items-center justify-between mb-5 overflow-x-auto pb-1">
+        <div className="inline-flex p-1 bg-slate-200/60 backdrop-blur-md rounded-2xl gap-1">
+          {[
+            { id: 'todos', label: 'Todos los Productos', icon: '📦' },
+            { id: 'agua_botellon', label: 'Agua & Botellones', icon: '💧' },
+            { id: 'helado', label: 'Helados', icon: '🍦' },
+            { id: 'snack', label: 'Snacks', icon: '🍿' },
+          ].map(cat => {
+            const isActive = selectedCategory === cat.id;
+            return (
+              <button
+                key={cat.id}
+                type="button"
+                onClick={() => setSelectedCategory(cat.id)}
+                className={`px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all shrink-0 pressable cursor-pointer flex items-center space-x-1.5 ${
+                  isActive
+                    ? 'bg-white text-slate-900 shadow-sm border border-slate-200/80 scale-100'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
+                }`}
+              >
+                <span className="text-sm">{cat.icon}</span>
+                <span>{cat.label}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* 4. GRID DE PRODUCTOS & PANEL LATERAL DE CARRITO */}
@@ -561,7 +574,7 @@ export function PosModule({
         {/* Catálogo de Productos */}
         <div className="lg:col-span-2 grid grid-cols-2 sm:grid-cols-3 gap-3 content-start">
           {filteredProducts.length === 0 ? (
-            <div className="col-span-full py-12 text-center text-slate-400 bg-white rounded-2xl border border-dashed border-slate-200">
+            <div className="col-span-full py-12 text-center text-slate-400 bg-white rounded-3xl border border-dashed border-slate-200">
               <span className="text-3xl mb-2 block">🔍</span>
               <p className="text-xs font-bold text-slate-700">No se encontraron productos</p>
               <p className="text-[11px] text-slate-400 mt-1">
@@ -575,25 +588,39 @@ export function PosModule({
                 <div
                   key={product.id}
                   onClick={() => addToCart(product)}
-                  className="bg-white rounded-2xl p-4 border border-slate-200/80 hover:border-sky-400 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between group active:scale-[0.98] min-h-[160px]"
+                  className="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200/80 hover:border-sky-300 hover:shadow-xl hover:shadow-sky-500/10 transition-all cursor-pointer flex flex-col justify-between group pressable active:scale-[0.97] min-h-[175px] relative"
                 >
                   <div>
-                    <div className="text-3xl mb-2">{product.icon || '📦'}</div>
-                    <h3 className="text-xs font-bold text-slate-900 line-clamp-2 mb-1 group-hover:text-sky-600 transition-colors">
+                    <div className="flex items-start justify-between mb-2.5">
+                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-sky-50 to-cyan-50 border border-sky-100/80 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shadow-2xs">
+                        {product.icon || '📦'}
+                      </div>
+                      <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+                        {product.category}
+                      </span>
+                    </div>
+
+                    <h3 className="text-xs sm:text-sm font-extrabold text-slate-900 line-clamp-2 mb-1 group-hover:text-sky-600 transition-colors">
                       {product.name}
                     </h3>
-                    <span className="text-[10px] text-slate-400 capitalize">{product.category}</span>
                   </div>
-                  <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between">
+
+                  <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between">
                     <div>
-                      <span className="text-base font-extrabold text-slate-900">
+                      <span className="text-base sm:text-lg font-black text-slate-900">
                         ${product.price_usd.toFixed(2)}
                       </span>
-                      <span className="text-[10px] text-slate-500 block">Bs. {priceBs}</span>
+                      <span className="text-[10px] font-extrabold text-sky-700 bg-sky-50 px-1.5 py-0.5 rounded-md border border-sky-100/80 block mt-0.5">
+                        Bs. {priceBs}
+                      </span>
                     </div>
-                    <span className="w-7 h-7 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center font-bold text-sm group-hover:bg-sky-600 group-hover:text-white transition-colors">
+                    <button
+                      type="button"
+                      className="w-8 h-8 rounded-xl bg-sky-50 text-sky-600 group-hover:bg-gradient-to-r group-hover:from-sky-600 group-hover:to-cyan-500 group-hover:text-white flex items-center justify-center shadow-2xs transition-all pressable font-black text-sm"
+                      aria-label={`Agregar ${product.name} al carrito`}
+                    >
                       +
-                    </span>
+                    </button>
                   </div>
                 </div>
               );
@@ -701,24 +728,32 @@ export function PosModule({
             </div>
           </div>
 
-          {/* Subtotal y Botón de Cobro */}
+          {/* Subtotal y Botón de Cobro (Single Primary CTA de Alta Gama) */}
           <div className="mt-4 pt-4 border-t border-slate-100">
             <div className="flex items-baseline justify-between mb-1">
-              <span className="text-xs text-slate-500 font-medium">Total en Dólares:</span>
-              <span className="text-2xl font-black text-slate-900">${totalUsd.toFixed(2)}</span>
+              <span className="text-xs text-slate-500 font-semibold">Total en Dólares:</span>
+              <span className="text-2xl font-black text-slate-900 tracking-tight">${totalUsd.toFixed(2)}</span>
             </div>
             <div className="flex items-baseline justify-between mb-4">
-              <span className="text-xs text-slate-500 font-medium">Total en Bolívares:</span>
-              <span className="text-base font-extrabold text-sky-600">Bs. {totalBs}</span>
+              <span className="text-xs text-slate-500 font-semibold">Total Tasa BCV:</span>
+              <span className="text-sm font-extrabold text-sky-700 bg-sky-50 px-2.5 py-1 rounded-xl border border-sky-100">
+                Bs. {totalBs}
+              </span>
             </div>
 
             <button
+              type="button"
               onClick={handleOpenCheckout}
               disabled={cart.length === 0}
-              className="w-full bg-gradient-to-r from-sky-600 to-cyan-500 hover:from-sky-700 hover:to-cyan-600 disabled:opacity-50 text-white font-extrabold py-3.5 px-4 rounded-xl shadow-lg shadow-sky-500/25 active:scale-[0.98] transition-all flex items-center justify-center space-x-2"
+              className="w-full min-h-[52px] bg-gradient-to-r from-sky-600 via-sky-500 to-cyan-500 hover:from-sky-700 hover:to-cyan-600 disabled:opacity-50 text-white font-black py-4 px-6 rounded-2xl shadow-xl shadow-sky-500/25 active:scale-[0.98] transition-all flex items-center justify-between pressable cursor-pointer"
             >
-              <CreditCard className="w-5 h-5" />
-              <span>Cobrar Orden (${totalUsd.toFixed(2)})</span>
+              <div className="flex items-center space-x-2">
+                <CreditCard className="w-5 h-5" />
+                <span className="text-xs sm:text-sm uppercase tracking-wide">Cobrar Orden</span>
+              </div>
+              <span className="text-base font-black bg-white/20 px-2.5 py-1 rounded-xl">
+                ${totalUsd.toFixed(2)}
+              </span>
             </button>
           </div>
         </div>
@@ -759,37 +794,41 @@ export function PosModule({
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {[
-                  { id: 'pago_movil', label: 'Pago Móvil', icon: <Smartphone className="w-4 h-4" /> },
-                  { id: 'punto', label: 'Punto Venta', icon: <CreditCard className="w-4 h-4" /> },
-                  { id: 'efectivo_usd', label: 'Efectivo $', icon: <DollarSign className="w-4 h-4" /> },
-                  { id: 'efectivo_bs', label: 'Efectivo Bs', icon: <Banknote className="w-4 h-4" /> },
-                ].map(m => (
-                  <button
-                    key={m.id}
-                    onClick={() => setActivePaymentMethod(m.id as PaymentMethod)}
-                    className={`py-2.5 px-2 rounded-xl text-xs font-bold flex flex-col items-center justify-center space-y-1 border transition-all ${
-                      activePaymentMethod === m.id
-                        ? 'bg-sky-600 text-white border-sky-600 shadow-xs'
-                        : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
-                    }`}
-                  >
-                    {m.icon}
-                    <span>{m.label}</span>
-                  </button>
-                ))}
+                  { id: 'pago_movil', label: 'Pago Móvil', icon: <Smartphone className="w-4 h-4 text-sky-600" /> },
+                  { id: 'punto', label: 'Punto Venta', icon: <CreditCard className="w-4 h-4 text-indigo-600" /> },
+                  { id: 'efectivo_usd', label: 'Efectivo $', icon: <DollarSign className="w-4 h-4 text-emerald-600" /> },
+                  { id: 'efectivo_bs', label: 'Efectivo Bs', icon: <Banknote className="w-4 h-4 text-amber-600" /> },
+                ].map(m => {
+                  const isSelected = activePaymentMethod === m.id;
+                  return (
+                    <button
+                      key={m.id}
+                      type="button"
+                      onClick={() => setActivePaymentMethod(m.id as PaymentMethod)}
+                      className={`py-3 px-2 rounded-2xl text-xs font-extrabold flex flex-col items-center justify-center space-y-1.5 border transition-all pressable cursor-pointer ${
+                        isSelected
+                          ? 'bg-sky-600 text-white border-sky-600 shadow-md shadow-sky-500/20 scale-102'
+                          : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300'
+                      }`}
+                    >
+                      <span className={isSelected ? 'text-white' : ''}>{m.icon}</span>
+                      <span>{m.label}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
             {/* Campos condicionales según el método */}
             {activePaymentMethod === 'pago_movil' && (
-              <div className="bg-slate-50 rounded-xl p-3 border border-slate-200 space-y-2 mb-4">
+              <div className="bg-sky-50/60 rounded-2xl p-3.5 border border-sky-100 space-y-2 mb-4">
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <label className="text-[10px] font-bold text-slate-600 uppercase">Banco:</label>
                     <select
                       value={pagoMovilBank}
                       onChange={e => setPagoMovilBank(e.target.value)}
-                      className="w-full text-xs font-medium bg-white border border-slate-200 rounded-lg p-2"
+                      className="w-full text-xs font-bold bg-white border border-slate-200 rounded-xl p-2.5 focus:border-sky-500 focus:outline-hidden"
                     >
                       <option value="Banesco">Banesco</option>
                       <option value="Banco de Venezuela">Banco de Venezuela</option>
@@ -809,7 +848,7 @@ export function PosModule({
                       value={pagoMovilRef}
                       onChange={e => setPagoMovilRef(sanitizeBankReference(e.target.value))}
                       maxLength={8}
-                      className="w-full text-xs font-bold bg-white border border-slate-200 rounded-lg p-2 font-mono uppercase"
+                      className="w-full text-xs font-bold bg-white border border-slate-200 rounded-xl p-2.5 font-mono uppercase focus:border-sky-500 focus:outline-hidden"
                     />
                   </div>
                 </div>
@@ -817,8 +856,8 @@ export function PosModule({
             )}
 
             {activePaymentMethod === 'punto' && (
-              <div className="bg-slate-50 rounded-xl p-3 border border-slate-200 space-y-2 mb-4">
-                <label className="text-[10px] font-bold text-slate-600 uppercase">
+              <div className="bg-indigo-50/50 rounded-2xl p-3.5 border border-indigo-100 space-y-2 mb-4">
+                <label className="text-[10px] font-bold text-indigo-900 uppercase">
                   Referencia o Lote de Tarjeta:
                 </label>
                 <input
@@ -827,14 +866,14 @@ export function PosModule({
                   value={puntoRef}
                   onChange={e => setPuntoRef(sanitizeBankReference(e.target.value))}
                   maxLength={8}
-                  className="w-full text-xs font-bold bg-white border border-slate-200 rounded-lg p-2 font-mono uppercase"
+                  className="w-full text-xs font-bold bg-white border border-slate-200 rounded-xl p-2.5 font-mono uppercase focus:border-indigo-500 focus:outline-hidden"
                 />
               </div>
             )}
 
             {activePaymentMethod === 'efectivo_usd' && (
-              <div className="bg-emerald-50/80 rounded-xl p-3 border border-emerald-200 space-y-2 mb-4">
-                <label className="text-[10px] font-bold text-emerald-800 uppercase">
+              <div className="bg-emerald-50/80 rounded-2xl p-3.5 border border-emerald-200 space-y-2.5 mb-4">
+                <label className="text-[10px] font-bold text-emerald-900 uppercase">
                   Monto Recibido en Dólares ($):
                 </label>
                 <div className="flex items-center space-x-2">
@@ -844,14 +883,14 @@ export function PosModule({
                     value={cashUsdGiven}
                     onChange={e => setCashUsdGiven(sanitizeCurrencyInput(e.target.value))}
                     maxLength={8}
-                    className="flex-1 text-sm font-black bg-white border border-emerald-300 rounded-lg p-2 text-slate-900"
+                    className="flex-1 text-sm font-black bg-white border border-emerald-300 rounded-xl p-2.5 text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-emerald-400"
                   />
                   {[1, 5, 10, 20].map(bill => (
                     <button
                       key={bill}
                       type="button"
                       onClick={() => setCashUsdGiven(bill.toString())}
-                      className="px-2 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-black hover:bg-emerald-700"
+                      className="px-2.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black pressable shadow-xs cursor-pointer"
                     >
                       ${bill}
                     </button>
@@ -863,7 +902,7 @@ export function PosModule({
                     <span className="text-xs font-extrabold text-emerald-900">Vuelto a Entregar:</span>
                     <div className="text-right">
                       <span className="text-sm font-black text-emerald-900">${changeUsd.toFixed(2)}</span>
-                      <span className="text-xs text-emerald-700 block">Bs. {changeBs}</span>
+                      <span className="text-xs text-emerald-700 font-bold block">Bs. {changeBs}</span>
                     </div>
                   </div>
                 )}
@@ -880,14 +919,15 @@ export function PosModule({
                 placeholder="Ej. Vuelto entregado, garrafón prestado..."
                 value={saleNotes}
                 onChange={e => setSaleNotes(e.target.value)}
-                className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-2"
+                className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl p-2.5 focus:border-sky-500 focus:outline-hidden"
               />
             </div>
 
-            {/* Botón Finalizar */}
+            {/* Botón Finalizar (Single Primary CTA en Checkout) */}
             <button
+              type="button"
               onClick={handleFinalizeSale}
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3.5 rounded-xl shadow-lg shadow-emerald-600/25 active:scale-[0.98] transition-all flex items-center justify-center space-x-2"
+              className="w-full min-h-[50px] bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 hover:from-emerald-700 text-white font-black py-4 px-6 rounded-2xl shadow-xl shadow-emerald-600/30 active:scale-[0.98] transition-all flex items-center justify-center space-x-2.5 cursor-pointer pressable"
             >
               <CheckCircle2 className="w-5 h-5" />
               <span>Registrar Venta Exitosa</span>

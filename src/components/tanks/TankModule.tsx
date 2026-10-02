@@ -259,13 +259,13 @@ export function TankModule() {
                 <button
                   type="button"
                   onClick={() => setIsCisternModalOpen(false)}
-                  className="flex-1 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl"
+                  className="flex-1 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl pressable cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 text-xs font-bold bg-sky-600 text-white rounded-xl hover:bg-sky-700 shadow-md"
+                  className="flex-1 py-3 text-xs font-black bg-gradient-to-r from-sky-600 via-sky-500 to-cyan-500 hover:from-sky-700 text-white rounded-xl shadow-md shadow-sky-500/25 pressable cursor-pointer active:scale-95 transition-all"
                 >
                   Guardar Descarga
                 </button>

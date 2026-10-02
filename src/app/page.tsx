@@ -29,7 +29,7 @@ function H2OLifeAppContent() {
   }, [searchParams]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900">
+    <div className="min-h-screen flex flex-col bg-slate-50 bg-mesh-water text-slate-900 selection:bg-sky-500 selection:text-white">
       <Navbar onNavigate={setActiveTab} activeTab={activeTab} />
 
       <main className="flex-1 w-full pb-36 sm:pb-40">

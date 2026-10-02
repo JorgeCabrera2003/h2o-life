@@ -161,8 +161,9 @@ export function CashClosureModule() {
         />
 
         <button
+          type="button"
           onClick={handleGenerateClosure}
-          className="w-full bg-slate-900 hover:bg-slate-800 text-white font-extrabold py-3.5 rounded-xl text-xs flex items-center justify-center space-x-2 shadow-md"
+          className="w-full min-h-[50px] bg-gradient-to-r from-sky-600 via-sky-500 to-cyan-500 hover:from-sky-700 text-white font-black py-4 px-6 rounded-2xl shadow-xl shadow-sky-500/25 active:scale-[0.98] transition-all flex items-center justify-center space-x-2.5 pressable cursor-pointer"
         >
           <Lock className="w-4 h-4" />
           <span>Generar y Guardar Cierre de Turno</span>
@@ -171,22 +172,23 @@ export function CashClosureModule() {
 
       {/* Último Cierre Generado */}
       {lastGeneratedClosure && (
-        <div className="bg-emerald-50 border border-emerald-200 rounded-3xl p-5 mb-5 animate-in fade-in">
+        <div className="bg-emerald-50/80 border border-emerald-200 rounded-3xl p-5 mb-5 animate-in fade-in zoom-in-95">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-bold text-emerald-800 flex items-center space-x-1">
-              <CheckCircle2 className="w-4 h-4" />
-              <span>Cierre de Caja Guardado</span>
+            <span className="text-xs font-black text-emerald-800 flex items-center space-x-1.5">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+              <span>Cierre de Turno Guardado con Éxito</span>
             </span>
             <button
+              type="button"
               onClick={() => handleShareWhatsAppClosure(lastGeneratedClosure)}
-              className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold flex items-center space-x-1"
+              className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black flex items-center space-x-1.5 pressable shadow-xs cursor-pointer"
             >
               <Share2 className="w-3.5 h-3.5" />
               <span>Enviar a Jorge por WhatsApp</span>
             </button>
           </div>
-          <p className="text-xs text-emerald-900">
-            Total Neto Entregado: <strong>${lastGeneratedClosure.net_usd.toFixed(2)}</strong>
+          <p className="text-xs text-emerald-950 font-medium">
+            Total Neto Cuadrado en Caja: <strong className="text-sm font-black text-emerald-900">${lastGeneratedClosure.net_usd.toFixed(2)}</strong>
           </p>
         </div>
       )}

@@ -18,8 +18,8 @@ CREATE TABLE IF NOT EXISTS roles (
 
 INSERT INTO roles (id, name, description) VALUES
 (1, 'superadmin', 'TSU Jorge Cabrera - Acceso total y auditoría de finanzas'),
-(2, 'admin', 'Freyeli - Gestión operativa, inventario y proveedores'),
-(3, 'worker', 'Carla - Punto de venta, escaneo AI de tanques y arqueo de caja')
+(2, 'admin', 'Freyeliz - Gestión operativa, inventario y proveedores'),
+(3, 'worker', 'Karla - Punto de venta, escaneo AI de tanques y arqueo de caja')
 ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description;
 
 -- 2. TABLA DE USUARIOS / PERFILES
@@ -36,9 +36,10 @@ CREATE TABLE IF NOT EXISTS user_profiles (
 -- Seed de usuarios base
 INSERT INTO user_profiles (name, email, role_id) VALUES
 ('TSU Jorge Cabrera', 'jorge@h2olife.com', 1),
-('Freyeli', 'freyeli@h2olife.com', 2),
-('Carla', 'carla@h2olife.com', 3)
+('Freyeliz', 'freyeliz@h2olife.com', 2),
+('Karla', 'karla@h2olife.com', 3)
 ON CONFLICT (email) DO NOTHING;
+
 
 -- 3. TABLA DE CLIENTES HABITUALES
 CREATE TABLE IF NOT EXISTS clients (

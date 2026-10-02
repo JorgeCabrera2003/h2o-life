@@ -221,7 +221,7 @@ export function ClientsModule({ onSelectClientForSale }: ClientsModuleProps) {
 
         <button
           onClick={handleOpenAdd}
-          className="bg-gradient-to-r from-sky-600 to-cyan-500 hover:from-sky-700 text-white font-extrabold px-4 py-2.5 rounded-xl shadow-md shadow-sky-500/20 text-xs flex items-center space-x-2 active:scale-95 transition-all cursor-pointer min-h-[44px]"
+          className="bg-gradient-to-r from-sky-600 to-cyan-500 hover:from-sky-700 text-white font-black px-4 py-2.5 rounded-xl shadow-md shadow-sky-500/20 text-xs flex items-center space-x-2 pressable cursor-pointer min-h-[44px]"
         >
           <Plus className="w-4 h-4" />
           <span>+ Registrar Nuevo Cliente</span>
@@ -229,7 +229,7 @@ export function ClientsModule({ onSelectClientForSale }: ClientsModuleProps) {
       </div>
 
       {/* Buscador y Filtros */}
-      <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-2xs mb-5">
+      <div className="bg-white/95 backdrop-blur-md rounded-2xl p-4 border border-slate-200/80 shadow-2xs mb-5">
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
@@ -238,7 +238,7 @@ export function ClientsModule({ onSelectClientForSale }: ClientsModuleProps) {
               placeholder="Buscar por nombre, teléfono, calle o punto de referencia..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:border-sky-500"
+              className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:border-sky-500 font-medium"
             />
           </div>
 
@@ -252,7 +252,7 @@ export function ClientsModule({ onSelectClientForSale }: ClientsModuleProps) {
               <button
                 key={f.id}
                 onClick={() => setFilterType(f.id as any)}
-                className={`px-3 py-2 rounded-xl text-xs font-bold shrink-0 transition-all ${
+                className={`px-3 py-2 rounded-xl text-xs font-bold shrink-0 transition-all pressable cursor-pointer ${
                   filterType === f.id
                     ? 'bg-sky-600 text-white shadow-xs'
                     : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -279,162 +279,164 @@ export function ClientsModule({ onSelectClientForSale }: ClientsModuleProps) {
           return (
             <div
               key={client.id}
-              className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm hover:border-sky-300 transition-all flex flex-col justify-between"
+              className="double-bezel hover:border-sky-300 transition-all flex flex-col justify-between"
             >
-              <div>
-                {/* Header del Cliente */}
-                <div className="flex items-start justify-between mb-2">
-                  <div>
-                    <h3 className="text-sm font-black text-slate-900 flex items-center space-x-1.5">
-                      <span>{client.name}</span>
-                      {(client.total_orders || 0) >= 10 && (
-                        <span className="text-[10px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.2 rounded-md">
-                          ⭐ Habitual
-                        </span>
+              <div className="double-bezel-inner p-5 flex flex-col justify-between h-full">
+                <div>
+                  {/* Header del Cliente */}
+                  <div className="flex items-start justify-between mb-2">
+                    <div>
+                      <h3 className="text-sm font-black text-slate-900 flex items-center space-x-1.5">
+                        <span>{client.name}</span>
+                        {(client.total_orders || 0) >= 10 && (
+                          <span className="text-[10px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.2 rounded-md">
+                            ⭐ Habitual
+                          </span>
+                        )}
+                      </h3>
+                      <p className="text-xs font-bold text-sky-700 mt-0.5 flex items-center space-x-1">
+                        <Phone className="w-3.5 h-3.5" />
+                        <span>{client.phone}</span>
+                      </p>
+                    </div>
+
+                    {/* Estado de Saldo / Deuda */}
+                    <span
+                      className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center space-x-1 ${
+                        hasDebt
+                          ? 'bg-rose-50 text-rose-700 border border-rose-200 animate-pulse'
+                          : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                      }`}
+                    >
+                      {hasDebt ? (
+                        <span>Deuda: ${Math.abs(client.balance_usd).toFixed(2)}</span>
+                      ) : (
+                        <span>Al Día</span>
                       )}
-                    </h3>
-                    <p className="text-xs font-bold text-sky-700 mt-0.5 flex items-center space-x-1">
-                      <Phone className="w-3.5 h-3.5" />
-                      <span>{client.phone}</span>
-                    </p>
+                    </span>
                   </div>
 
-                  {/* Estado de Saldo / Deuda */}
-                  <span
-                    className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center space-x-1 ${
-                      hasDebt
-                        ? 'bg-rose-50 text-rose-700 border border-rose-200 animate-pulse'
-                        : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                    }`}
-                  >
-                    {hasDebt ? (
-                      <span>Deuda: ${Math.abs(client.balance_usd).toFixed(2)}</span>
-                    ) : (
-                      <span>Al Día</span>
+                  {/* Dirección & Punto de Referencia para Delivery */}
+                  <div className="bg-slate-50/90 p-3 rounded-2xl border border-slate-100 space-y-1 mb-3 text-xs">
+                    <div className="flex items-start space-x-1.5 text-slate-700">
+                      <MapPin className="w-3.5 h-3.5 text-rose-500 shrink-0 mt-0.5" />
+                      <span className="font-semibold">{client.address || 'Venta directa en tienda'}</span>
+                    </div>
+
+                    {client.reference_point && (
+                      <div className="flex items-start space-x-1.5 text-slate-500 text-[11px] pl-5">
+                        <span>📍 Ref: <em>{client.reference_point}</em></span>
+                      </div>
                     )}
-                  </span>
+
+                    {client.id !== 'client-mostrador' && (
+                      <div className="flex items-center space-x-1.5 text-[11px] font-bold text-sky-700 bg-sky-50/90 px-2.5 py-1 rounded-xl border border-sky-200/70 mt-1">
+                        <Navigation className="w-3.5 h-3.5 text-sky-600 shrink-0" />
+                        <span className="truncate">
+                          Sede (C. 28 c/ Cra 25) ➔ Cliente: ~{routeInfo.formattedDistance} • ~{routeInfo.estimatedMinutes} min
+                        </span>
+                      </div>
+                    )}
+
+                    {client.notes && (
+                      <div className="mt-1 pt-1.5 border-t border-slate-200/60 text-[11px] text-slate-600">
+                        📝 {client.notes}
+                      </div>
+                    )}
+
+                    {/* Mapa Interactivo Manipulable dentro de la Tarjeta */}
+                    {isMapExpanded && (
+                      <div className="mt-2.5 pt-2 border-t border-slate-200 animate-in fade-in">
+                        <InteractiveMapPicker
+                          lat={clientLat}
+                          lng={clientLng}
+                          onCoordinatesChange={(newLat, newLng) => {
+                            updateClient(client.id, {
+                              latitude: newLat,
+                              longitude: newLng,
+                              maps_url: `https://www.google.com/maps/dir/?api=1&origin=10.07125,-69.32705&destination=${newLat.toFixed(6)},${newLng.toFixed(6)}&travelmode=driving`,
+                            });
+                          }}
+                          addressLabel={client.address}
+                          showStoreRoute={true}
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
 
-                {/* Dirección & Punto de Referencia para Delivery */}
-                <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100 space-y-1 mb-3 text-xs">
-                  <div className="flex items-start space-x-1.5 text-slate-700">
-                    <MapPin className="w-3.5 h-3.5 text-rose-500 shrink-0 mt-0.5" />
-                    <span className="font-semibold">{client.address || 'Venta directa en tienda'}</span>
+                {/* Botones de Acción */}
+                <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2 mt-2">
+                  <div className="flex items-center space-x-1.5">
+                    {client.phone && client.phone !== 'N/A' && (
+                      <button
+                        onClick={() => handleOpenWhatsApp(client.phone, client.name)}
+                        className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors pressable cursor-pointer"
+                        title="Escribir por WhatsApp"
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                      </button>
+                    )}
+
+                    {client.id !== 'client-mostrador' && (
+                      <a
+                        href={routeInfo.googleMapsDirectionsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-2.5 rounded-xl bg-sky-50 text-sky-600 hover:bg-sky-100 transition-colors flex items-center space-x-1 pressable cursor-pointer"
+                        title="Trazar ruta de despacho desde la Sede (Calle 28 con Carrera 25) en Google Maps / Waze"
+                      >
+                        <Navigation className="w-4 h-4" />
+                        <span className="text-[10px] font-bold hidden sm:inline">Ruta</span>
+                      </a>
+                    )}
+
+                    {/* Botón para abrir el mapa interactivo manipulable en la tarjeta */}
+                    <button
+                      onClick={() => setExpandedMapClientId(isMapExpanded ? null : client.id)}
+                      className={`p-2.5 rounded-xl transition-colors pressable cursor-pointer ${
+                        isMapExpanded
+                          ? 'bg-sky-600 text-white shadow-xs'
+                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      }`}
+                      title={isMapExpanded ? 'Ocultar mapa interactivo' : 'Manipular mapa aquí'}
+                    >
+                      <Compass className="w-4 h-4" />
+                    </button>
+
+                    <button
+                      onClick={() => handleOpenEdit(client)}
+                      className="p-2.5 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors pressable cursor-pointer"
+                      title="Editar Cliente"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+
+                    {client.id !== 'client-mostrador' && (
+                      <button
+                        onClick={() => {
+                          if (confirm(`¿Eliminar a ${client.name} del directorio?`)) {
+                            deleteClient(client.id);
+                          }
+                        }}
+                        className="p-2.5 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors pressable cursor-pointer"
+                        title="Eliminar Cliente"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
                   </div>
 
-                  {client.reference_point && (
-                    <div className="flex items-start space-x-1.5 text-slate-500 text-[11px] pl-5">
-                      <span>📍 Ref: <em>{client.reference_point}</em></span>
-                    </div>
-                  )}
-
-                  {client.id !== 'client-mostrador' && (
-                    <div className="flex items-center space-x-1.5 text-[11px] font-bold text-sky-700 bg-sky-50/90 px-2.5 py-1 rounded-xl border border-sky-200/70 mt-1">
-                      <Navigation className="w-3.5 h-3.5 text-sky-600 shrink-0" />
-                      <span className="truncate">
-                        Sede (C. 28 c/ Cra 25) ➔ Cliente: ~{routeInfo.formattedDistance} • ~{routeInfo.estimatedMinutes} min
-                      </span>
-                    </div>
-                  )}
-
-                  {client.notes && (
-                    <div className="mt-1 pt-1.5 border-t border-slate-200/60 text-[11px] text-slate-600">
-                      📝 {client.notes}
-                    </div>
-                  )}
-
-                  {/* Mapa Interactivo Manipulable dentro de la Tarjeta */}
-                  {isMapExpanded && (
-                    <div className="mt-2.5 pt-2 border-t border-slate-200 animate-in fade-in">
-                      <InteractiveMapPicker
-                        lat={clientLat}
-                        lng={clientLng}
-                        onCoordinatesChange={(newLat, newLng) => {
-                          updateClient(client.id, {
-                            latitude: newLat,
-                            longitude: newLng,
-                            maps_url: `https://www.google.com/maps/dir/?api=1&origin=10.07125,-69.32705&destination=${newLat.toFixed(6)},${newLng.toFixed(6)}&travelmode=driving`,
-                          });
-                        }}
-                        addressLabel={client.address}
-                        showStoreRoute={true}
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Botones de Acción */}
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-                <div className="flex items-center space-x-1.5">
-                  {client.phone && client.phone !== 'N/A' && (
+                  {onSelectClientForSale && (
                     <button
-                      onClick={() => handleOpenWhatsApp(client.phone, client.name)}
-                      className="p-2 rounded-xl bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"
-                      title="Escribir por WhatsApp"
+                      onClick={() => onSelectClientForSale(client)}
+                      className="bg-sky-600 hover:bg-sky-700 text-white font-black px-3.5 py-2.5 rounded-xl text-xs flex items-center space-x-1.5 shadow-md shadow-sky-500/20 pressable cursor-pointer"
                     >
-                      <MessageCircle className="w-4 h-4" />
-                    </button>
-                  )}
-
-                  {client.id !== 'client-mostrador' && (
-                    <a
-                      href={routeInfo.googleMapsDirectionsUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-2 rounded-xl bg-sky-50 text-sky-600 hover:bg-sky-100 transition-colors flex items-center space-x-1"
-                      title="Trazar ruta de despacho desde la Sede (Calle 28 con Carrera 25) en Google Maps / Waze"
-                    >
-                      <Navigation className="w-4 h-4" />
-                      <span className="text-[10px] font-bold hidden sm:inline">Ruta</span>
-                    </a>
-                  )}
-
-                  {/* Botón para abrir el mapa interactivo manipulable en la tarjeta */}
-                  <button
-                    onClick={() => setExpandedMapClientId(isMapExpanded ? null : client.id)}
-                    className={`p-2 rounded-xl transition-colors ${
-                      isMapExpanded
-                        ? 'bg-sky-600 text-white shadow-xs'
-                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                    }`}
-                    title={isMapExpanded ? 'Ocultar mapa interactivo' : 'Manipular mapa aquí'}
-                  >
-                    <Compass className="w-4 h-4" />
-                  </button>
-
-                  <button
-                    onClick={() => handleOpenEdit(client)}
-                    className="p-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
-                    title="Editar Cliente"
-                  >
-                    <Edit2 className="w-4 h-4" />
-                  </button>
-
-                  {client.id !== 'client-mostrador' && (
-                    <button
-                      onClick={() => {
-                        if (confirm(`¿Eliminar a ${client.name} del directorio?`)) {
-                          deleteClient(client.id);
-                        }
-                      }}
-                      className="p-2 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-                      title="Eliminar Cliente"
-                    >
-                      <Trash2 className="w-4 h-4" />
+                      <ShoppingCart className="w-3.5 h-3.5" />
+                      <span>Cargar Venta</span>
                     </button>
                   )}
                 </div>
-
-                {onSelectClientForSale && (
-                  <button
-                    onClick={() => onSelectClientForSale(client)}
-                    className="bg-sky-600 hover:bg-sky-700 active:scale-95 text-white font-extrabold px-3.5 py-2 rounded-xl text-xs flex items-center space-x-1.5 shadow-sm"
-                  >
-                    <ShoppingCart className="w-3.5 h-3.5" />
-                    <span>Cargar Venta</span>
-                  </button>
-                )}
               </div>
             </div>
           );
@@ -597,13 +599,13 @@ export function ClientsModule({ onSelectClientForSale }: ClientsModuleProps) {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="flex-1 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl cursor-pointer min-h-[44px]"
+                  className="flex-1 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl pressable cursor-pointer min-h-[44px]"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 text-xs font-black bg-gradient-to-r from-sky-600 to-cyan-500 text-white rounded-xl hover:from-sky-700 shadow-md active:scale-95 transition-all cursor-pointer min-h-[44px]"
+                  className="flex-1 py-2.5 text-xs font-black bg-gradient-to-r from-sky-600 to-cyan-500 text-white rounded-xl hover:from-sky-700 shadow-md pressable cursor-pointer min-h-[44px]"
                 >
                   Guardar Cliente con Ubicación
                 </button>

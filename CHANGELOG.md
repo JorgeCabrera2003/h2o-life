@@ -4,6 +4,27 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 
 ---
 
+## [1.5.1] - 2026-10-02
+
+### 💎 Excelencia Frontend Psicológica, Técnica & Estandarización de Nombre
+* **Estandarización de Nombre del Personal ("Karla" con K):**
+  * Corregido y estandarizado el nombre de la cajera/operadora a **Karla** en toda la plataforma: almacén reactivo (`src/lib/store.tsx`), selector de operador de barra de navegación, comentarios de código, base de datos SQL (`supabase_schema.sql`) y notas de versión. Cero ocurrencias restantes de "Carla".
+* **Física Háptica & Ergonomía Táctil (Apple / Emil Kowalski / Linear):**
+  * Añadida clase utilitaria `.pressable` con micro-resorte `scale(0.97)` y curvas de aceleración `var(--ease-out-quint)` en todos los botones, tarjetas de productos, interruptores de categorías y disparadores de modales.
+  * Eliminado el retraso táctil móvil de 300ms (`touch-action: manipulation`, `-webkit-tap-highlight-color: transparent`).
+* **Arquitectura de Bisel Doble Concéntrico (Doppelrand):**
+  * Contenedores con radios concéntricos matemáticamente precisos (`.double-bezel` y `.double-bezel-inner`), proporcionando un acabado hardware de alta gama y reduciendo el ruido visual.
+* **Reducción de Fatiga Cognitiva & Claridad Psicológica Monetaria:**
+  * Visual Chunking en tarjetas y recibos: jerarquía visual dual en dólares estadounidenses ($) y bolívares (Bs. según tasa oficial BCV), eliminando la confusión en mostrador tanto para Karla como para el cliente.
+  * Atajo rápido de recargas (1, 2, 3, 4 botellones) con pills frosted glass y carga inmediata en un solo toque.
+  * Selector rápido de denominación de billetes en efectivo ($1, $5, $10, $20) con cálculo automático en vivo de vuelto exacto en ambas monedas.
+* **Glow Acuático Ambiental GPU:**
+  * Fondo luminoso sutil `.bg-mesh-water` acelerado por hardware que unifica la experiencia visual con la identidad de H2O Life.
+* **Validación & Estabilidad Certificada:**
+  * 12/12 pruebas automáticas superadas con 100% de éxito y cero errores de TypeScript (`tsc --noEmit`).
+
+---
+
 ## [1.5.0] - 2026-10-02
 
 ### 🚀 Implementación Integral de los 20 Puntos de Excelencia Frontend & Producción
@@ -141,10 +162,11 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 ### 🚀 Lanzamiento Inicial (H2O Life Core)
 * Inicialización del proyecto con **Next.js 16 (App Router)**, **React 19**, **TypeScript** y **Tailwind CSS v4**.
 * Esquema relacional **PostgreSQL en 3NF** para Supabase ([`supabase_schema.sql`](file:///c:/proyectos/h2o-life/supabase_schema.sql)):
-  * Control de roles (RBAC: Superadmin Jorge, Admin Freyeli, Worker Carla).
+  * Control de roles (RBAC: Superadmin Jorge, Admin Freyeliz, Worker Karla).
   * Catálogo unificado de recargas, botellones, helados y snacks.
   * Trigger automático `trg_deduct_water` para descontar 20L por recarga vendida.
-* Punto de venta (POS) móvil de alta velocidad para Carla con atajos rápidos de recargas (1, 2, 3 y 4 recargas).
+* Punto de venta (POS) móvil de alta velocidad para Karla con atajos rápidos de recargas (1, 2, 3 y 4 recargas).
+
 * Soporte nativo para el contexto venezolano:
   * Doble denominación simultánea ($ USD y Bs).
   * Integración con la API oficial del Banco Central de Venezuela (BCV) en [`/api/exchange-rate`](file:///c:/proyectos/h2o-life/src/app/api/exchange-rate/route.ts).

@@ -71,22 +71,22 @@ export function FinanceModule() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-4 pb-40 md:pb-36">
+    <div className="max-w-5xl mx-auto px-4 py-4 pb-40 md:pb-36 animate-in fade-in duration-200">
       {/* Título & Botón de Gasto */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
         <div>
-          <h2 className="text-xl font-black text-slate-900 flex items-center space-x-2">
+          <h2 className="text-xl font-black text-slate-900 flex items-center space-x-2 tracking-tight">
             <BarChart3 className="w-5 h-5 text-sky-600" />
             <span>Control Financiero & Reportes</span>
           </h2>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-500 mt-0.5">
             Métricas de ingresos, ganancias netas y gastos operativos de H2O Life
           </p>
         </div>
 
         <button
           onClick={() => setIsExpenseModalOpen(true)}
-          className="bg-slate-900 hover:bg-slate-800 text-white font-extrabold px-4 py-2.5 rounded-xl shadow-md text-xs flex items-center space-x-2 active:scale-95 transition-all"
+          className="bg-slate-900 hover:bg-slate-800 text-white font-black px-4 py-2.5 rounded-xl shadow-md text-xs flex items-center space-x-2 pressable cursor-pointer min-h-[44px]"
         >
           <Plus className="w-4 h-4" />
           <span>Registrar Gasto Operativo</span>
@@ -95,44 +95,52 @@ export function FinanceModule() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mb-6">
-        <div className="bg-white p-4 rounded-3xl border border-slate-200 shadow-2xs">
-          <div className="flex items-center justify-between text-slate-400 mb-1">
-            <span className="text-[10px] font-bold uppercase tracking-wider">Ingreso Bruto</span>
-            <ArrowUpRight className="w-4 h-4 text-emerald-500" />
+        <div className="double-bezel">
+          <div className="double-bezel-inner p-4">
+            <div className="flex items-center justify-between text-slate-400 mb-1">
+              <span className="text-[10px] font-bold uppercase tracking-wider">Ingreso Bruto</span>
+              <ArrowUpRight className="w-4 h-4 text-emerald-500" />
+            </div>
+            <p className="text-2xl font-black text-slate-900">${totalSalesUsd.toFixed(2)}</p>
+            <span className="text-xs font-bold text-slate-500">Bs. {totalSalesBs.toLocaleString()}</span>
           </div>
-          <p className="text-2xl font-black text-slate-900">${totalSalesUsd.toFixed(2)}</p>
-          <span className="text-xs font-semibold text-slate-500">Bs. {totalSalesBs.toLocaleString()}</span>
         </div>
 
-        <div className="bg-white p-4 rounded-3xl border border-slate-200 shadow-2xs">
-          <div className="flex items-center justify-between text-slate-400 mb-1">
-            <span className="text-[10px] font-bold uppercase tracking-wider">Gastos Totales</span>
-            <ArrowDownRight className="w-4 h-4 text-rose-500" />
+        <div className="double-bezel">
+          <div className="double-bezel-inner p-4">
+            <div className="flex items-center justify-between text-slate-400 mb-1">
+              <span className="text-[10px] font-bold uppercase tracking-wider">Gastos Totales</span>
+              <ArrowDownRight className="w-4 h-4 text-rose-500" />
+            </div>
+            <p className="text-2xl font-black text-rose-600">${totalExpensesUsd.toFixed(2)}</p>
+            <span className="text-xs font-bold text-slate-500">Bs. {totalExpensesBs.toLocaleString()}</span>
           </div>
-          <p className="text-2xl font-black text-rose-600">${totalExpensesUsd.toFixed(2)}</p>
-          <span className="text-xs font-semibold text-slate-500">Bs. {totalExpensesBs.toLocaleString()}</span>
         </div>
 
-        <div className="bg-white p-4 rounded-3xl border border-slate-200 shadow-2xs">
-          <div className="flex items-center justify-between text-slate-400 mb-1">
-            <span className="text-[10px] font-bold uppercase tracking-wider">Ganancia Neta</span>
-            <TrendingUp className="w-4 h-4 text-sky-500" />
+        <div className="double-bezel">
+          <div className="double-bezel-inner p-4">
+            <div className="flex items-center justify-between text-slate-400 mb-1">
+              <span className="text-[10px] font-bold uppercase tracking-wider">Ganancia Neta</span>
+              <TrendingUp className="w-4 h-4 text-sky-500" />
+            </div>
+            <p className={`text-2xl font-black ${netProfitUsd >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+              ${netProfitUsd.toFixed(2)}
+            </p>
+            <span className="text-xs font-bold text-slate-500">Bs. {netProfitBs.toLocaleString()}</span>
           </div>
-          <p className={`text-2xl font-black ${netProfitUsd >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
-            ${netProfitUsd.toFixed(2)}
-          </p>
-          <span className="text-xs font-semibold text-slate-500">Bs. {netProfitBs.toLocaleString()}</span>
         </div>
 
-        <div className="bg-white p-4 rounded-3xl border border-slate-200 shadow-2xs">
-          <div className="flex items-center justify-between text-slate-400 mb-1">
-            <span className="text-[10px] font-bold uppercase tracking-wider">Agua Despachada</span>
-            <Droplet className="w-4 h-4 text-sky-500" />
+        <div className="double-bezel">
+          <div className="double-bezel-inner p-4">
+            <div className="flex items-center justify-between text-slate-400 mb-1">
+              <span className="text-[10px] font-bold uppercase tracking-wider">Agua Despachada</span>
+              <Droplet className="w-4 h-4 text-sky-500" />
+            </div>
+            <p className="text-2xl font-black text-sky-600">{totalLitersSold.toLocaleString()} L</p>
+            <span className="text-xs font-bold text-slate-500">
+              {Math.round(totalLitersSold / 20)} Garrafones
+            </span>
           </div>
-          <p className="text-2xl font-black text-sky-600">{totalLitersSold.toLocaleString()} L</p>
-          <span className="text-xs font-semibold text-slate-500">
-            {Math.round(totalLitersSold / 20)} Garrafones
-          </span>
         </div>
       </div>
 
@@ -140,16 +148,16 @@ export function FinanceModule() {
       <div className="flex space-x-2 mb-4 border-b border-slate-200 pb-2">
         <button
           onClick={() => setActiveTab('ventas')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-            activeTab === 'ventas' ? 'bg-sky-600 text-white' : 'text-slate-600 hover:bg-slate-100'
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all pressable cursor-pointer ${
+            activeTab === 'ventas' ? 'bg-sky-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100'
           }`}
         >
           Historial de Ventas ({sales.length})
         </button>
         <button
           onClick={() => setActiveTab('gastos')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-            activeTab === 'gastos' ? 'bg-sky-600 text-white' : 'text-slate-600 hover:bg-slate-100'
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all pressable cursor-pointer ${
+            activeTab === 'gastos' ? 'bg-sky-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100'
           }`}
         >
           Gastos Operativos ({expenses.length})
@@ -322,13 +330,13 @@ export function FinanceModule() {
                 <button
                   type="button"
                   onClick={() => setIsExpenseModalOpen(false)}
-                  className="flex-1 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl"
+                  className="flex-1 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl pressable cursor-pointer min-h-[44px]"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 text-xs font-bold bg-slate-900 text-white rounded-xl hover:bg-slate-800 shadow-md"
+                  className="flex-1 py-2.5 text-xs font-black bg-slate-900 text-white rounded-xl hover:bg-slate-800 shadow-md pressable cursor-pointer min-h-[44px]"
                 >
                   Guardar Gasto
                 </button>

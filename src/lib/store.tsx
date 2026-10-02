@@ -34,10 +34,10 @@ export const INITIAL_USERS: UserProfile[] = [
     phone: '+584121234567',
   },
   {
-    id: 'user-carla',
-    name: 'Carla',
+    id: 'user-karla',
+    name: 'Karla',
     role: 'worker',
-    email: 'carla@h2olife.com',
+    email: 'karla@h2olife.com',
     avatar: '👩‍🔧',
     phone: '+584249998877',
   },
@@ -256,8 +256,8 @@ export const INITIAL_SALES: Sale[] = [
     created_at: '2026-09-23T09:15:00Z',
     client_id: 'client-doraida',
     client_name: 'Doraida Mendoza',
-    worker_id: 'user-carla',
-    worker_name: 'Carla',
+    worker_id: 'user-karla',
+    worker_name: 'Karla',
     total_usd: 1.00,
     total_bs: 45.50,
     exchange_rate: 45.50,
@@ -288,8 +288,8 @@ export const INITIAL_SALES: Sale[] = [
     folio: 'H2O-2026-002',
     created_at: '2026-09-23T10:30:00Z',
     client_name: 'Cliente Mostrador / Transeúnte',
-    worker_id: 'user-carla',
-    worker_name: 'Carla',
+    worker_id: 'user-karla',
+    worker_name: 'Karla',
     total_usd: 2.00,
     total_bs: 91.00,
     exchange_rate: 45.50,
@@ -320,8 +320,8 @@ export const INITIAL_SALES: Sale[] = [
     folio: 'H2O-2026-003',
     created_at: '2026-09-23T11:45:00Z',
     client_name: 'Cliente Mostrador / Transeúnte',
-    worker_id: 'user-carla',
-    worker_name: 'Carla',
+    worker_id: 'user-karla',
+    worker_name: 'Karla',
     total_usd: 1.50,
     total_bs: 68.25,
     exchange_rate: 45.50,
@@ -376,7 +376,7 @@ export const INITIAL_EXPENSES: Expense[] = [
     amount_usd: 5.00,
     amount_bs: 227.50,
     payment_method: 'efectivo_bs',
-    recorded_by: 'Carla',
+    recorded_by: 'Karla',
   },
 ];
 
@@ -419,7 +419,7 @@ interface StoreContextType {
 const StoreContext = createContext<StoreContextType | null>(null);
 
 export function StoreProvider({ children }: { children: React.ReactNode }) {
-  const [currentUser, setCurrentUser] = useState<UserProfile>(INITIAL_USERS[2]); // Carla (Worker)
+  const [currentUser, setCurrentUser] = useState<UserProfile>(INITIAL_USERS[2]); // Karla (Worker)
   const [systemSettings, setSystemSettings] = useState<SystemSettings>(INITIAL_SETTINGS);
   const [products] = useState<Product[]>(INITIAL_PRODUCTS);
   const [clients, setClients] = useState<Client[]>(INITIAL_CLIENTS);
