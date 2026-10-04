@@ -1,5 +1,4 @@
-import { Sale, Expense, Client } from '@/types';
-
+import { Sale, Expense, Client, Product } from '@/types';
 /**
  * DATOS DE PRUEBA Y DEMOSTRACIÓN (TEST / MOCK DATA)
  * Separados estrictamente de los datos de inicialización reales (Production Seed).
@@ -214,5 +213,80 @@ export const DEMO_TEST_EXPENSES: Expense[] = [
     payment_method: 'transferencia',
     recorded_by: 'TSU Jorge Cabrera',
     notes: 'Mantenimiento preventivo mensual de purificación',
+  },
+];
+
+export const DEMO_TEST_PRODUCTS: Product[] = [
+  {
+    id: 'prod-helado-artesanal',
+    name: 'Helado Tío Rico / Artesanal',
+    category: 'helado',
+    price_usd: 1.00,
+    cost_usd: 0.60,
+    stock: 45,
+    unit: 'unidad',
+    icon: '🍦',
+    quick_select: true,
+  },
+  {
+    id: 'prod-helado-paleta',
+    name: 'Helado Premium Paleta',
+    category: 'helado',
+    price_usd: 1.50,
+    cost_usd: 0.90,
+    stock: 35,
+    unit: 'unidad',
+    icon: '🍧',
+    quick_select: false,
+  },
+  {
+    id: 'prod-tostones',
+    name: 'Tostones Caseros',
+    category: 'snack',
+    price_usd: 1.00,
+    cost_usd: 0.50,
+    stock: 20,
+    unit: 'bolsa',
+    icon: '🥔',
+    quick_select: false,
+  },
+  {
+    id: 'prod-empanadas',
+    name: 'Empanadas Chilenas',
+    category: 'snack',
+    price_usd: 1.50,
+    cost_usd: 0.80,
+    stock: 15,
+    unit: 'unidad',
+    icon: '🥟',
+    quick_select: false,
+  },
+  {
+    id: 'prod-servicio-desinfeccion',
+    name: 'Lavado y Desinfección con Ozono',
+    category: 'servicio',
+    price_usd: 0.50,
+    cost_usd: 0.05,
+    stock: 9999,
+    unit: 'servicio',
+    icon: '✨',
+    quick_select: true,
+    is_service: true,
+    active: true,
+    description: 'Sanitización profunda bactericida y enjuague interno con agua ozonizada',
+  },
+  {
+    id: 'prod-servicio-delivery',
+    name: 'Servicio de Despacho / Delivery Express',
+    category: 'servicio',
+    price_usd: 1.00,
+    cost_usd: 0.30,
+    stock: 9999,
+    unit: 'despacho',
+    icon: '🛵',
+    quick_select: true,
+    is_service: true,
+    active: true,
+    description: 'Despacho a domicilio en Barquisimeto desde sede Calle 28 con Carrera 25',
   },
 ];

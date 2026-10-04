@@ -14,11 +14,14 @@ import {
   ExchangeRateInfo,
   PaymentLine,
   SystemSettings,
+  AuditLog,
+  AuditAction,
 } from '@/types';
 import {
   DEMO_TEST_CLIENTS,
   DEMO_TEST_SALES,
   DEMO_TEST_EXPENSES,
+  DEMO_TEST_PRODUCTS,
 } from '@/lib/demoData';
 
 export const INITIAL_USERS: UserProfile[] = [
@@ -121,78 +124,6 @@ export const INITIAL_PRODUCTS: Product[] = [
     icon: '🔘',
     quick_select: false,
   },
-  {
-    id: 'prod-helado-artesanal',
-    name: 'Helado Tío Rico / Artesanal',
-    category: 'helado',
-    price_usd: 1.00,
-    cost_usd: 0.60,
-    stock: 45,
-    unit: 'unidad',
-    icon: '🍦',
-    quick_select: true,
-  },
-  {
-    id: 'prod-helado-paleta',
-    name: 'Helado Premium Paleta',
-    category: 'helado',
-    price_usd: 1.50,
-    cost_usd: 0.90,
-    stock: 35,
-    unit: 'unidad',
-    icon: '🍧',
-    quick_select: false,
-  },
-  {
-    id: 'prod-tostones',
-    name: 'Tostones Caseros',
-    category: 'snack',
-    price_usd: 1.00,
-    cost_usd: 0.50,
-    stock: 20,
-    unit: 'bolsa',
-    icon: '🥔',
-    quick_select: false,
-  },
-  {
-    id: 'prod-empanadas',
-    name: 'Empanadas Chilenas',
-    category: 'snack',
-    price_usd: 1.50,
-    cost_usd: 0.80,
-    stock: 15,
-    unit: 'unidad',
-    icon: '🥟',
-    quick_select: false,
-  },
-  {
-    id: 'prod-servicio-desinfeccion',
-    name: 'Lavado y Desinfección con Ozono',
-    category: 'servicio',
-    price_usd: 0.50,
-    cost_usd: 0.05,
-    stock: 9999,
-    unit: 'servicio',
-    icon: '✨',
-    quick_select: true,
-    is_service: true,
-    active: true,
-    description: 'Sanitización profunda bactericida y enjuague interno con agua ozonizada',
-  },
-  {
-    id: 'prod-servicio-delivery',
-    name: 'Servicio de Despacho / Delivery Express',
-    category: 'servicio',
-    price_usd: 1.00,
-    cost_usd: 0.30,
-    stock: 9999,
-    unit: 'despacho',
-    icon: '🛵',
-    quick_select: true,
-    is_service: true,
-    active: true,
-    description: 'Despacho a domicilio en Barquisimeto desde sede Calle 28 con Carrera 25',
-  },
 ];
 
 // CLIENTE BASE DE SEMILLA REAL (Mostrador)
@@ -237,8 +168,11 @@ export const INITIAL_SALES: Sale[] = [];
 export const INITIAL_EXPENSES: Expense[] = [];
 
 interface StoreContextType {
-  currentUser: UserProfile;
-  setCurrentUser: (user: UserProfile) => void;
+  currentUser: UserProfile | null;
+  isAuthenticated: boolean;
+  login: (user: UserProfile) => void;
+  logout: () => void;
+  setCurrentUser: (user: UserProfile | null) => void;
   systemSettings: SystemSettings;
   updateSystemSettings: (settings: Partial<SystemSettings>) => void;
   products: Product[];
@@ -279,12 +213,18 @@ interface StoreContextType {
   loadDemoData: () => void;
   clearDemoData: () => void;
   isDemoModeActive: boolean;
+  // Auditoría
+  auditLogs: AuditLog[];
+  addAuditLog: (action: AuditAction, targetTable: string, targetId: string, desc: string, previousData?: any, newData?: any) => void;
+  restoreAuditLog: (logId: string) => void;
 }
 
 const StoreContext = createContext<StoreContextType | null>(null);
 
 export function StoreProvider({ children }: { children: React.ReactNode }) {
-  const [currentUser, setCurrentUser] = useState<UserProfile>(INITIAL_USERS[2]); // Karla (Worker)
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [systemSettings, setSystemSettings] = useState<SystemSettings>(INITIAL_SETTINGS);
   const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
   const [clients, setClients] = useState<Client[]>(INITIAL_CLIENTS);
@@ -326,6 +266,69 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
+  const login = (user: UserProfile) => {
+    setCurrentUser(user);
+    setIsAuthenticated(true);
+    addAuditLog('LOGIN', 'auth', user.id, `Usuario ${user.name} inició sesión`);
+  };
+
+  const logout = () => {
+    if (currentUser) {
+      addAuditLog('LOGOUT', 'auth', currentUser.id, `Usuario ${currentUser.name} cerró sesión`);
+    }
+    setCurrentUser(null);
+    setIsAuthenticated(false);
+  };
+
+  const addAuditLog = (
+    action: AuditAction,
+    targetTable: string,
+    targetId: string,
+    desc: string,
+    previousData?: any,
+    newData?: any
+  ) => {
+    const log: AuditLog = {
+      id: `audit-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      user_id: currentUser?.id || 'system',
+      user_name: currentUser?.name || 'Sistema',
+      action,
+      target_table: targetTable,
+      target_id: targetId,
+      description: desc,
+      previous_data: previousData,
+      new_data: newData,
+      device_info: typeof window !== 'undefined' ? navigator.userAgent : 'Unknown',
+    };
+    setAuditLogs(prev => [log, ...prev]);
+  };
+
+  const restoreAuditLog = (logId: string) => {
+    const log = auditLogs.find(l => l.id === logId);
+    if (!log || !log.previous_data) return;
+    
+    // Implementación dinámica de restauración según la tabla afectada
+    switch (log.target_table) {
+      case 'products':
+        updateProduct(log.target_id, log.previous_data);
+        break;
+      case 'clients':
+        updateClient(log.target_id, log.previous_data);
+        break;
+      case 'tanks':
+        updateTankLevel(log.target_id, log.previous_data.current_liters);
+        break;
+      case 'sales':
+        // Lógica de anulación (ya que normalmente no eliminamos ventas)
+        setSales(prev => prev.map(s => s.id === log.target_id ? { ...s, status: 'anulada' } : s));
+        break;
+    }
+    
+    addAuditLog('RESTORE', log.target_table, log.target_id, `Restaurado a estado previo del log ${logId}`, null, log.previous_data);
+    alert('Restauración completada con éxito.');
+  };
+
   const updateSystemSettings = (newSettings: Partial<SystemSettings>) => {
     setSystemSettings(prev => ({ ...prev, ...newSettings }));
   };
@@ -352,6 +355,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         setSales(DEMO_TEST_SALES);
         setExpenses(DEMO_TEST_EXPENSES);
         setClients([...INITIAL_CLIENTS, ...DEMO_TEST_CLIENTS]);
+        setProducts([...INITIAL_PRODUCTS, ...DEMO_TEST_PRODUCTS]);
         setIsDemoModeActive(true);
       }
     } catch {}
@@ -382,8 +386,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   // Actualizar producto o servicio existente
   const updateProduct = (id: string, productData: Partial<Product>) => {
     setProducts(prev => {
+      const oldProduct = prev.find(p => p.id === id);
       const updated = prev.map(p => (p.id === id ? { ...p, ...productData } : p));
       saveProductsToStorage(updated);
+      
+      if (oldProduct) {
+        addAuditLog('UPDATE', 'products', id, `Producto ${oldProduct.name} modificado`, oldProduct, productData);
+      }
+      
       return updated;
     });
 
@@ -444,6 +454,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     setSales(DEMO_TEST_SALES);
     setExpenses(DEMO_TEST_EXPENSES);
     setClients([...INITIAL_CLIENTS, ...DEMO_TEST_CLIENTS]);
+    setProducts([...INITIAL_PRODUCTS, ...DEMO_TEST_PRODUCTS]);
     setIsDemoModeActive(true);
     try {
       localStorage.setItem('h2o_demo_mode', 'true');
@@ -455,6 +466,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     setSales([]);
     setExpenses([]);
     setClients(INITIAL_CLIENTS);
+    setProducts(INITIAL_PRODUCTS);
     setCashClosures([]);
     setIsDemoModeActive(false);
     try {
@@ -532,8 +544,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       created_at: new Date().toISOString(),
       client_id: client?.id,
       client_name: client ? client.name : 'Cliente Mostrador / Transeúnte',
-      worker_id: currentUser.id,
-      worker_name: currentUser.name,
+      worker_id: currentUser?.id || 'sys',
+      worker_name: currentUser?.name || 'Sistema',
       total_usd: Number(totalUsd.toFixed(2)),
       total_bs: totalBs,
       exchange_rate: exchangeRate.rate,
@@ -551,6 +563,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       status: 'completada',
       notified_to_admin: false,
     };
+    
+    addAuditLog('CREATE', 'sales', newSale.id, `Venta generada por ${totalUsd.toFixed(2)}$ (${totalBs} Bs)`, null, newSale);
 
     // Actualizar historial del cliente
     if (client) {
@@ -613,6 +627,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       maps_url: clientData.maps_url || (clientData.address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(clientData.address)}` : undefined),
     };
     setClients(prev => [newClient, ...prev]);
+    addAuditLog('CREATE', 'clients', newClient.id, `Cliente ${newClient.name} agregado`, null, newClient);
     return newClient;
   };
 
@@ -669,7 +684,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       amount_usd: delivery.cost_usd,
       amount_bs: Number((delivery.cost_usd * exchangeRate.rate).toFixed(2)),
       payment_method: 'transferencia',
-      recorded_by: currentUser.name,
+      recorded_by: currentUser?.name || 'Sistema',
       notes: `Descarga en tanque. Estado: ${delivery.status}`,
     });
   };
@@ -706,7 +721,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     const closure: CashClosure = {
       id: `closure-${Date.now()}`,
       closed_at: new Date().toISOString(),
-      worker_name: currentUser.name,
+      worker_name: currentUser?.name || 'Sistema',
       exchange_rate: exchangeRate.rate,
       total_sales_count: sales.length,
       total_usd: Number(totalUsd.toFixed(2)),
@@ -744,6 +759,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     <StoreContext.Provider
       value={{
         currentUser,
+        isAuthenticated,
+        login,
+        logout,
         setCurrentUser,
         systemSettings,
         updateSystemSettings,
@@ -777,6 +795,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         loadDemoData,
         clearDemoData,
         isDemoModeActive,
+        auditLogs,
+        addAuditLog,
+        restoreAuditLog,
       }}
     >
       {children}

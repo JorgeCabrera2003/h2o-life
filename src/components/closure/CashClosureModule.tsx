@@ -2,12 +2,13 @@
 
 import React, { useState } from 'react';
 import { useH2OStore } from '@/lib/store';
-import { Lock, CheckCircle2, Share2, DollarSign, Banknote, Smartphone, CreditCard, AlertCircle } from 'lucide-react';
+import { CashClosure } from '@/types';
+import { Lock, CheckCircle2, Share2, DollarSign, Banknote, Smartphone, CreditCard } from 'lucide-react';
 
 export function CashClosureModule() {
   const { sales, expenses, exchangeRate, currentUser, createCashClosure, cashClosures } = useH2OStore();
   const [closureNotes, setClosureNotes] = useState('');
-  const [lastGeneratedClosure, setLastGeneratedClosure] = useState<any>(null);
+  const [lastGeneratedClosure, setLastGeneratedClosure] = useState<CashClosure | null>(null);
 
   // Calcular desglose de las ventas del día
   const completedSales = sales.filter(s => s.status === 'completada');
@@ -39,10 +40,9 @@ export function CashClosureModule() {
   const handleGenerateClosure = () => {
     const closure = createCashClosure(closureNotes);
     setLastGeneratedClosure(closure);
-    alert('¡Cierre de caja generado con éxito!');
   };
 
-  const handleShareWhatsAppClosure = (closureData: any) => {
+  const handleShareWhatsAppClosure = (closureData: CashClosure) => {
     const text = `🔒 *H2O LIFE - CIERRE DIARIO DE CAJA*%0AOperador: ${closureData.worker_name}%0AFecha: ${new Date(closureData.closed_at).toLocaleDateString()} ${new Date(closureData.closed_at).toLocaleTimeString()}%0ATasa BCV: Bs. ${closureData.exchange_rate.toFixed(2)}%0A-----------------------------%0A*Total Ventas:* ${closureData.total_sales_count}%0A*Ingreso Bruto:* $${closureData.total_usd.toFixed(2)} / Bs. ${closureData.total_bs.toFixed(2)}%0A-----------------------------%0A*DESGLOSE DE FONDOS:*%0A💵 Efectivo USD: $${closureData.breakdown.efectivo_usd.toFixed(2)}%0A💵 Efectivo Bs: Bs. ${closureData.breakdown.efectivo_bs.toFixed(2)}%0A💳 Punto de Venta: Bs. ${closureData.breakdown.punto_bs.toFixed(2)}%0A📱 Pago Móvil: Bs. ${closureData.breakdown.pago_movil_bs.toFixed(2)}%0A🏦 Transferencia: Bs. ${closureData.breakdown.transferencia_bs.toFixed(2)}%0A-----------------------------%0A*Gastos del Turno:* $${closureData.total_expenses_usd.toFixed(2)}%0A*BALANCE NETO:* $${closureData.net_usd.toFixed(2)}%0A${closureData.notes ? `Nota: ${closureData.notes}` : ''}`;
     window.open(`https://wa.me/?text=${text}`, '_blank');
   };

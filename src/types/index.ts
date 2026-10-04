@@ -166,3 +166,21 @@ export interface SystemSettings {
   auto_notify_cisterns: boolean;
   auto_notify_closures: boolean;
 }
+
+export type AuditAction = 'CREATE' | 'UPDATE' | 'DELETE' | 'LOGIN' | 'LOGOUT' | 'RESTORE';
+
+export interface AuditLog {
+  id: string;
+  timestamp: string;
+  user_id: string;
+  user_name: string;
+  action: AuditAction;
+  target_table: string;
+  target_id: string;
+  description: string;
+  previous_data?: any;
+  new_data?: any;
+  ip_address?: string;
+  device_info?: string;
+  location?: string;
+}

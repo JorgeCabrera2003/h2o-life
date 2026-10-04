@@ -6,7 +6,9 @@ import { useSearchParams } from 'next/navigation';
 import { Navbar } from '@/components/Navbar';
 import { BottomNav, ActiveTab } from '@/components/BottomNav';
 import { PosModule } from '@/components/pos/PosModule';
+import { LoginScreen } from '@/components/auth/LoginScreen';
 import { Client } from '@/types';
+import { useH2OStore } from '@/lib/store';
 
 // Componente visual de carga suave para transiciones fluidas de pestañas
 function TabLoadingSkeleton({ title, subtitle }: { title: string; subtitle: string }) {
@@ -35,8 +37,8 @@ function TabLoadingSkeleton({ title, subtitle }: { title: string; subtitle: stri
 }
 
 // Carga Dinámica Optimizada: Reduce drásticamente el bundle JS inicial de 8 módulos a solo el POS principal
-const ProductsServicesModule = dynamic(
-  () => import('@/components/products/ProductsServicesModule').then((m) => m.ProductsServicesModule),
+const ProductsServicesPanel = dynamic(
+  () => import('@/components/products/ProductsServicesPanel').then((m) => m.ProductsServicesPanel),
   {
     loading: () => <TabLoadingSkeleton title="Catálogo de Productos & Servicios" subtitle="Cargando inventario y tarifas..." />,
     ssr: false,
@@ -91,16 +93,26 @@ const SettingsModule = dynamic(
   }
 );
 
+const AuditLogModule = dynamic(
+  () => import('@/components/admin/AuditLogModule').then((m) => m.AuditLogModule),
+  {
+    loading: () => <TabLoadingSkeleton title="Bitácora de Seguridad" subtitle="Cargando registros de auditoría..." />,
+    ssr: false,
+  }
+);
+
 function H2OLifeAppContent() {
   const searchParams = useSearchParams();
   const initialTab = (searchParams.get('tab') as ActiveTab) || 'pos';
   const [activeTab, setActiveTab] = useState<ActiveTab>(initialTab);
   const [isCartDrawerOpen, setIsCartDrawerOpen] = useState(false);
   const [selectedClientForSale, setSelectedClientForSale] = useState<Client | null>(null);
+  
+  const { isAuthenticated } = useH2OStore();
 
   useEffect(() => {
     const tabParam = searchParams.get('tab') as ActiveTab;
-    if (tabParam && ['pos', 'products', 'clients', 'camera', 'closure', 'tanks', 'finance', 'settings'].includes(tabParam)) {
+    if (tabParam && ['pos', 'products', 'clients', 'camera', 'closure', 'tanks', 'finance', 'settings', 'audit'].includes(tabParam)) {
       setActiveTab(tabParam);
     }
   }, [searchParams]);
@@ -110,7 +122,7 @@ function H2OLifeAppContent() {
     if (typeof window === 'undefined') return;
 
     const prefetchSecondaryChunks = () => {
-      import('@/components/products/ProductsServicesModule');
+      import('@/components/products/ProductsServicesPanel');
       import('@/components/clients/ClientsModule');
       import('@/components/closure/CashClosureModule');
       import('@/components/tanks/TankModule');
@@ -132,6 +144,10 @@ function H2OLifeAppContent() {
     }
   }, []);
 
+  if (!isAuthenticated) {
+    return <LoginScreen />;
+  }
+
   return (
     <div
       suppressHydrationWarning
@@ -149,7 +165,7 @@ function H2OLifeAppContent() {
           />
         )}
 
-        {activeTab === 'products' && <ProductsServicesModule />}
+        {activeTab === 'products' && <ProductsServicesPanel />}
 
         {activeTab === 'clients' && (
           <ClientsModule
@@ -176,6 +192,8 @@ function H2OLifeAppContent() {
         {activeTab === 'finance' && <FinanceModule />}
 
         {activeTab === 'settings' && <SettingsModule />}
+
+        {activeTab === 'audit' && <AuditLogModule />}
       </main>
 
       <BottomNav

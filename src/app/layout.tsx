@@ -3,7 +3,6 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { CookieConsentBanner } from '@/components/common/CookieConsentBanner';
 import { AnalyticsTracker } from '@/components/common/AnalyticsTracker';
-import { FloatingWhatsAppButton } from '@/components/common/FloatingWhatsAppButton';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -96,11 +95,11 @@ export const metadata: Metadata = {
     title: 'H2O Life',
   },
   robots: {
-    index: true,
-    follow: true,
+    index: false,
+    follow: false,
     googleBot: {
-      index: true,
-      follow: true,
+      index: false,
+      follow: false,
       'max-video-preview': -1,
       'max-image-preview': 'large',
       'max-snippet': -1,
@@ -228,9 +227,6 @@ export default function RootLayout({
 
           {/* Contenido principal de la aplicación */}
           {children}
-
-          {/* Concierge flotante de WhatsApp permanente */}
-          <FloatingWhatsAppButton />
 
           {/* Banner de consentimiento de cookies y almacenamiento local */}
           <CookieConsentBanner />

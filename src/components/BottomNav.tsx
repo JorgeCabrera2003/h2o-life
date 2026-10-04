@@ -11,17 +11,14 @@ import {
   BarChart3,
   MoreHorizontal,
   Settings,
-  MessageSquare,
   Smartphone,
+  Shield,
   X,
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useH2OStore } from '@/lib/store';
+import { hasPermission } from '@/lib/auth';
 
-const WhatsAppHubModal = dynamic(
-  () => import('@/components/whatsapp/WhatsAppHubModal').then((m) => m.WhatsAppHubModal),
-  { ssr: false }
-);
 
 const ConnectMobileModal = dynamic(
   () => import('@/components/common/ConnectMobileModal').then((m) => m.ConnectMobileModal),
@@ -36,7 +33,8 @@ export type ActiveTab =
   | 'closure'
   | 'tanks'
   | 'finance'
-  | 'settings';
+  | 'settings'
+  | 'audit';
 
 interface BottomNavProps {
   activeTab: ActiveTab;
@@ -45,9 +43,9 @@ interface BottomNavProps {
 }
 
 export function BottomNav({ activeTab, setActiveTab, onOpenCart }: BottomNavProps) {
-  const { cart, exchangeRate } = useH2OStore();
+  const { cart, exchangeRate, currentUser } = useH2OStore();
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
-  const [isWhatsAppOpen, setIsWhatsAppOpen] = useState(false);
+
   const [isMobileConnectOpen, setIsMobileConnectOpen] = useState(false);
 
   const totalCartItems = useMemo(() => cart.reduce((acc, item) => acc + item.quantity, 0), [cart]);
@@ -82,7 +80,7 @@ export function BottomNav({ activeTab, setActiveTab, onOpenCart }: BottomNavProp
     },
   ];
 
-  const isMoreTabActive = ['camera', 'closure', 'finance', 'settings'].includes(activeTab);
+  const isMoreTabActive = ['camera', 'closure', 'finance', 'settings', 'audit'].includes(activeTab);
 
   return (
     <>
@@ -176,6 +174,7 @@ export function BottomNav({ activeTab, setActiveTab, onOpenCart }: BottomNavProp
                 <span className="text-[10px] text-slate-500">Arqueo del turno</span>
               </button>
 
+              {hasPermission(currentUser, 'admin') && (
               <button
                 type="button"
                 onClick={() => {
@@ -194,7 +193,9 @@ export function BottomNav({ activeTab, setActiveTab, onOpenCart }: BottomNavProp
                 <span className="text-xs font-black">Finanzas</span>
                 <span className="text-[10px] text-slate-500">Balance y métricas</span>
               </button>
+              )}
 
+              {hasPermission(currentUser, 'admin') && (
               <button
                 type="button"
                 onClick={() => {
@@ -213,26 +214,31 @@ export function BottomNav({ activeTab, setActiveTab, onOpenCart }: BottomNavProp
                 <span className="text-xs font-black">Ajustes</span>
                 <span className="text-[10px] text-slate-500">Configurar sistema</span>
               </button>
-            </div>
+              )}
 
-            <div className="mt-3 pt-3 border-t border-slate-100 space-y-2">
+              {hasPermission(currentUser, 'audit') && (
               <button
                 type="button"
                 onClick={() => {
-                  setIsWhatsAppOpen(true);
+                  setActiveTab('audit');
                   setIsMoreMenuOpen(false);
                 }}
-                className="w-full p-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center justify-between cursor-pointer"
+                className={`p-3.5 rounded-2xl border text-left flex flex-col items-start transition-all cursor-pointer ${
+                  activeTab === 'audit'
+                    ? 'bg-sky-50 border-sky-300 text-sky-900 font-bold'
+                    : 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-700'
+                }`}
               >
-                <span className="flex items-center space-x-2">
-                  <MessageSquare className="w-4 h-4 text-emerald-600" />
-                  <span>WhatsApp Hub & Catálogo al Día</span>
-                </span>
-                <span className="text-[10px] font-black uppercase bg-emerald-200/70 text-emerald-900 px-1.5 py-0.5 rounded">
-                  Gratis
-                </span>
+                <div className="w-8 h-8 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center mb-2">
+                  <Shield className="w-4 h-4" />
+                </div>
+                <span className="text-xs font-black">Auditoría</span>
+                <span className="text-[10px] text-slate-500">Bitácora de seguridad</span>
               </button>
+              )}
+            </div>
 
+            <div className="mt-3 pt-3 border-t border-slate-100 space-y-2">
               <button
                 type="button"
                 onClick={() => {
@@ -324,13 +330,6 @@ export function BottomNav({ activeTab, setActiveTab, onOpenCart }: BottomNavProp
       </nav>
 
       {/* Modales Compartidos */}
-      {isWhatsAppOpen && (
-        <WhatsAppHubModal
-          isOpen={isWhatsAppOpen}
-          onClose={() => setIsWhatsAppOpen(false)}
-        />
-      )}
-
       {isMobileConnectOpen && (
         <ConnectMobileModal
           isOpen={isMobileConnectOpen}

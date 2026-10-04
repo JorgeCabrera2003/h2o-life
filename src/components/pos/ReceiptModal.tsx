@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Sale, SystemSettings } from '@/types';
-import { CheckCircle2, Share2, MessageCircle } from 'lucide-react';
+import { CheckCircle2, MessageCircle } from 'lucide-react';
 
 interface ReceiptModalProps {
   completedSale: Sale | null;
@@ -21,8 +21,6 @@ export function ReceiptModal({
 }: ReceiptModalProps) {
   if (!completedSale) return null;
 
-  const freyelizPhone = systemSettings.freyeliz_phone || systemSettings.freyeli_phone || '+58 424-5658068';
-  const jorgePhone = systemSettings.jorge_phone || '+58 424-5567016';
 
   return (
     <div className="fixed inset-0 z-60 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-150">
@@ -62,33 +60,7 @@ export function ReceiptModal({
         </div>
 
         <div className="space-y-2">
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                const url = getWhatsAppSaleUrl(completedSale, freyelizPhone);
-                window.open(url, '_blank', 'noopener,noreferrer');
-              }}
-              className="bg-sky-600 hover:bg-sky-700 active:scale-95 text-white font-bold py-2.5 px-2 rounded-xl shadow-md flex items-center justify-center space-x-1.5 text-xs pressable cursor-pointer min-h-[44px] transition-all"
-              title="Enviar notificación a Freyeliz"
-            >
-              <Share2 className="w-3.5 h-3.5" />
-              <span>👩‍💼 A Freyeliz</span>
-            </button>
 
-            <button
-              type="button"
-              onClick={() => {
-                const url = getWhatsAppSaleUrl(completedSale, jorgePhone);
-                window.open(url, '_blank', 'noopener,noreferrer');
-              }}
-              className="bg-sky-800 hover:bg-sky-900 active:scale-95 text-white font-bold py-2.5 px-2 rounded-xl shadow-md flex items-center justify-center space-x-1.5 text-xs pressable cursor-pointer min-h-[44px] transition-all"
-              title="Enviar notificación a Jorge"
-            >
-              <Share2 className="w-3.5 h-3.5" />
-              <span>👨‍💼 A Jorge</span>
-            </button>
-          </div>
 
           <button
             type="button"

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useH2OStore } from '@/lib/store';
+import { hasPermission } from '@/lib/auth';
 import {
   Settings,
   Bell,
@@ -29,7 +30,7 @@ import { GoogleBusinessBadge } from '@/components/common/GoogleBusinessBadge';
 import { analytics, TelemetryEvent } from '@/lib/analytics';
 
 export function SettingsModule() {
-  const { systemSettings, updateSystemSettings, loadDemoData, clearDemoData, isDemoModeActive } = useH2OStore();
+  const { systemSettings, updateSystemSettings, loadDemoData, clearDemoData, isDemoModeActive, currentUser } = useH2OStore();
 
   const [businessName, setBusinessName] = useState(systemSettings.business_name);
   const [businessRif, setBusinessRif] = useState(systemSettings.business_rif);
@@ -377,6 +378,7 @@ export function SettingsModule() {
         </div>
 
         {/* 5. GESTIÓN DE BASE DE DATOS: SEMILLA REAL vs. DATOS DE PRUEBA */}
+        {hasPermission(currentUser, 'dev') && (
         <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-2xs">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
             <div className="flex items-center space-x-2 text-xs font-bold text-sky-700 uppercase tracking-wider">
@@ -448,6 +450,7 @@ export function SettingsModule() {
             </div>
           </div>
         </div>
+        )}
 
         {/* 6. CUMPLIMIENTO LEGAL, PRIVACIDAD & COOKIES (Puntos 1, 2 y 3) */}
         <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-2xs">
@@ -527,6 +530,7 @@ export function SettingsModule() {
         </div>
 
         {/* 6. ANALÍTICA & TELEMETRÍA (Punto 19) */}
+        {hasPermission(currentUser, 'dev') && (
         <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-2xs">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-2 text-xs font-bold text-sky-700 uppercase tracking-wider">
@@ -609,6 +613,7 @@ export function SettingsModule() {
             </p>
           )}
         </div>
+        )}
 
         {/* Botón Principal Guardar (Única llamada a la acción principal - Punto 20) */}
         <div className="flex justify-end">
