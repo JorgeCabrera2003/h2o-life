@@ -320,6 +320,7 @@ export function ProductsServicesPanel() {
           )}
         </div>
       </div>
+      )}
 
       {/* 3. CONTROL DE DATOS DE PRUEBA VS SEMILLA REAL */}
       {hasPermission(currentUser, 'dev') && (
