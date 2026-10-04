@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useH2OStore, INITIAL_USERS } from '@/lib/store';
+import { hasPermission } from '@/lib/auth';
 import { ActiveTab } from '@/components/BottomNav';
 import dynamic from 'next/dynamic';
 import { Droplet, Edit3, Check, Settings, ChevronDown, Package, Smartphone } from 'lucide-react';
@@ -73,11 +74,15 @@ export function Navbar({ onNavigate, activeTab }: NavbarProps) {
           <button
             type="button"
             onClick={() => {
+              if (!hasPermission(currentUser, 'admin')) return;
               setCustomRate(exchangeRate.rate.toString());
               setIsEditingRate(true);
             }}
-            className="group bg-gradient-to-r from-sky-50/80 via-white to-sky-50/50 hover:bg-sky-100/70 border border-sky-200/80 hover:border-sky-300 rounded-2xl px-2.5 sm:px-3 py-1 sm:py-1.5 flex items-center space-x-2 pressable text-left shadow-2xs shrink-0 cursor-pointer"
-            title="Tasa oficial BCV Venezuela. Toca para actualizar"
+            disabled={!hasPermission(currentUser, 'admin')}
+            className={`group bg-gradient-to-r from-sky-50/80 via-white to-sky-50/50 border border-sky-200/80 rounded-2xl px-2.5 sm:px-3 py-1 sm:py-1.5 flex items-center space-x-2 text-left shadow-2xs shrink-0 ${
+              hasPermission(currentUser, 'admin') ? 'hover:bg-sky-100/70 hover:border-sky-300 pressable cursor-pointer' : 'opacity-90 cursor-default'
+            }`}
+            title={hasPermission(currentUser, 'admin') ? "Tasa oficial BCV Venezuela. Toca para actualizar" : "Tasa oficial BCV Venezuela"}
           >
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
@@ -92,7 +97,9 @@ export function Navbar({ onNavigate, activeTab }: NavbarProps) {
                 Bs. {exchangeRate.rate.toFixed(2)}
               </span>
             </div>
-            <Edit3 className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-sky-500 opacity-60 group-hover:opacity-100 group-hover:scale-110 transition-all shrink-0 ml-0.5" />
+            {hasPermission(currentUser, 'admin') && (
+              <Edit3 className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-sky-500 opacity-60 group-hover:opacity-100 group-hover:scale-110 transition-all shrink-0 ml-0.5" />
+            )}
           </button>
 
           {/* Modal Centrado para Editar Tasa */}

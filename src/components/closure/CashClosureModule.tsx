@@ -57,7 +57,7 @@ export function CashClosureModule() {
             <span>Cierre de Caja & Arqueo</span>
           </h2>
           <p className="text-xs text-slate-500">
-            Operador actual: <strong className="text-slate-800">{currentUser.name}</strong> • Tasa: Bs. {exchangeRate.rate.toFixed(2)}
+            Operador actual: <strong className="text-slate-800">{currentUser?.name || 'Sistema'}</strong> • Tasa: Bs. {exchangeRate.rate.toFixed(2)}
           </p>
         </div>
       </div>

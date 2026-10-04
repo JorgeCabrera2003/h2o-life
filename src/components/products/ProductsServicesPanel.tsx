@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useH2OStore } from '@/lib/store';
+import { hasPermission } from '@/lib/auth';
 import { Product, ProductCategory } from '@/types';
 import {
   Package,
@@ -48,6 +49,7 @@ export function ProductsServicesPanel() {
     isDemoModeActive,
     loadDemoData,
     clearDemoData,
+    currentUser,
   } = useH2OStore();
 
   // Filtros y Búsqueda
@@ -203,6 +205,7 @@ export function ProductsServicesPanel() {
         </div>
 
         <div className="flex items-center space-x-2 w-full sm:w-auto">
+          {hasPermission(currentUser, 'admin') && (
           <button
             type="button"
             onClick={handleOpenAdd}
@@ -211,10 +214,12 @@ export function ProductsServicesPanel() {
             <Plus className="w-4 h-4" />
             <span>+ Crear Ítem</span>
           </button>
+          )}
         </div>
       </div>
 
       {/* 2. CONTROLADOR DESTACADO: AJUSTE RÁPIDO DE PRECIO DE RECARGA DE AGUA */}
+      {hasPermission(currentUser, 'admin') && (
       <div className="double-bezel mb-6">
         <div className="double-bezel-inner p-5 sm:p-6 bg-gradient-to-br from-white via-sky-50/30 to-cyan-50/40">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-sky-100">
@@ -317,6 +322,7 @@ export function ProductsServicesPanel() {
       </div>
 
       {/* 3. CONTROL DE DATOS DE PRUEBA VS SEMILLA REAL */}
+      {hasPermission(currentUser, 'dev') && (
       <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-2xs mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div className="flex items-center space-x-3">
           <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white ${
@@ -365,6 +371,7 @@ export function ProductsServicesPanel() {
           )}
         </div>
       </div>
+      )}
 
       {/* 4. BUSCADOR Y FILTROS DEL CATÁLOGO */}
       <div className="bg-white/95 backdrop-blur-md rounded-2xl p-4 border border-slate-200/80 shadow-2xs mb-5">
@@ -534,6 +541,8 @@ export function ProductsServicesPanel() {
                 {/* Acciones de Edición */}
                 <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
                   <div className="flex items-center space-x-1.5">
+                    {hasPermission(currentUser, 'admin') && (
+                    <>
                     <button
                       type="button"
                       onClick={() => handleOpenEdit(p)}
@@ -557,6 +566,8 @@ export function ProductsServicesPanel() {
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
+                    )}
+                    </>
                     )}
                   </div>
 

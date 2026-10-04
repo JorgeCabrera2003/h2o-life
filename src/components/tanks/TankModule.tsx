@@ -2,10 +2,11 @@
 
 import React, { useState } from 'react';
 import { useH2OStore } from '@/lib/store';
+import { hasPermission } from '@/lib/auth';
 import { Database, Truck, Plus, CheckCircle, AlertCircle, Droplets } from 'lucide-react';
 
 export function TankModule() {
-  const { tanks, registerCisternDelivery, updateTankLevel } = useH2OStore();
+  const { tanks, registerCisternDelivery, updateTankLevel, currentUser } = useH2OStore();
 
   const [isCisternModalOpen, setIsCisternModalOpen] = useState(false);
   const [supplierName, setSupplierName] = useState('Cisterna Los Andes');
@@ -48,6 +49,7 @@ export function TankModule() {
           </p>
         </div>
 
+        {hasPermission(currentUser, 'admin') && (
         <button
           onClick={() => setIsCisternModalOpen(true)}
           className="bg-gradient-to-r from-sky-600 to-cyan-500 hover:from-sky-700 text-white font-extrabold px-4 py-2.5 rounded-xl shadow-md shadow-sky-500/20 text-xs flex items-center space-x-2 active:scale-95 transition-all"
@@ -55,6 +57,7 @@ export function TankModule() {
           <Truck className="w-4 h-4" />
           <span>+ Registrar Cisterna</span>
         </button>
+        )}
       </div>
 
       {/* Tarjetas Visuales de Tanques */}
@@ -120,6 +123,7 @@ export function TankModule() {
               </div>
 
               {/* Botones de Ajuste Manual Rápido */}
+              {hasPermission(currentUser, 'admin') && (
               <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
                 <span className="text-slate-400 text-[10px] font-semibold">Ajuste manual:</span>
                 <div className="flex space-x-1">
@@ -134,6 +138,7 @@ export function TankModule() {
                   ))}
                 </div>
               </div>
+              )}
             </div>
           );
         })}
@@ -151,12 +156,14 @@ export function TankModule() {
               </p>
             </div>
           </div>
+          {hasPermission(currentUser, 'admin') && (
           <button
             onClick={() => setIsCisternModalOpen(true)}
             className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-lg shrink-0"
           >
             Pedir Cisterna
           </button>
+          )}
         </div>
       )}
 

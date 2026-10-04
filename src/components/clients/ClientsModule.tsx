@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useH2OStore } from '@/lib/store';
+import { hasPermission } from '@/lib/auth';
 import { Client } from '@/types';
 import {
   Users,
@@ -51,7 +52,7 @@ interface ClientsModuleProps {
 }
 
 export function ClientsModule({ onSelectClientForSale }: ClientsModuleProps) {
-  const { clients, addClient, updateClient, deleteClient } = useH2OStore();
+  const { clients, addClient, updateClient, deleteClient, currentUser } = useH2OStore();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<'todos' | 'con_deuda' | 'al_dia' | 'frecuentes'>('todos');
@@ -412,7 +413,7 @@ export function ClientsModule({ onSelectClientForSale }: ClientsModuleProps) {
                       <Edit2 className="w-4 h-4" />
                     </button>
 
-                    {client.id !== 'client-mostrador' && (
+                    {client.id !== 'client-mostrador' && hasPermission(currentUser, 'admin') && (
                       <button
                         onClick={() => {
                           if (confirm(`¿Eliminar a ${client.name} del directorio?`)) {

@@ -60,7 +60,7 @@ export function FinanceModule() {
         amount_usd: amount,
         amount_bs: Number((amount * exchangeRate.rate).toFixed(2)),
         payment_method: expensePaymentMethod,
-        recorded_by: currentUser.name,
+        recorded_by: currentUser?.name || 'Sistema',
       });
 
       setExpenseDescription('');
