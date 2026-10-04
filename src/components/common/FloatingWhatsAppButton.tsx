@@ -85,7 +85,7 @@ Freyeliz: +58 424-5658068 (Bot Activo)`;
     <div
       ref={containerRef}
       className={`fixed ${
-        cartCount > 0 ? 'bottom-28 sm:bottom-24 lg:bottom-8' : 'bottom-22 sm:bottom-24 lg:bottom-8'
+        cartCount > 0 ? 'bottom-28 sm:bottom-26 lg:bottom-22' : 'bottom-20 sm:bottom-22 lg:bottom-20'
       } right-3 sm:right-6 lg:right-8 z-50 flex flex-col items-end pointer-events-none transition-all duration-200`}
       aria-label="Atención al Cliente por WhatsApp"
     >
