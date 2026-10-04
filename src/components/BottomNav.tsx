@@ -88,14 +88,14 @@ export function BottomNav({ activeTab, setActiveTab, onOpenCart }: BottomNavProp
     <>
       {/* Botón Flotante del Carrito para vista móvil (Apple-tier Spring Pill) */}
       {totalCartItems > 0 && activeTab === 'pos' && onOpenCart && (
-        <div className="fixed bottom-20 left-2.5 right-2.5 sm:left-4 sm:right-4 z-40 lg:hidden animate-in slide-in-from-bottom-5 duration-200">
+        <div className="fixed bottom-20 left-2.5 right-2.5 sm:left-4 sm:right-4 z-35 lg:hidden animate-in slide-in-from-bottom-5 duration-200">
           <button
             type="button"
             onClick={onOpenCart}
-            className="w-full bg-gradient-to-r from-sky-600 via-sky-500 to-cyan-500 hover:from-sky-700 text-white font-black py-3 px-4 rounded-2xl shadow-xl shadow-sky-600/35 border border-white/20 flex items-center justify-between pressable active:scale-[0.98] transition-all cursor-pointer min-h-[50px]"
+            className="w-full bg-gradient-to-r from-sky-600 via-sky-500 to-cyan-500 hover:from-sky-700 text-white font-black py-3 px-4 rounded-2xl shadow-xl shadow-sky-600/35 border border-white/20 flex items-center justify-between pressable active:scale-[0.98] transition-all cursor-pointer min-h-[50px] gpu-accelerated"
           >
             <div className="flex items-center space-x-2.5">
-              <span className="bg-white/25 px-2.5 py-1 rounded-xl text-xs font-black tracking-tight shadow-inner">
+              <span className="bg-white/25 px-2.5 py-1 rounded-xl text-xs font-black tracking-tight shadow-inner tabular-nums">
                 {totalCartItems} {totalCartItems === 1 ? 'ítem' : 'ítems'}
               </span>
               <span className="text-xs sm:text-sm font-extrabold uppercase tracking-wide">
@@ -104,8 +104,8 @@ export function BottomNav({ activeTab, setActiveTab, onOpenCart }: BottomNavProp
             </div>
             <div className="flex items-center space-x-2 text-right">
               <div>
-                <span className="text-sm sm:text-base font-black">${totalCartUsd.toFixed(2)}</span>
-                <span className="text-[10px] text-sky-100 ml-1 font-bold">(Bs. {totalCartBs})</span>
+                <span className="text-sm sm:text-base font-black tabular-nums">${totalCartUsd.toFixed(2)}</span>
+                <span className="text-[10px] text-sky-100 ml-1 font-bold tabular-nums">(Bs. {totalCartBs})</span>
               </div>
               <span className="bg-white text-sky-700 px-3 py-1 rounded-xl text-xs font-black shadow-xs">
                 Cobrar →
@@ -117,12 +117,12 @@ export function BottomNav({ activeTab, setActiveTab, onOpenCart }: BottomNavProp
 
       {/* Modal / Bottom Sheet con Más Opciones */}
       {isMoreMenuOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-150">
+        <div className="fixed inset-0 z-60 bg-slate-950/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-150">
           <div
             className="fixed inset-0"
             onClick={() => setIsMoreMenuOpen(false)}
           />
-          <div className="bg-white rounded-t-3xl sm:rounded-3xl max-w-sm w-full p-5 shadow-2xl border border-sky-100 relative z-10 animate-in slide-in-from-bottom-10 sm:zoom-in-95 duration-200">
+          <div className="bg-white rounded-t-3xl sm:rounded-3xl max-w-sm w-full p-5 shadow-2xl border border-sky-100 relative z-10 animate-in slide-in-from-bottom-10 sm:zoom-in-95 duration-200 gpu-accelerated">
             <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-3 sm:hidden" />
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
               <h4 className="text-sm font-black text-slate-900 flex items-center space-x-2">

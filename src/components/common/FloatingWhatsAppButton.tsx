@@ -4,16 +4,34 @@ import React, { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, ChevronRight, User, Wrench, Droplet, Bot, Sparkles, Send, Copy, Check } from 'lucide-react';
 import { useH2OStoreSafe } from '@/lib/store';
 import { analytics } from '@/lib/analytics';
+import { generateCatalogWhatsAppMessage } from '@/lib/whatsapp';
+import { ExchangeRateInfo, SystemSettings } from '@/types';
 
 export function FloatingWhatsAppButton() {
   const store = useH2OStoreSafe();
-  const systemSettings = store?.systemSettings || {
+  const systemSettings: SystemSettings = store?.systemSettings || {
+    business_name: 'H2O Life C.A.',
+    business_rif: 'J-50982341-2',
+    store_address: 'Calle 28 con Carrera 25, Barquisimeto',
+    store_lat: 10.07125,
+    store_lng: -69.32705,
     jorge_phone: '+58 424-5567016',
     freyeliz_phone: '+58 424-5658068',
     freyeli_phone: '+58 424-5658068',
     karla_phone: '+58 424-5717589',
+    tank_low_threshold_pct: 20,
+    auto_notify_sales: true,
+    auto_notify_tank_alerts: true,
+    auto_notify_cisterns: true,
+    auto_notify_closures: true,
   };
-  const exchangeRate = store?.exchangeRate || { rate: 866.56 };
+  const exchangeRate: ExchangeRateInfo = store?.exchangeRate || {
+    rate: 866.56,
+    source: 'BCV Oficial',
+    updated_at: new Date().toISOString(),
+    is_manual_override: false,
+  };
+  const products = store?.products || [];
   const cartCount = store?.cart?.length || 0;
   const [isOpen, setIsOpen] = useState(false);
   const [copiedCatalog, setCopiedCatalog] = useState(false);
@@ -47,35 +65,7 @@ export function FloatingWhatsAppButton() {
   };
 
   const handleCopyCatalog = () => {
-    const rate = exchangeRate.rate;
-    const r = (usd: number) => (usd * rate).toLocaleString('es-VE', { minimumFractionDigits: 2 });
-    const text = `💧 *H2O LIFE - CATÁLOGO Y PRECIOS AL DÍA*
-📍 *Ubicación:* Calle 28 con Carrera 25, Barquisimeto
-🏢 *RIF:* J-50982341-2
-💵 *Tasa BCV Oficial:* Bs. ${rate.toFixed(2)} / USD
-━━━━━━━━━━━━━━━━━━━━━━
-💧 *RECARGAS DE AGUA:*
-• Recarga 20L / 18L: *$0.70* (Bs. ${r(0.70)})
-*(Ósmosis Inversa, Ozono y Luz UV)*
-
-🧴 *BOTELLONES Y ENVASES:*
-• Botellón Nuevo 20L (Lleno): *$7.00* (Bs. ${r(7.00)})
-• Botellón Vacío 20L: *$6.50* (Bs. ${r(6.50)})
-• Botellón 5L (Lleno): *$2.50* (Bs. ${r(2.50)})
-
-✨ *SERVICIOS:*
-• Lavado y Desinfección con Ozono: *$0.50* (Bs. ${r(0.50)})
-• Delivery Express: *$1.00* (Bs. ${r(1.00)})
-
-🍦 *HELADOS Y MERIENDAS:*
-• Helado Artesanal: *$1.00* (Bs. ${r(1.00)})
-• Helado Paleta Premium: *$1.50* (Bs. ${r(1.50)})
-• Tostones Caseros: *$1.00* (Bs. ${r(1.00)})
-• Empanadas Chilenas: *$1.50* (Bs. ${r(1.50)})
-━━━━━━━━━━━━━━━━━━━━━━
-📲 *ATENCIÓN DIRECTA:*
-Freyeliz: +58 424-5658068 (Bot Activo)`;
-
+    const text = generateCatalogWhatsAppMessage(products, exchangeRate, systemSettings);
     navigator.clipboard.writeText(text);
     setCopiedCatalog(true);
     setTimeout(() => setCopiedCatalog(false), 2000);
@@ -86,7 +76,7 @@ Freyeliz: +58 424-5658068 (Bot Activo)`;
       ref={containerRef}
       className={`fixed ${
         cartCount > 0 ? 'bottom-28 sm:bottom-26 lg:bottom-22' : 'bottom-20 sm:bottom-22 lg:bottom-20'
-      } right-3 sm:right-6 lg:right-8 z-50 flex flex-col items-end pointer-events-none transition-all duration-200`}
+      } right-3 sm:right-6 lg:right-8 z-40 flex flex-col items-end pointer-events-none transition-all duration-200`}
       aria-label="Atención al Cliente por WhatsApp"
     >
       {/* Menú Desplegable con Opciones de Contacto & Bot de Freyeliz */}

@@ -89,7 +89,7 @@ export function Navbar({ onNavigate, activeTab }: NavbarProps) {
               <span className="text-[9px] font-bold text-sky-700 uppercase tracking-tight leading-none">
                 {exchangeRate.source}
               </span>
-              <span className="text-xs sm:text-sm font-black text-slate-900 leading-tight">
+              <span className="text-xs sm:text-sm font-black text-slate-900 leading-tight tabular-nums">
                 Bs. {exchangeRate.rate.toFixed(2)}
               </span>
             </div>
@@ -98,7 +98,7 @@ export function Navbar({ onNavigate, activeTab }: NavbarProps) {
 
           {/* Modal Centrado para Editar Tasa */}
           {isEditingRate && (
-            <div className="fixed inset-0 z-50 bg-slate-950/50 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-150">
+            <div className="fixed inset-0 z-60 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-150">
               <div className="bg-white rounded-3xl max-w-xs w-full p-6 shadow-2xl border border-sky-100 animate-in zoom-in-95 duration-200">
                 <div className="flex items-center justify-between mb-3">
                   <h4 className="font-black text-sm text-slate-900 flex items-center space-x-1.5">

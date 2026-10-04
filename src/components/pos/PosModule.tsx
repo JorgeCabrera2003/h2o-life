@@ -33,6 +33,9 @@ import {
   validateAntiSpamSubmission,
 } from '@/lib/validators';
 import { analytics } from '@/lib/analytics';
+import { PaymentModal } from '@/components/pos/PaymentModal';
+import { ReceiptModal } from '@/components/pos/ReceiptModal';
+import { QuickClientModal } from '@/components/pos/QuickClientModal';
 
 interface PosModuleProps {
   isCartDrawerOpen?: boolean;
@@ -351,8 +354,8 @@ export function PosModule({
                   )}
                 </div>
                 <div className="mt-2 flex items-baseline justify-between pt-1.5 border-t border-white/15">
-                  <span className="text-[11px] text-sky-100 font-bold block">Bs. {costBs}</span>
-                  <span className="text-sm font-black bg-white/25 px-2 py-0.5 rounded-lg shadow-inner">
+                  <span className="text-[11px] text-sky-100 font-bold block tabular-nums">Bs. {costBs}</span>
+                  <span className="text-sm font-black bg-white/25 px-2 py-0.5 rounded-lg shadow-inner tabular-nums">
                     ${costUsd}
                   </span>
                 </div>
@@ -721,10 +724,10 @@ export function PosModule({
 
                   <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between">
                     <div>
-                      <span className="text-sm sm:text-base font-black text-slate-900">
+                      <span className="text-sm sm:text-base font-black text-slate-900 tabular-nums">
                         ${product.price_usd.toFixed(2)}
                       </span>
-                      <span className="text-[9px] sm:text-[10px] font-extrabold text-sky-700 bg-sky-50 px-1.5 py-0.5 rounded-md border border-sky-100/80 block mt-0.5">
+                      <span className="text-[9px] sm:text-[10px] font-extrabold text-sky-700 bg-sky-50 px-1.5 py-0.5 rounded-md border border-sky-100/80 block mt-0.5 tabular-nums">
                         Bs. {priceBs}
                       </span>
                     </div>
@@ -889,11 +892,11 @@ export function PosModule({
           <div className="mt-4 pt-4 border-t border-slate-100">
             <div className="flex items-baseline justify-between mb-1">
               <span className="text-xs text-slate-500 font-semibold">Total en Dólares:</span>
-              <span className="text-2xl font-black text-slate-900 tracking-tight">${totalUsd.toFixed(2)}</span>
+              <span className="text-2xl font-black text-slate-900 tracking-tight tabular-nums">${totalUsd.toFixed(2)}</span>
             </div>
             <div className="flex items-baseline justify-between mb-4">
               <span className="text-xs text-slate-500 font-semibold">Total Tasa BCV:</span>
-              <span className="text-sm font-extrabold text-sky-700 bg-sky-50 px-2.5 py-1 rounded-xl border border-sky-100">
+              <span className="text-sm font-extrabold text-sky-700 bg-sky-50 px-2.5 py-1 rounded-xl border border-sky-100 tabular-nums">
                 Bs. {totalBs}
               </span>
             </div>
@@ -908,7 +911,7 @@ export function PosModule({
                 <CreditCard className="w-5 h-5" />
                 <span className="text-xs sm:text-sm uppercase tracking-wide">Cobrar Orden</span>
               </div>
-              <span className="text-base font-black bg-white/20 px-2.5 py-1 rounded-xl">
+              <span className="text-base font-black bg-white/20 px-2.5 py-1 rounded-xl tabular-nums">
                 ${totalUsd.toFixed(2)}
               </span>
             </button>
@@ -917,380 +920,86 @@ export function PosModule({
       </div>
 
       {/* 5. MODAL DE COBRO / MULTIPAGO VENEZOLANO */}
-      {isCheckoutOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-5 sm:p-6 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 duration-150 my-auto max-h-[92vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-              <div>
-                <h3 className="font-extrabold text-lg text-slate-900">Cobro de Venta</h3>
-                <p className="text-xs text-slate-500">
-                  {selectedClient?.name} • Tasa: Bs. {exchangeRate.rate.toFixed(2)}
-                </p>
-              </div>
-              <button
-                onClick={() => setIsCheckoutOpen(false)}
-                className="p-1 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Total a Pagar Grande */}
-            <div className="bg-sky-50 rounded-2xl p-4 text-center border border-sky-100 mb-4">
-              <p className="text-xs font-bold text-sky-800 uppercase tracking-wider mb-0.5">
-                Total a Recibir
-              </p>
-              <p className="text-3xl font-black text-sky-950">${totalUsd.toFixed(2)}</p>
-              <p className="text-sm font-extrabold text-sky-700">Bs. {totalBs}</p>
-            </div>
-
-            {/* Selector de Método de Pago */}
-            <div className="mb-4">
-              <label className="text-xs font-bold text-slate-700 block mb-2">
-                Método de Pago Principal:
-              </label>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {[
-                  { id: 'pago_movil', label: 'Pago Móvil', icon: <Smartphone className="w-4 h-4 text-sky-600" /> },
-                  { id: 'punto', label: 'Punto Venta', icon: <CreditCard className="w-4 h-4 text-indigo-600" /> },
-                  { id: 'efectivo_usd', label: 'Efectivo $', icon: <DollarSign className="w-4 h-4 text-emerald-600" /> },
-                  { id: 'efectivo_bs', label: 'Efectivo Bs', icon: <Banknote className="w-4 h-4 text-amber-600" /> },
-                ].map(m => {
-                  const isSelected = activePaymentMethod === m.id;
-                  return (
-                    <button
-                      key={m.id}
-                      type="button"
-                      onClick={() => setActivePaymentMethod(m.id as PaymentMethod)}
-                      className={`py-3 px-2 rounded-2xl text-xs font-extrabold flex flex-col items-center justify-center space-y-1.5 border transition-all pressable cursor-pointer ${
-                        isSelected
-                          ? 'bg-sky-600 text-white border-sky-600 shadow-md shadow-sky-500/20 scale-102'
-                          : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300'
-                      }`}
-                    >
-                      <span className={isSelected ? 'text-white' : ''}>{m.icon}</span>
-                      <span>{m.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Campos condicionales según el método */}
-            {activePaymentMethod === 'pago_movil' && (
-              <div className="bg-sky-50/60 rounded-2xl p-3.5 border border-sky-100 space-y-2 mb-4">
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="text-[10px] font-bold text-slate-600 uppercase">Banco:</label>
-                    <select
-                      value={pagoMovilBank}
-                      onChange={e => setPagoMovilBank(e.target.value)}
-                      className="w-full text-xs font-bold bg-white border border-slate-200 rounded-xl p-2.5 focus:border-sky-500 focus:outline-hidden"
-                    >
-                      <option value="Banesco">Banesco</option>
-                      <option value="Banco de Venezuela">Banco de Venezuela</option>
-                      <option value="Mercantil">Mercantil</option>
-                      <option value="Provincial">Provincial</option>
-                      <option value="Bancaribe">Bancaribe</option>
-                      <option value="BNC">BNC</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="text-[10px] font-bold text-slate-600 uppercase">
-                      Referencia (4 dígitos):
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Ej. 3062"
-                      value={pagoMovilRef}
-                      onChange={e => setPagoMovilRef(sanitizeBankReference(e.target.value))}
-                      maxLength={8}
-                      className="w-full text-xs font-bold bg-white border border-slate-200 rounded-xl p-2.5 font-mono uppercase focus:border-sky-500 focus:outline-hidden"
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activePaymentMethod === 'punto' && (
-              <div className="bg-indigo-50/50 rounded-2xl p-3.5 border border-indigo-100 space-y-2 mb-4">
-                <label className="text-[10px] font-bold text-indigo-900 uppercase">
-                  Referencia o Lote de Tarjeta:
-                </label>
-                <input
-                  type="text"
-                  placeholder="Ej. 8841"
-                  value={puntoRef}
-                  onChange={e => setPuntoRef(sanitizeBankReference(e.target.value))}
-                  maxLength={8}
-                  className="w-full text-xs font-bold bg-white border border-slate-200 rounded-xl p-2.5 font-mono uppercase focus:border-indigo-500 focus:outline-hidden"
-                />
-              </div>
-            )}
-
-            {activePaymentMethod === 'efectivo_usd' && (
-              <div className="bg-emerald-50/80 rounded-2xl p-3.5 border border-emerald-200 space-y-2.5 mb-4">
-                <label className="text-[10px] font-bold text-emerald-900 uppercase">
-                  Monto Recibido en Dólares ($):
-                </label>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="text"
-                    placeholder={`Mínimo $${totalUsd.toFixed(2)}`}
-                    value={cashUsdGiven}
-                    onChange={e => setCashUsdGiven(sanitizeCurrencyInput(e.target.value))}
-                    maxLength={8}
-                    className="flex-1 text-sm font-black bg-white border border-emerald-300 rounded-xl p-2.5 text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-emerald-400"
-                  />
-                  {[1, 5, 10, 20].map(bill => (
-                    <button
-                      key={bill}
-                      type="button"
-                      onClick={() => setCashUsdGiven(bill.toString())}
-                      className="px-2.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black pressable shadow-xs cursor-pointer"
-                    >
-                      ${bill}
-                    </button>
-                  ))}
-                </div>
-
-                {changeUsd > 0 && (
-                  <div className="mt-2 pt-2 border-t border-emerald-200 flex justify-between items-center">
-                    <span className="text-xs font-extrabold text-emerald-900">Vuelto a Entregar:</span>
-                    <div className="text-right">
-                      <span className="text-sm font-black text-emerald-900">${changeUsd.toFixed(2)}</span>
-                      <span className="text-xs text-emerald-700 font-bold block">Bs. {changeBs}</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Notas operativas de libreta (ej. "Vuelto de 1$") */}
-            <div className="mb-4">
-              <label className="text-[10px] font-bold text-slate-600 uppercase block mb-1">
-                Nota Operativa (opcional):
-              </label>
-              <input
-                type="text"
-                placeholder="Ej. Vuelto entregado, garrafón prestado..."
-                value={saleNotes}
-                onChange={e => setSaleNotes(e.target.value)}
-                className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl p-2.5 focus:border-sky-500 focus:outline-hidden"
-              />
-            </div>
-
-            {/* Botón Finalizar (Single Primary CTA en Checkout) */}
-            <button
-              type="button"
-              onClick={handleFinalizeSale}
-              className="w-full min-h-[50px] bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 hover:from-emerald-700 text-white font-black py-4 px-6 rounded-2xl shadow-xl shadow-emerald-600/30 active:scale-[0.98] transition-all flex items-center justify-center space-x-2.5 cursor-pointer pressable"
-            >
-              <CheckCircle2 className="w-5 h-5" />
-              <span>Registrar Venta Exitosa</span>
-            </button>
-          </div>
-        </div>
-      )}
+      <PaymentModal
+        isOpen={isCheckoutOpen}
+        onClose={() => setIsCheckoutOpen(false)}
+        selectedClient={selectedClient}
+        totalUsd={totalUsd}
+        totalBs={totalBs}
+        exchangeRate={exchangeRate}
+        activePaymentMethod={activePaymentMethod}
+        setActivePaymentMethod={setActivePaymentMethod}
+        pagoMovilBank={pagoMovilBank}
+        setPagoMovilBank={setPagoMovilBank}
+        pagoMovilRef={pagoMovilRef}
+        setPagoMovilRef={setPagoMovilRef}
+        puntoRef={puntoRef}
+        setPuntoRef={setPuntoRef}
+        cashUsdGiven={cashUsdGiven}
+        setCashUsdGiven={setCashUsdGiven}
+        changeUsd={changeUsd}
+        changeBs={changeBs.toString()}
+        saleNotes={saleNotes}
+        setSaleNotes={setSaleNotes}
+        onFinalizeSale={handleFinalizeSale}
+      />
 
       {/* 6. MODAL DE RECIBO DIGITAL EXITOSO */}
-      {completedSale && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl text-center border border-slate-100 animate-in zoom-in-95 duration-150">
-            <div className="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-3 shadow-inner">
-              <CheckCircle2 className="w-8 h-8" />
-            </div>
+      <ReceiptModal
+        completedSale={completedSale}
+        onClose={() => setCompletedSale(null)}
+        onShareWhatsApp={handleShareWhatsApp}
+        getWhatsAppSaleUrl={getWhatsAppSaleUrl}
+        systemSettings={systemSettings}
+      />
 
-            <h3 className="text-lg font-black text-slate-900">¡Venta Registrada!</h3>
-            <p className="text-xs text-slate-500 mb-4">{completedSale.folio}</p>
+      {/* 7. MODAL DE NUEVO CLIENTE RÁPIDO */}
+      <QuickClientModal
+        isOpen={isClientModalOpen}
+        onClose={() => {
+          setNewClientName('');
+          setNewClientPhone('');
+          setNewClientAddress('');
+          setHoneypot('');
+          setIsClientModalOpen(false);
+        }}
+        newClientName={newClientName}
+        setNewClientName={setNewClientName}
+        newClientPhone={newClientPhone}
+        setNewClientPhone={setNewClientPhone}
+        newClientAddress={newClientAddress}
+        setNewClientAddress={setNewClientAddress}
+        honeypot={honeypot}
+        setHoneypot={setHoneypot}
+        onSubmit={e => {
+          e.preventDefault();
+          const spamCheck = validateAntiSpamSubmission({
+            honeypotValue: honeypot,
+            formRenderTimeMs: formRenderTimeRef.current,
+            minHumanDurationMs: 400,
+          });
+          if (spamCheck.isSpam) {
+            console.warn('Envío de formulario bloqueado por seguridad anti-spam:', spamCheck.reason);
+            return;
+          }
 
-            <div className="bg-slate-50 rounded-2xl p-4 text-left border border-slate-100 mb-4 space-y-1.5 text-xs">
-              <div className="flex justify-between">
-                <span className="text-slate-500">Cliente:</span>
-                <span className="font-bold text-slate-800">{completedSale.client_name}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500">Total USD:</span>
-                <span className="font-extrabold text-slate-900">
-                  ${completedSale.total_usd.toFixed(2)}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500">Total Bs:</span>
-                <span className="font-bold text-sky-700">Bs. {completedSale.total_bs.toFixed(2)}</span>
-              </div>
-              {completedSale.notes && (
-                <div className="mt-2 pt-2 border-t border-slate-200 text-[11px] text-slate-600 italic">
-                  &quot;{completedSale.notes}&quot;
-                </div>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    const url = getWhatsAppSaleUrl(completedSale, systemSettings.freyeliz_phone || '+58 424-5658068');
-                    window.open(url, '_blank');
-                  }}
-                  className="bg-sky-600 hover:bg-sky-700 text-white font-bold py-2.5 px-2 rounded-xl shadow-md flex items-center justify-center space-x-1.5 text-xs pressable cursor-pointer min-h-[44px]"
-                  title="Enviar notificación a Freyeliz"
-                >
-                  <Share2 className="w-3.5 h-3.5" />
-                  <span>👩‍💼 A Freyeliz</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    const url = getWhatsAppSaleUrl(completedSale, systemSettings.jorge_phone || '+58 424-5567016');
-                    window.open(url, '_blank');
-                  }}
-                  className="bg-sky-800 hover:bg-sky-900 text-white font-bold py-2.5 px-2 rounded-xl shadow-md flex items-center justify-center space-x-1.5 text-xs pressable cursor-pointer min-h-[44px]"
-                  title="Enviar notificación a Jorge"
-                >
-                  <Share2 className="w-3.5 h-3.5" />
-                  <span>👨‍💼 A Jorge</span>
-                </button>
-              </div>
-
-              <button
-                onClick={handleShareWhatsApp}
-                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl shadow-sm flex items-center justify-center space-x-2 text-xs"
-              >
-                <MessageCircle className="w-4 h-4" />
-                <span>Enviar Recibo al Cliente</span>
-              </button>
-
-              <button
-                onClick={() => setCompletedSale(null)}
-                className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 rounded-xl text-xs"
-              >
-                Nueva Venta
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 7. MODAL DE NUEVO CLIENTE RÁPIDO (CON VALIDACIONES ESTRICTAS) */}
-      {isClientModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-sm w-full p-5 sm:p-6 shadow-2xl animate-in zoom-in-95">
-            <h3 className="font-black text-base text-slate-900 mb-1">Registrar Nuevo Cliente</h3>
-            <p className="text-xs text-slate-500 mb-4">
-              Se agregará al inicio del directorio en <strong>Orden Actual</strong>
-            </p>
-
-            <div className="space-y-3 mb-4">
-              <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Nombre Completo:</label>
-                <input
-                  type="text"
-                  placeholder="Ej. Carmen De La Luz"
-                  value={newClientName}
-                  onChange={e => setNewClientName(sanitizeAndCapitalizeName(e.target.value))}
-                  maxLength={50}
-                  className="w-full text-xs font-semibold p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:border-sky-500 focus:outline-hidden"
-                  autoFocus
-                />
-              </div>
-
-              <div>
-                <div className="flex justify-between items-center mb-1">
-                  <label className="text-xs font-bold text-slate-700">Teléfono (WhatsApp):</label>
-                  <span className="text-[10px] text-slate-400">Máx. 11 dígitos</span>
-                </div>
-                <input
-                  type="tel"
-                  placeholder="Ej. 0424-5567016"
-                  value={newClientPhone}
-                  onChange={e => {
-                    const res = sanitizeVenezuelanPhoneInput(e.target.value);
-                    setNewClientPhone(res.formatted);
-                  }}
-                  maxLength={12}
-                  className="w-full text-xs font-bold p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:border-sky-500 focus:outline-hidden"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Dirección / Sector:</label>
-                <input
-                  type="text"
-                  placeholder="Ej. Calle 26 con Carrera 25"
-                  value={newClientAddress}
-                  onChange={e => setNewClientAddress(sanitizeAddressText(e.target.value))}
-                  maxLength={120}
-                  className="w-full text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:border-sky-500 focus:outline-hidden"
-                />
-              </div>
-
-              {/* Honeypot invisible para protección anti-spam */}
-              <input
-                type="text"
-                name="_hp_security_check"
-                value={honeypot}
-                onChange={e => setHoneypot(e.target.value)}
-                tabIndex={-1}
-                autoComplete="off"
-                className="hidden"
-                aria-hidden="true"
-              />
-            </div>
-
-            <div className="flex space-x-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setNewClientName('');
-                  setNewClientPhone('');
-                  setNewClientAddress('');
-                  setHoneypot('');
-                  setIsClientModalOpen(false);
-                }}
-                className="flex-1 py-2.5 text-xs font-semibold text-slate-500 hover:bg-slate-100 rounded-xl cursor-pointer"
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  const spamCheck = validateAntiSpamSubmission({
-                    honeypotValue: honeypot,
-                    formRenderTimeMs: formRenderTimeRef.current,
-                    minHumanDurationMs: 400,
-                  });
-                  if (spamCheck.isSpam) {
-                    console.warn('Envío de formulario bloqueado por seguridad anti-spam:', spamCheck.reason);
-                    return;
-                  }
-
-                  if (newClientName.trim()) {
-                    const client = addClient({
-                      name: newClientName.trim(),
-                      phone: newClientPhone.trim() || 'N/A',
-                      address: newClientAddress.trim() || 'Entrega en tienda / Mostrador',
-                      balance_usd: 0,
-                    });
-                    analytics.logEvent('client_created_pos', 'client', { name: client.name });
-                    setSelectedClient(client);
-                    setNewClientName('');
-                    setNewClientPhone('');
-                    setNewClientAddress('');
-                    setHoneypot('');
-                    setIsClientModalOpen(false);
-                  }
-                }}
-                className="flex-1 py-2.5 text-xs font-extrabold bg-gradient-to-r from-sky-600 to-cyan-500 text-white rounded-xl hover:from-sky-700 shadow-md active:scale-95 transition-all cursor-pointer"
-              >
-                Guardar Cliente
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+          if (newClientName.trim()) {
+            const client = addClient({
+              name: newClientName.trim(),
+              phone: newClientPhone.trim() || 'N/A',
+              address: newClientAddress.trim() || 'Entrega en tienda / Mostrador',
+              balance_usd: 0,
+            });
+            analytics.logEvent('client_created_pos', 'client', { name: client.name });
+            setSelectedClient(client);
+            setNewClientName('');
+            setNewClientPhone('');
+            setNewClientAddress('');
+            setHoneypot('');
+            setIsClientModalOpen(false);
+          }
+        }}
+      />
     </div>
   );
 }
