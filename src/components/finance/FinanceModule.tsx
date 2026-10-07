@@ -15,6 +15,7 @@ import {
   ArrowDownRight,
   ArrowUpRight,
 } from 'lucide-react';
+import { SwipeableBottomSheet } from '@/components/common/SwipeableBottomSheet';
 
 export function FinanceModule() {
   const { sales, expenses, exchangeRate, currentUser, createExpense } = useH2OStore();
@@ -86,9 +87,9 @@ export function FinanceModule() {
 
         <button
           onClick={() => setIsExpenseModalOpen(true)}
-          className="bg-slate-900 hover:bg-slate-800 text-white font-black px-4 py-2.5 rounded-xl shadow-md text-xs flex items-center space-x-2 pressable cursor-pointer min-h-[44px]"
+          className="bg-white dark:bg-slate-800 text-slate-800 dark:text-white font-black px-4 py-2.5 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-xs flex items-center space-x-2 pressable cursor-pointer min-h-[44px] transition-all"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-4 h-4 text-sky-600" />
           <span>Registrar Gasto Operativo</span>
         </button>
       </div>
@@ -260,34 +261,36 @@ export function FinanceModule() {
       )}
 
       {/* Modal para Registrar Nuevo Gasto */}
-      {isExpenseModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl">
-            <h3 className="font-black text-lg text-slate-900 mb-1">Registrar Gasto Operativo</h3>
-            <p className="text-xs text-slate-500 mb-4">
-              Ingresa los detalles del pago o insumo adquirido
-            </p>
+      <SwipeableBottomSheet
+        isOpen={isExpenseModalOpen}
+        onClose={() => setIsExpenseModalOpen(false)}
+        title="Registrar Gasto Operativo"
+        maxWidth="md"
+      >
+        <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 px-1">
+          Ingresa los detalles del pago o insumo adquirido
+        </p>
 
-            <form onSubmit={handleSaveExpense} className="space-y-3">
+        <form onSubmit={handleSaveExpense} className="space-y-3 px-1 pb-4">
               <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Descripción:</label>
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Descripción:</label>
                 <input
                   type="text"
                   placeholder="Ej. Mantenimiento de filtros, compra de precintos..."
                   value={expenseDescription}
                   onChange={e => setExpenseDescription(e.target.value)}
-                  className="w-full text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-xl"
+                  className="w-full text-xs p-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 dark:text-white rounded-xl focus:border-sky-500 focus:outline-hidden"
                   required
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="text-xs font-bold text-slate-700 block mb-1">Categoría:</label>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Categoría:</label>
                   <select
                     value={expenseCategory}
                     onChange={e => setExpenseCategory(e.target.value)}
-                    className="w-full text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-xl"
+                    className="w-full text-xs p-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 dark:text-white rounded-xl focus:border-sky-500 focus:outline-hidden"
                   >
                     <option value="cisterna">Cisterna de Agua</option>
                     <option value="mantenimiento_filtros">Filtros y Purificación</option>
@@ -299,25 +302,25 @@ export function FinanceModule() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-slate-700 block mb-1">Monto ($ USD):</label>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Monto ($ USD):</label>
                   <input
                     type="number"
                     step="0.5"
                     placeholder="0.00"
                     value={expenseAmountUsd}
                     onChange={e => setExpenseAmountUsd(e.target.value)}
-                    className="w-full text-xs font-bold p-2.5 bg-slate-50 border border-slate-200 rounded-xl"
+                    className="w-full text-xs font-bold p-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 dark:text-white rounded-xl focus:border-sky-500 focus:outline-hidden"
                     required
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Método de Pago:</label>
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Método de Pago:</label>
                 <select
                   value={expensePaymentMethod}
                   onChange={e => setExpensePaymentMethod(e.target.value as PaymentMethod)}
-                  className="w-full text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-xl"
+                  className="w-full text-xs p-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 dark:text-white rounded-xl focus:border-sky-500 focus:outline-hidden"
                 >
                   <option value="efectivo_bs">Efectivo Bolívares (Bs)</option>
                   <option value="efectivo_usd">Efectivo Dólares ($)</option>
@@ -326,25 +329,23 @@ export function FinanceModule() {
                 </select>
               </div>
 
-              <div className="flex space-x-2 pt-3">
+              <div className="flex space-x-2 pt-4 sticky bottom-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md pb-2">
                 <button
                   type="button"
                   onClick={() => setIsExpenseModalOpen(false)}
-                  className="flex-1 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl pressable cursor-pointer min-h-[44px]"
+                  className="flex-1 py-2.5 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl pressable cursor-pointer min-h-[44px]"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 text-xs font-black bg-slate-900 text-white rounded-xl hover:bg-slate-800 shadow-md pressable cursor-pointer min-h-[44px]"
+                  className="flex-1 py-2.5 text-xs font-black bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl hover:bg-slate-800 dark:hover:bg-slate-200 shadow-md pressable cursor-pointer min-h-[44px]"
                 >
                   Guardar Gasto
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
+      </SwipeableBottomSheet>
     </div>
   );
 }

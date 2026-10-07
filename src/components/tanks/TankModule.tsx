@@ -3,7 +3,8 @@
 import React, { useState } from 'react';
 import { useH2OStore } from '@/lib/store';
 import { hasPermission } from '@/lib/auth';
-import { Database, Truck, Plus, CheckCircle, AlertCircle, Droplets } from 'lucide-react';
+import { Database, Truck, Plus, AlertCircle, Droplets } from 'lucide-react';
+import { SwipeableBottomSheet } from '@/components/common/SwipeableBottomSheet';
 
 export function TankModule() {
   const { tanks, registerCisternDelivery, updateTankLevel, currentUser } = useH2OStore();
@@ -40,24 +41,29 @@ export function TankModule() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
         <div>
-          <h2 className="text-xl font-black text-slate-900 flex items-center space-x-2">
-            <Database className="w-5 h-5 text-sky-600" />
-            <span>Monitoreo de Tanques & Cisternas</span>
+          <div className="inline-flex items-center space-x-1.5 bg-sky-50 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300 px-3 py-1 rounded-full text-xs font-bold border border-sky-200/80 dark:border-sky-800/50 mb-1.5 shadow-2xs">
+            <Database className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
+            <span>Control de Volumen & Inventario Líquido</span>
+          </div>
+          <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+            Tanques & Cisternas
           </h2>
-          <p className="text-xs text-slate-500">
-            Control de volumen de agua en tiempo real y recepción de camiones cisterna
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            Monitoreo en tiempo real de capacidad y recepción de suministros
           </p>
         </div>
 
-        {hasPermission(currentUser, 'admin') && (
-        <button
-          onClick={() => setIsCisternModalOpen(true)}
-          className="bg-gradient-to-r from-sky-600 to-cyan-500 hover:from-sky-700 text-white font-extrabold px-4 py-2.5 rounded-xl shadow-md shadow-sky-500/20 text-xs flex items-center space-x-2 active:scale-95 transition-all"
-        >
-          <Truck className="w-4 h-4" />
-          <span>+ Registrar Cisterna</span>
-        </button>
-        )}
+        <div className="flex items-center w-full sm:w-auto">
+          {hasPermission(currentUser, 'admin') && (
+          <button
+            onClick={() => setIsCisternModalOpen(true)}
+            className="flex-1 sm:flex-initial bg-gradient-to-r from-sky-600 to-cyan-500 dark:from-sky-700 dark:to-cyan-600 hover:from-sky-700 dark:hover:to-cyan-500 text-white font-extrabold px-4 py-2.5 rounded-xl shadow-md shadow-sky-500/20 dark:shadow-sky-900/40 text-xs flex items-center justify-center space-x-2 active:scale-95 transition-all min-h-[44px]"
+          >
+            <Truck className="w-4 h-4" />
+            <span>Registrar Cisterna</span>
+          </button>
+          )}
+        </div>
       </div>
 
       {/* Tarjetas Visuales de Tanques */}
@@ -69,23 +75,23 @@ export function TankModule() {
           return (
             <div
               key={tank.id}
-              className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm relative overflow-hidden flex flex-col justify-between"
+              className="bg-white dark:bg-slate-900/80 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden flex flex-col justify-between"
             >
               {/* Badge de Estado */}
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className="text-sm font-black text-slate-900">{tank.name}</h3>
-                  <span className="text-[11px] text-slate-400">
+                  <h3 className="text-sm font-black text-slate-900 dark:text-white">{tank.name}</h3>
+                  <span className="text-[11px] text-slate-400 dark:text-slate-500">
                     Capacidad Máxima: {tank.capacity_liters.toLocaleString()} L
                   </span>
                 </div>
                 <span
                   className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center space-x-1 ${
                     isOptimal
-                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                      ? 'bg-emerald-50 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50'
                       : isMedium
-                      ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                      : 'bg-red-50 text-red-700 border border-red-200 animate-pulse'
+                      ? 'bg-amber-50 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800/50'
+                      : 'bg-red-50 dark:bg-rose-900/40 text-red-700 dark:text-rose-400 border border-red-200 dark:border-rose-800/50 animate-pulse'
                   }`}
                 >
                   <span
@@ -100,15 +106,15 @@ export function TankModule() {
               {/* Medidor Gráfico de Agua */}
               <div className="my-3">
                 <div className="flex items-baseline justify-between mb-1.5">
-                  <span className="text-3xl font-black text-slate-900">
+                  <span className="text-3xl font-black text-slate-900 dark:text-white">
                     {tank.current_liters.toLocaleString()}{' '}
-                    <span className="text-sm text-slate-500 font-bold">L</span>
+                    <span className="text-sm text-slate-500 dark:text-slate-400 font-bold">L</span>
                   </span>
-                  <span className="text-2xl font-black text-sky-600">{tank.percentage}%</span>
+                  <span className="text-2xl font-black text-sky-600 dark:text-sky-400">{tank.percentage}%</span>
                 </div>
 
                 {/* Barra Líquida con Gradiente */}
-                <div className="w-full bg-slate-100 h-6 rounded-2xl overflow-hidden p-1 border border-slate-200 relative">
+                <div className="w-full bg-slate-100 dark:bg-slate-800 h-6 rounded-2xl overflow-hidden p-1 border border-slate-200 dark:border-slate-700 relative">
                   <div
                     className={`h-full rounded-xl transition-all duration-700 ${
                       isOptimal
@@ -124,14 +130,14 @@ export function TankModule() {
 
               {/* Botones de Ajuste Manual Rápido */}
               {hasPermission(currentUser, 'admin') && (
-              <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                <span className="text-slate-400 text-[10px] font-semibold">Ajuste manual:</span>
+              <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
+                <span className="text-slate-400 dark:text-slate-500 text-[10px] font-semibold">Ajuste manual:</span>
                 <div className="flex space-x-1">
                   {[-100, -500, +500, +1000].map(delta => (
                     <button
                       key={delta}
                       onClick={() => updateTankLevel(tank.id, tank.current_liters + delta)}
-                      className="px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded-lg text-[10px] font-bold text-slate-700"
+                      className="px-2 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg text-[10px] font-bold text-slate-700 dark:text-slate-300"
                     >
                       {delta > 0 ? `+${delta}L` : `${delta}L`}
                     </button>
@@ -146,12 +152,12 @@ export function TankModule() {
 
       {/* Alerta de Pedido de Cisterna */}
       {tanks.some(t => t.percentage <= 35) && (
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-center justify-between mb-6">
+        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 rounded-2xl p-4 flex items-center justify-between mb-6">
           <div className="flex items-center space-x-3">
-            <AlertCircle className="w-6 h-6 text-amber-600 shrink-0" />
+            <AlertCircle className="w-6 h-6 text-amber-600 dark:text-amber-500 shrink-0" />
             <div>
-              <p className="text-xs font-bold text-amber-900">Alerta de Suministro de Agua</p>
-              <p className="text-[11px] text-amber-700">
+              <p className="text-xs font-bold text-amber-900 dark:text-amber-400">Alerta de Suministro de Agua</p>
+              <p className="text-[11px] text-amber-700 dark:text-amber-300/80">
                 El nivel de uno o más tanques está por debajo del 35%. Se recomienda coordinar un camión cisterna.
               </p>
             </div>
@@ -159,7 +165,7 @@ export function TankModule() {
           {hasPermission(currentUser, 'admin') && (
           <button
             onClick={() => setIsCisternModalOpen(true)}
-            className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-lg shrink-0"
+            className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 dark:bg-amber-700 dark:hover:bg-amber-600 text-white text-xs font-bold rounded-lg shrink-0 transition-colors"
           >
             Pedir Cisterna
           </button>
@@ -168,20 +174,20 @@ export function TankModule() {
       )}
 
       {/* Modal de Registro de Cisterna */}
-      {isCisternModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl animate-in zoom-in-95 duration-150">
-            <h3 className="font-black text-lg text-slate-900 mb-1 flex items-center space-x-2">
-              <Truck className="w-5 h-5 text-sky-600" />
-              <span>Registrar Descarga de Cisterna</span>
-            </h3>
-            <p className="text-xs text-slate-500 mb-4">
-              Ingresa los litros comprados para sumar al tanque y registrar el gasto
-            </p>
+      <SwipeableBottomSheet
+        isOpen={isCisternModalOpen}
+        onClose={() => setIsCisternModalOpen(false)}
+        title="Registrar Descarga de Cisterna"
+        icon={<Truck className="w-5 h-5 text-sky-600 dark:text-sky-400" />}
+        maxWidth="md"
+      >
+        <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 px-1">
+          Ingresa los litros comprados para sumar al tanque y registrar el gasto
+        </p>
 
-            <form onSubmit={handleSaveCistern} className="space-y-3">
+        <form onSubmit={handleSaveCistern} className="space-y-3 px-1 pb-4">
               <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
                   Proveedor de Agua / Camión:
                 </label>
                 <input
@@ -189,42 +195,42 @@ export function TankModule() {
                   value={supplierName}
                   onChange={e => setSupplierName(e.target.value)}
                   placeholder="Ej. Cisterna Los Andes"
-                  className="w-full text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-xl"
+                  className="w-full text-xs p-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 dark:text-white rounded-xl focus:outline-hidden focus:border-sky-500"
                   required
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="text-xs font-bold text-slate-700 block mb-1">Litros Descargados:</label>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Litros Descargados:</label>
                   <input
                     type="number"
                     step="100"
                     value={litersDelivered}
                     onChange={e => setLitersDelivered(e.target.value)}
-                    className="w-full text-xs font-bold p-2.5 bg-slate-50 border border-slate-200 rounded-xl"
+                    className="w-full text-xs font-bold p-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 dark:text-white rounded-xl focus:outline-hidden focus:border-sky-500"
                     required
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-slate-700 block mb-1">Costo ($ USD):</label>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Costo ($ USD):</label>
                   <input
                     type="number"
                     step="0.5"
                     value={costUsd}
                     onChange={e => setCostUsd(e.target.value)}
-                    className="w-full text-xs font-bold p-2.5 bg-slate-50 border border-slate-200 rounded-xl"
+                    className="w-full text-xs font-bold p-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 dark:text-white rounded-xl focus:outline-hidden focus:border-sky-500"
                     required
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Tanque de Destino:</label>
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Tanque de Destino:</label>
                 <select
                   value={targetTankId}
                   onChange={e => setTargetTankId(e.target.value)}
-                  className="w-full text-xs font-semibold p-2.5 bg-slate-50 border border-slate-200 rounded-xl"
+                  className="w-full text-xs font-semibold p-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 dark:text-white rounded-xl focus:outline-hidden focus:border-sky-500"
                 >
                   {tanks.map(t => (
                     <option key={t.id} value={t.id}>
@@ -235,15 +241,15 @@ export function TankModule() {
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Estado del Pago:</label>
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Estado del Pago:</label>
                 <div className="flex space-x-2">
                   <button
                     type="button"
                     onClick={() => setPaymentStatus('pagado')}
-                    className={`flex-1 py-2 text-xs font-bold rounded-xl border ${
+                    className={`flex-1 py-2 text-xs font-bold rounded-xl border transition-colors ${
                       paymentStatus === 'pagado'
-                        ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
-                        : 'bg-white border-slate-200 text-slate-600'
+                        ? 'bg-emerald-50 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 border-emerald-300 dark:border-emerald-800/50'
+                        : 'bg-white dark:bg-slate-800/80 border-slate-200 dark:border-slate-700/80 text-slate-600 dark:text-slate-400'
                     }`}
                   >
                     Pagado de Inmediato
@@ -251,10 +257,10 @@ export function TankModule() {
                   <button
                     type="button"
                     onClick={() => setPaymentStatus('pendiente')}
-                    className={`flex-1 py-2 text-xs font-bold rounded-xl border ${
+                    className={`flex-1 py-2 text-xs font-bold rounded-xl border transition-colors ${
                       paymentStatus === 'pendiente'
-                        ? 'bg-amber-50 text-amber-700 border-amber-300'
-                        : 'bg-white border-slate-200 text-slate-600'
+                        ? 'bg-amber-50 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-800/50'
+                        : 'bg-white dark:bg-slate-800/80 border-slate-200 dark:border-slate-700/80 text-slate-600 dark:text-slate-400'
                     }`}
                   >
                     Pendiente (Deuda Proveedor)
@@ -262,25 +268,23 @@ export function TankModule() {
                 </div>
               </div>
 
-              <div className="flex space-x-2 pt-3">
+              <div className="flex space-x-2 pt-3 sticky bottom-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md pb-2">
                 <button
                   type="button"
                   onClick={() => setIsCisternModalOpen(false)}
-                  className="flex-1 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl pressable cursor-pointer"
+                  className="flex-1 py-2.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl pressable cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-3 text-xs font-black bg-gradient-to-r from-sky-600 via-sky-500 to-cyan-500 hover:from-sky-700 text-white rounded-xl shadow-md shadow-sky-500/25 pressable cursor-pointer active:scale-95 transition-all"
+                  className="flex-1 py-3 text-xs font-black bg-gradient-to-r from-sky-600 via-sky-500 to-cyan-500 dark:from-sky-700 dark:to-cyan-600 hover:from-sky-700 dark:hover:to-cyan-500 text-white rounded-xl shadow-md shadow-sky-500/25 dark:shadow-sky-900/40 pressable cursor-pointer active:scale-95 transition-all"
                 >
                   Guardar Descarga
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
+      </SwipeableBottomSheet>
     </div>
   );
 }

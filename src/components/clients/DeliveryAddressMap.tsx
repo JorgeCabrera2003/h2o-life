@@ -128,7 +128,7 @@ export function DeliveryAddressMap({
       {/* 1. INPUT DE DIRECCIÓN CON AUTOCOMPLETADO INTELIGENTE */}
       <div className="relative">
         <div className="flex justify-between items-center mb-1">
-          <label className="text-xs font-bold text-slate-800 flex items-center space-x-1">
+          <label className="text-xs font-bold text-slate-800 dark:text-slate-300 flex items-center space-x-1">
             <MapPin className="w-3.5 h-3.5 text-rose-500" />
             <span>Dirección de Despacho (con autocompletado de calles):</span>
           </label>
@@ -136,7 +136,7 @@ export function DeliveryAddressMap({
             type="button"
             onClick={handleGetGpsLocation}
             disabled={isLocating}
-            className="text-[11px] font-bold text-sky-700 bg-sky-50 hover:bg-sky-100 border border-sky-200 px-2.5 py-1 rounded-lg flex items-center space-x-1 active:scale-95 transition-all"
+            className="text-[11px] font-bold text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-900/40 hover:bg-sky-100 dark:hover:bg-sky-900/60 border border-sky-200 dark:border-sky-800/50 px-2.5 py-1 rounded-lg flex items-center space-x-1 active:scale-95 transition-all"
           >
             <Crosshair className={`w-3 h-3 ${isLocating ? 'animate-spin text-sky-600' : ''}`} />
             <span>{isLocating ? 'Fijando GPS...' : 'Usar mi GPS'}</span>
@@ -150,19 +150,19 @@ export function DeliveryAddressMap({
           onFocus={() => setShowSuggestions(true)}
           placeholder="Escribe calle, carrera o sector (ej. Calle 26 con Carrera 25)..."
           maxLength={120}
-          className="w-full text-xs font-semibold p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:border-sky-500 shadow-2xs"
+          className="w-full text-xs font-semibold p-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 dark:text-white rounded-xl focus:outline-hidden focus:border-sky-500 dark:focus:border-sky-500 shadow-2xs placeholder-slate-400 dark:placeholder-slate-500 transition-colors"
           required
         />
 
         {/* Desplegable de Sugerencias Dinámicas */}
         {showSuggestions && suggestions.length > 0 && (
-          <div className="absolute left-0 right-0 top-full mt-1 z-30 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-1 duration-150">
-            <div className="p-1.5 bg-slate-50 border-b border-slate-100 flex items-center justify-between text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+          <div className="absolute left-0 right-0 top-full mt-1 z-30 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-1 duration-150">
+            <div className="p-1.5 bg-slate-50 dark:bg-slate-950 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between text-[10px] text-slate-400 font-bold uppercase tracking-wider">
               <span>Sugerencias de Calles y Cuadrículas</span>
               <button
                 type="button"
                 onClick={() => setShowSuggestions(false)}
-                className="hover:text-slate-700 text-xs px-1.5 py-0.5 rounded hover:bg-slate-200"
+                className="hover:text-slate-700 dark:hover:text-slate-300 text-xs px-1.5 py-0.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700"
               >
                 ✕
               </button>
@@ -173,7 +173,7 @@ export function DeliveryAddressMap({
                   key={idx}
                   type="button"
                   onClick={() => handleSelectSuggestion(item)}
-                  className="w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-sky-50 hover:text-sky-900 flex items-center space-x-2 transition-colors group"
+                  className="w-full text-left px-3 py-2 text-xs text-slate-700 dark:text-slate-300 hover:bg-sky-50 dark:hover:bg-sky-900/40 hover:text-sky-900 dark:hover:text-sky-100 flex items-center space-x-2 transition-colors group"
                 >
                   <MapPin className="w-3.5 h-3.5 text-sky-500 shrink-0 group-hover:scale-110 transition-transform" />
                   <span className="font-medium truncate">{item}</span>
@@ -186,7 +186,7 @@ export function DeliveryAddressMap({
 
       {/* 2. PUNTO DE REFERENCIA & CHIPS RÁPIDOS */}
       <div>
-        <label className="text-xs font-bold text-slate-800 block mb-1">
+        <label className="text-xs font-bold text-slate-800 dark:text-slate-300 block mb-1">
           Punto de Referencia (detalles para el repartidor):
         </label>
         <input
@@ -195,7 +195,7 @@ export function DeliveryAddressMap({
           onChange={(e) => setReferencePoint(sanitizeAddressText(e.target.value))}
           placeholder="Ej. Al lado de la farmacia, portón azul, frente a..."
           maxLength={100}
-          className="w-full text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-xl mb-2"
+          className="w-full text-xs p-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 dark:text-white rounded-xl mb-2 focus:outline-hidden focus:border-sky-500 dark:focus:border-sky-500 shadow-2xs placeholder-slate-400 dark:placeholder-slate-500 transition-colors"
         />
 
         {/* Chips de llenado rápido */}
@@ -209,7 +209,7 @@ export function DeliveryAddressMap({
                 const combined = referencePoint ? `${referencePoint}, ${chip}` : chip;
                 setReferencePoint(combined);
               }}
-              className="text-[10px] font-semibold bg-slate-100 hover:bg-sky-50 hover:text-sky-800 hover:border-sky-200 text-slate-600 border border-slate-200 px-2 py-0.5 rounded-lg transition-colors"
+              className="text-[10px] font-semibold bg-slate-100 dark:bg-slate-800/80 hover:bg-sky-50 dark:hover:bg-sky-900/40 hover:text-sky-800 dark:hover:text-sky-300 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700/80 px-2 py-0.5 rounded-lg transition-colors"
             >
               + {chip}
             </button>
@@ -220,11 +220,11 @@ export function DeliveryAddressMap({
       {/* 3. MAPA INTERACTIVO MANIPULABLE (Leaflet Drag & Drop Pin) */}
       <div className="mt-3">
         <div className="flex items-center justify-between mb-1.5">
-          <span className="text-[11px] font-bold text-slate-700 flex items-center space-x-1">
-            <Compass className="w-3.5 h-3.5 text-sky-600" />
+          <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300 flex items-center space-x-1">
+            <Compass className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
             <span>Mapa Interactivo (Puedes moverlo y arrastrar el pin):</span>
           </span>
-          <span className="text-[10px] font-mono text-sky-700 bg-sky-50 px-2 py-0.5 rounded-md border border-sky-200">
+          <span className="text-[10px] font-mono text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-900/40 px-2 py-0.5 rounded-md border border-sky-200 dark:border-sky-800/50">
             {currentCoords.lat.toFixed(5)}, {currentCoords.lng.toFixed(5)}
           </span>
         </div>

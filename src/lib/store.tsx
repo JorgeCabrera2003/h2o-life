@@ -23,6 +23,7 @@ import {
   DEMO_TEST_EXPENSES,
   DEMO_TEST_PRODUCTS,
 } from '@/lib/demoData';
+import { OfflineSyncQueue } from '@/lib/offline-sync';
 
 export const INITIAL_USERS: UserProfile[] = [
   {
@@ -350,8 +351,19 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           localStorage.setItem('h2o_custom_products', JSON.stringify(migrated));
         }
       }
+      
+      // Cargar Ventas, Gastos y Clientes si no estamos en demo
       const savedDemo = localStorage.getItem('h2o_demo_mode');
-      if (savedDemo === 'true') {
+      if (savedDemo !== 'true') {
+        const savedSales = localStorage.getItem('h2o_sales');
+        if (savedSales) setSales(JSON.parse(savedSales));
+
+        const savedExpenses = localStorage.getItem('h2o_expenses');
+        if (savedExpenses) setExpenses(JSON.parse(savedExpenses));
+
+        const savedClients = localStorage.getItem('h2o_clients');
+        if (savedClients) setClients(JSON.parse(savedClients));
+      } else {
         setSales(DEMO_TEST_SALES);
         setExpenses(DEMO_TEST_EXPENSES);
         setClients([...INITIAL_CLIENTS, ...DEMO_TEST_CLIENTS]);
@@ -360,6 +372,25 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       }
     } catch {}
   }, []);
+
+  // Efectos de Guardado Automático
+  useEffect(() => {
+    if (!isDemoModeActive && sales !== INITIAL_SALES) {
+      try { localStorage.setItem('h2o_sales', JSON.stringify(sales)); } catch {}
+    }
+  }, [sales, isDemoModeActive]);
+
+  useEffect(() => {
+    if (!isDemoModeActive && expenses !== INITIAL_EXPENSES) {
+      try { localStorage.setItem('h2o_expenses', JSON.stringify(expenses)); } catch {}
+    }
+  }, [expenses, isDemoModeActive]);
+
+  useEffect(() => {
+    if (!isDemoModeActive && clients !== INITIAL_CLIENTS) {
+      try { localStorage.setItem('h2o_clients', JSON.stringify(clients)); } catch {}
+    }
+  }, [clients, isDemoModeActive]);
 
   const saveProductsToStorage = (updatedProducts: Product[]) => {
     try {
@@ -566,12 +597,19 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     
     addAuditLog('CREATE', 'sales', newSale.id, `Venta generada por ${totalUsd.toFixed(2)}$ (${totalBs} Bs)`, null, newSale);
 
+    const totalPaidUsd = payments.reduce((acc, p) => acc + (p.method === 'fiado' ? 0 : p.amount_usd), 0);
+    const debtUsd = totalUsd - totalPaidUsd > 0 ? totalUsd - totalPaidUsd : 0;
+
     // Actualizar historial del cliente
     if (client) {
       setClients(prev =>
         prev.map(c =>
           c.id === client.id
-            ? { ...c, total_orders: (c.total_orders || 0) + 1 }
+            ? { 
+                ...c, 
+                total_orders: (c.total_orders || 0) + 1,
+                balance_usd: c.balance_usd - debtUsd
+              }
             : c
         )
       );
@@ -606,6 +644,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
     setSales(prev => [newSale, ...prev]);
     clearCart();
+
+    // Sincronización Resiliente a Supabase
+    OfflineSyncQueue.enqueue('SALE', newSale);
+
     return newSale;
   };
 
@@ -616,6 +658,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       created_at: new Date().toISOString(),
     };
     setExpenses(prev => [newExpense, ...prev]);
+
+    // Sincronización Resiliente a Supabase
+    OfflineSyncQueue.enqueue('EXPENSE', newExpense);
   };
 
   const addClient = (clientData: Omit<Client, 'id' | 'created_at'>): Client => {

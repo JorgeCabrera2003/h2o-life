@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { CookieConsentBanner } from '@/components/common/CookieConsentBanner';
 import { AnalyticsTracker } from '@/components/common/AnalyticsTracker';
+import { ThemeToaster } from '@/components/common/ThemeToaster';
+import { ThemeProvider } from 'next-themes';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -211,7 +213,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
+    <html lang="es" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -220,17 +222,38 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
       </head>
-      <body className="min-h-full flex flex-col bg-slate-50 text-slate-900 overflow-x-hidden" suppressHydrationWarning>
-        <StoreProvider>
-          {/* Telemetría y Analítica */}
-          <AnalyticsTracker />
+      <body className="min-h-full flex flex-col bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 overflow-x-hidden" suppressHydrationWarning>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <StoreProvider>
+            {/* Telemetría y Analítica */}
+            <AnalyticsTracker />
 
-          {/* Contenido principal de la aplicación */}
-          {children}
+            {/* Script temporal para matar Service Workers corruptos */}
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `
+                  if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                      for(let registration of registrations) {
+                        registration.unregister();
+                        console.log('ServiceWorker unregistered to fix cache');
+                      }
+                    });
+                  }
+                `,
+              }}
+            />
 
-          {/* Banner de consentimiento de cookies y almacenamiento local */}
-          <CookieConsentBanner />
-        </StoreProvider>
+            {/* Contenido principal de la aplicación */}
+            {children}
+
+            {/* Toast Notifications Globales */}
+            <ThemeToaster richColors position="bottom-center" />
+
+            {/* Banner de consentimiento de cookies y almacenamiento local */}
+            <CookieConsentBanner />
+          </StoreProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

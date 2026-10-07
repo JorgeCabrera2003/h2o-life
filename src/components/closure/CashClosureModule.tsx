@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useH2OStore } from '@/lib/store';
 import { CashClosure } from '@/types';
 import { Lock, CheckCircle2, Share2, DollarSign, Banknote, Smartphone, CreditCard } from 'lucide-react';
+import { toast } from 'sonner';
 
 export function CashClosureModule() {
   const { sales, expenses, exchangeRate, currentUser, createCashClosure, cashClosures } = useH2OStore();
@@ -40,6 +41,7 @@ export function CashClosureModule() {
   const handleGenerateClosure = () => {
     const closure = createCashClosure(closureNotes);
     setLastGeneratedClosure(closure);
+    toast.success('Cierre de caja generado exitosamente');
   };
 
   const handleShareWhatsAppClosure = (closureData: CashClosure) => {
@@ -64,92 +66,92 @@ export function CashClosureModule() {
 
       {/* Resumen Superior */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
-        <div className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs">
+        <div className="bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs">
           <span className="text-[10px] font-bold text-slate-400 uppercase">Ventas Hoy</span>
-          <p className="text-xl font-black text-slate-900 mt-0.5">{totalSalesCount}</p>
+          <p className="text-xl font-black text-slate-900 dark:text-white mt-0.5">{totalSalesCount}</p>
         </div>
-        <div className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs">
+        <div className="bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs">
           <span className="text-[10px] font-bold text-slate-400 uppercase">Ingresos USD</span>
-          <p className="text-xl font-black text-emerald-600 mt-0.5">${totalUsd.toFixed(2)}</p>
+          <p className="text-xl font-black text-emerald-600 dark:text-emerald-400 mt-0.5">${totalUsd.toFixed(2)}</p>
         </div>
-        <div className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs">
+        <div className="bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs">
           <span className="text-[10px] font-bold text-slate-400 uppercase">Ingresos Bs</span>
-          <p className="text-xl font-black text-sky-600 mt-0.5">Bs. {totalBs.toFixed(2)}</p>
+          <p className="text-xl font-black text-sky-600 dark:text-sky-400 mt-0.5">Bs. {totalBs.toFixed(2)}</p>
         </div>
-        <div className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs">
+        <div className="bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xs">
           <span className="text-[10px] font-bold text-slate-400 uppercase">Gastos Turno</span>
-          <p className="text-xl font-black text-rose-500 mt-0.5">${totalExpensesUsd.toFixed(2)}</p>
+          <p className="text-xl font-black text-rose-500 dark:text-rose-400 mt-0.5">${totalExpensesUsd.toFixed(2)}</p>
         </div>
       </div>
 
       {/* Desglose por Método de Pago */}
-      <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-xs mb-5">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 shadow-xs mb-5">
         <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">
           Arqueo por Métodos de Pago
         </h3>
 
         <div className="space-y-2.5">
           {/* Efectivo USD */}
-          <div className="flex items-center justify-between p-3 bg-emerald-50/60 rounded-xl border border-emerald-100">
+          <div className="flex items-center justify-between p-3 bg-emerald-50/60 dark:bg-emerald-900/20 rounded-xl border border-emerald-100 dark:border-emerald-800/50">
             <div className="flex items-center space-x-2.5">
-              <span className="p-1.5 rounded-lg bg-emerald-600 text-white">
+              <span className="p-1.5 rounded-lg bg-emerald-600 dark:bg-emerald-500/20 text-white dark:text-emerald-400">
                 <DollarSign className="w-4 h-4" />
               </span>
               <div>
-                <span className="text-xs font-bold text-slate-800 block">Efectivo en Dólares ($)</span>
-                <span className="text-[10px] text-slate-500">Billetes en gaveta</span>
+                <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block">Efectivo en Dólares ($)</span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400">Billetes en gaveta</span>
               </div>
             </div>
-            <span className="text-base font-black text-emerald-700">${efectivoUsd.toFixed(2)}</span>
+            <span className="text-base font-black text-emerald-700 dark:text-emerald-400">${efectivoUsd.toFixed(2)}</span>
           </div>
 
           {/* Efectivo Bs */}
-          <div className="flex items-center justify-between p-3 bg-sky-50/60 rounded-xl border border-sky-100">
+          <div className="flex items-center justify-between p-3 bg-sky-50/60 dark:bg-sky-900/20 rounded-xl border border-sky-100 dark:border-sky-800/50">
             <div className="flex items-center space-x-2.5">
-              <span className="p-1.5 rounded-lg bg-sky-600 text-white">
+              <span className="p-1.5 rounded-lg bg-sky-600 dark:bg-sky-500/20 text-white dark:text-sky-400">
                 <Banknote className="w-4 h-4" />
               </span>
               <div>
-                <span className="text-xs font-bold text-slate-800 block">Efectivo en Bolívares (Bs)</span>
-                <span className="text-[10px] text-slate-500">Billetes en gaveta</span>
+                <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block">Efectivo en Bolívares (Bs)</span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400">Billetes en gaveta</span>
               </div>
             </div>
-            <span className="text-base font-black text-sky-800">Bs. {efectivoBs.toFixed(2)}</span>
+            <span className="text-base font-black text-sky-800 dark:text-sky-400">Bs. {efectivoBs.toFixed(2)}</span>
           </div>
 
           {/* Punto de Venta */}
-          <div className="flex items-center justify-between p-3 bg-indigo-50/60 rounded-xl border border-indigo-100">
+          <div className="flex items-center justify-between p-3 bg-indigo-50/60 dark:bg-indigo-900/20 rounded-xl border border-indigo-100 dark:border-indigo-800/50">
             <div className="flex items-center space-x-2.5">
-              <span className="p-1.5 rounded-lg bg-indigo-600 text-white">
+              <span className="p-1.5 rounded-lg bg-indigo-600 dark:bg-indigo-500/20 text-white dark:text-indigo-400">
                 <CreditCard className="w-4 h-4" />
               </span>
               <div>
-                <span className="text-xs font-bold text-slate-800 block">Punto de Venta (Tarjeta)</span>
-                <span className="text-[10px] text-slate-500">Total en el lote del punto</span>
+                <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block">Punto de Venta (Tarjeta)</span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400">Total en el lote del punto</span>
               </div>
             </div>
-            <span className="text-base font-black text-indigo-800">Bs. {puntoBs.toFixed(2)}</span>
+            <span className="text-base font-black text-indigo-800 dark:text-indigo-400">Bs. {puntoBs.toFixed(2)}</span>
           </div>
 
           {/* Pago Móvil */}
-          <div className="flex items-center justify-between p-3 bg-amber-50/60 rounded-xl border border-amber-100">
+          <div className="flex items-center justify-between p-3 bg-amber-50/60 dark:bg-amber-900/20 rounded-xl border border-amber-100 dark:border-amber-800/50">
             <div className="flex items-center space-x-2.5">
-              <span className="p-1.5 rounded-lg bg-amber-600 text-white">
+              <span className="p-1.5 rounded-lg bg-amber-600 dark:bg-amber-500/20 text-white dark:text-amber-400">
                 <Smartphone className="w-4 h-4" />
               </span>
               <div>
-                <span className="text-xs font-bold text-slate-800 block">Pago Móvil</span>
-                <span className="text-[10px] text-slate-500">Verificado en cuentas bancarias</span>
+                <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block">Pago Móvil</span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400">Verificado en cuentas bancarias</span>
               </div>
             </div>
-            <span className="text-base font-black text-amber-800">Bs. {pagoMovilBs.toFixed(2)}</span>
+            <span className="text-base font-black text-amber-800 dark:text-amber-400">Bs. {pagoMovilBs.toFixed(2)}</span>
           </div>
         </div>
       </div>
 
       {/* Formulario de Cierre */}
-      <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-xs mb-5">
-        <label className="text-xs font-bold text-slate-700 block mb-1.5">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 shadow-xs mb-5">
+        <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
           Observaciones del Cierre de Caja:
         </label>
         <textarea
@@ -157,13 +159,13 @@ export function CashClosureModule() {
           placeholder="Ej. Todo cuadrado con el lote del punto. Se apartaron $20 para la cisterna de mañana..."
           value={closureNotes}
           onChange={e => setClosureNotes(e.target.value)}
-          className="w-full text-xs p-3 bg-slate-50 border border-slate-200 rounded-xl mb-4"
+          className="w-full text-xs p-3 bg-slate-50 dark:bg-slate-950 dark:text-white border border-slate-200 dark:border-slate-800 rounded-xl mb-4 focus:outline-hidden focus:border-sky-500"
         />
 
         <button
           type="button"
           onClick={handleGenerateClosure}
-          className="w-full min-h-[50px] bg-gradient-to-r from-sky-600 via-sky-500 to-cyan-500 hover:from-sky-700 text-white font-black py-4 px-6 rounded-2xl shadow-xl shadow-sky-500/25 active:scale-[0.98] transition-all flex items-center justify-center space-x-2.5 pressable cursor-pointer"
+          className="w-full min-h-[44px] bg-gradient-to-r from-sky-600 to-cyan-500 hover:from-sky-700 dark:hover:to-cyan-500 text-white font-black py-3.5 px-6 rounded-xl shadow-md active:scale-[0.98] transition-all flex items-center justify-center space-x-2 pressable cursor-pointer text-sm"
         >
           <Lock className="w-4 h-4" />
           <span>Generar y Guardar Cierre de Turno</span>
@@ -172,9 +174,9 @@ export function CashClosureModule() {
 
       {/* Último Cierre Generado */}
       {lastGeneratedClosure && (
-        <div className="bg-emerald-50/80 border border-emerald-200 rounded-3xl p-5 mb-5 animate-in fade-in zoom-in-95">
+        <div className="bg-emerald-50/80 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/50 rounded-3xl p-5 mb-5 animate-in fade-in zoom-in-95">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-black text-emerald-800 flex items-center space-x-1.5">
+            <span className="text-xs font-black text-emerald-800 dark:text-emerald-400 flex items-center space-x-1.5">
               <CheckCircle2 className="w-4 h-4 text-emerald-600" />
               <span>Cierre de Turno Guardado con Éxito</span>
             </span>

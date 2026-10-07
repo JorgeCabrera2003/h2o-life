@@ -1,4 +1,5 @@
 import { UserProfile } from '@/types';
+import { supabase, isSupabaseConfigured } from './supabase';
 
 // SHA-256 Polyfill / Helper (for internal client-side auth in PWA)
 async function hashPin(pin: string): Promise<string> {
@@ -46,14 +47,83 @@ const USER_CREDENTIALS = [
   },
 ];
 
-export async function verifyLogin(pin: string): Promise<UserProfile | null> {
-  const hash = await hashPin(pin);
+export async function verifyLogin(pinOrEmail: string, password?: string): Promise<UserProfile | null> {
+  // 1. Supabase Auth (Producción)
+  if (isSupabaseConfigured && password) {
+    try {
+      const { data, error } = await supabase!.auth.signInWithPassword({
+        email: pinOrEmail,
+        password: password,
+      });
+      
+      if (error || !data.user) return null;
+      
+      // Obtener el perfil de la tabla public.profiles validado por RLS
+      const { data: profileData } = await supabase!
+        .from('profiles')
+        .select('*')
+        .eq('id', data.user.id)
+        .single();
+        
+      if (profileData) {
+        return {
+          id: profileData.id,
+          name: profileData.full_name || 'Usuario',
+          role: profileData.role,
+          email: profileData.email,
+          avatar: profileData.role === 'superadmin' ? '👨‍💼' : '👩‍🔧',
+          phone: '',
+          permissions: profileData.role === 'superadmin' ? ['all'] : profileData.role === 'admin' ? ['admin', 'pos', 'audit'] : ['pos']
+        };
+      }
+    } catch (e) {
+      console.error('Error logging in with Supabase:', e);
+      return null;
+    }
+  }
+
+  // 2. Fallback / Mock Local (Desarrollo / Si Supabase no está configurado)
+  const hash = await hashPin(pinOrEmail); // En modo fallback, `pinOrEmail` es el PIN
   const user = USER_CREDENTIALS.find(u => u.pinHash === hash);
   if (user) {
     const { pinHash, ...profile } = user;
     return profile as UserProfile;
   }
   return null;
+}
+
+// Cargar sesión activa de Supabase
+export async function getActiveSession(): Promise<UserProfile | null> {
+  if (!isSupabaseConfigured) return null;
+  
+  const { data: { session } } = await supabase!.auth.getSession();
+  if (!session?.user) return null;
+  
+  const { data: profileData } = await supabase!
+    .from('profiles')
+    .select('*')
+    .eq('id', session.user.id)
+    .single();
+    
+  if (profileData) {
+    return {
+      id: profileData.id,
+      name: profileData.full_name || 'Usuario',
+      role: profileData.role,
+      email: profileData.email,
+      avatar: profileData.role === 'superadmin' ? '👨‍💼' : '👩‍🔧',
+      phone: '',
+      permissions: profileData.role === 'superadmin' ? ['all'] : profileData.role === 'admin' ? ['admin', 'pos', 'audit'] : ['pos']
+    };
+  }
+  
+  return null;
+}
+
+export async function signOut() {
+  if (isSupabaseConfigured) {
+    await supabase!.auth.signOut();
+  }
 }
 
 export function hasPermission(user: UserProfile | null, permission: string): boolean {

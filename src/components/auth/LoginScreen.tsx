@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { useH2OStore } from '@/lib/store';
 import { verifyLogin, USERS_LIST } from '@/lib/auth';
 import { Lock, User, KeyRound, ShieldCheck, AlertCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'sonner';
 
 export function LoginScreen() {
   const { login } = useH2OStore();
@@ -49,12 +51,17 @@ export function LoginScreen() {
     try {
       const user = await verifyLogin(currentPin);
       if (user && user.id === selectedUser) {
+        toast.success(`Bienvenido ${user.name}`);
         login(user);
       } else {
-        setError('PIN incorrecto o usuario no coincide.');
+        const msg = 'PIN incorrecto o usuario no coincide.';
+        setError(msg);
+        toast.error(msg);
       }
     } catch (err) {
-      setError('Error al verificar credenciales.');
+      const msg = 'Error al verificar credenciales.';
+      setError(msg);
+      toast.error(msg);
     } finally {
       setIsLoading(false);
     }
@@ -94,8 +101,16 @@ export function LoginScreen() {
           <p className="text-sm font-medium text-slate-500 mt-1">Acceso Seguro al Sistema</p>
         </div>
 
+        <AnimatePresence mode="wait">
         {!selectedUser ? (
-          <div className="space-y-3 animate-in slide-in-from-right-4 duration-300">
+          <motion.div 
+            key="user-selection"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.2 }}
+            className="space-y-3"
+          >
             <h2 className="text-sm font-bold text-slate-600 mb-4 text-center">Seleccione su usuario:</h2>
             {USERS_LIST.map((u) => (
               <button
@@ -112,9 +127,16 @@ export function LoginScreen() {
                 </div>
               </button>
             ))}
-          </div>
+          </motion.div>
         ) : (
-          <form onSubmit={handleLogin} className="animate-in slide-in-from-left-4 duration-300">
+          <motion.form 
+            key="pin-entry"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            transition={{ duration: 0.2 }}
+            onSubmit={handleLogin}
+          >
             <div className="flex items-center space-x-3 mb-6 bg-slate-100 p-3 rounded-2xl">
               <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-xl shadow-xs">
                 {USERS_LIST.find(u => u.id === selectedUser)?.avatar}
@@ -195,8 +217,9 @@ export function LoginScreen() {
                 <span className="text-xs font-bold text-rose-700">{error}</span>
               </div>
             )}
-          </form>
+          </motion.form>
         )}
+        </AnimatePresence>
       </div>
       
       <p className="mt-8 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">

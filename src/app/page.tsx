@@ -9,6 +9,7 @@ import { PosModule } from '@/components/pos/PosModule';
 import { LoginScreen } from '@/components/auth/LoginScreen';
 import { Client } from '@/types';
 import { useH2OStore } from '@/lib/store';
+import { hasPermission } from '@/lib/auth';
 
 // Componente visual de carga suave para transiciones fluidas de pestañas
 function TabLoadingSkeleton({ title, subtitle }: { title: string; subtitle: string }) {
@@ -85,8 +86,8 @@ const FinanceModule = dynamic(
   }
 );
 
-const SettingsModule = dynamic(
-  () => import('@/components/settings/SettingsModule').then((m) => m.SettingsModule),
+const SettingsPanel = dynamic(
+  () => import('@/components/settings/SettingsPanel').then((m) => m.SettingsPanel),
   {
     loading: () => <TabLoadingSkeleton title="Configuración H2O Life" subtitle="Cargando opciones del sistema..." />,
     ssr: false,
@@ -108,7 +109,20 @@ function H2OLifeAppContent() {
   const [isCartDrawerOpen, setIsCartDrawerOpen] = useState(false);
   const [selectedClientForSale, setSelectedClientForSale] = useState<Client | null>(null);
   
-  const { isAuthenticated } = useH2OStore();
+  const { isAuthenticated, currentUser } = useH2OStore();
+
+  // Redirección de seguridad: Si cambia de perfil a uno sin permisos mientras está en una pestaña restringida
+  useEffect(() => {
+    if (activeTab === 'audit' && !hasPermission(currentUser, 'audit')) {
+      setActiveTab('pos');
+    }
+    if (activeTab === 'settings' && !hasPermission(currentUser, 'admin')) {
+      setActiveTab('pos');
+    }
+    if (activeTab === 'finance' && !hasPermission(currentUser, 'admin')) {
+      setActiveTab('pos');
+    }
+  }, [activeTab, currentUser]);
 
   useEffect(() => {
     const tabParam = searchParams.get('tab') as ActiveTab;
@@ -191,7 +205,7 @@ function H2OLifeAppContent() {
 
         {activeTab === 'finance' && <FinanceModule />}
 
-        {activeTab === 'settings' && <SettingsModule />}
+        {activeTab === 'settings' && <SettingsPanel />}
 
         {activeTab === 'audit' && <AuditLogModule />}
       </main>

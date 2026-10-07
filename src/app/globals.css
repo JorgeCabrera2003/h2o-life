@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 @import "leaflet/dist/leaflet.css";
 
 :root {
@@ -9,6 +10,21 @@
   --ease-in-out-smooth: cubic-bezier(0.77, 0, 0.175, 1);
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
 }
+
+/* Inversión Automática de Colores para Modo Oscuro (Smart Dark Mode overrides) */
+.dark .bg-white { background-color: #1e293b !important; }
+.dark .bg-slate-50 { background-color: #0f172a !important; }
+.dark .bg-slate-100 { background-color: #1e293b !important; }
+.dark .text-slate-900 { color: #f8fafc !important; }
+.dark .text-slate-800 { color: #f1f5f9 !important; }
+.dark .text-slate-700 { color: #cbd5e1 !important; }
+.dark .text-slate-600 { color: #94a3b8 !important; }
+.dark .text-slate-500 { color: #64748b !important; }
+.dark .border-slate-100 { border-color: #1e293b !important; }
+.dark .border-slate-200 { border-color: #334155 !important; }
+.dark .border-slate-200\/60 { border-color: rgba(51, 65, 85, 0.6) !important; }
+.dark .border-slate-200\/80 { border-color: rgba(51, 65, 85, 0.8) !important; }
+.dark .shadow-sm { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.5) !important; }
 
 @theme inline {
   --color-background: var(--background);
@@ -94,6 +110,10 @@ input, textarea, select {
   border: 1px solid rgba(226, 232, 240, 0.8);
   box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
 }
+.dark .glass-panel {
+  background: rgba(30, 41, 59, 0.88) !important;
+  border-color: rgba(51, 65, 85, 0.8) !important;
+}
 
 .glass-pill {
   background: rgba(255, 255, 255, 0.92);
@@ -101,6 +121,11 @@ input, textarea, select {
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(186, 230, 253, 0.5);
   box-shadow: 0 10px 30px -5px rgba(2, 132, 199, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.8);
+}
+.dark .glass-pill {
+  background: rgba(30, 41, 59, 0.92) !important;
+  border-color: rgba(51, 65, 85, 0.8) !important;
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.1) !important;
 }
 
 /* Double-Bezel Hardware Architecture (Doppelrand) */
@@ -111,12 +136,21 @@ input, textarea, select {
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04), 0 8px 24px -4px rgba(2, 132, 199, 0.06);
   border-radius: 1.5rem;
 }
+.dark .double-bezel {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.6)) !important;
+  border-color: rgba(51, 65, 85, 0.9) !important;
+}
 
 .double-bezel-inner {
   border-radius: calc(1.5rem - 3px);
   background: #ffffff;
   border: 1px solid rgba(241, 245, 249, 0.9);
   box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.9);
+}
+.dark .double-bezel-inner {
+  background: #0f172a !important;
+  border-color: rgba(30, 41, 59, 0.9) !important;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1) !important;
 }
 
 /* Custom Scrollbar - Sleek & Non-Intrusive */

@@ -42,7 +42,7 @@ export interface Client {
   created_at: string;
 }
 
-export type PaymentMethod = 'punto' | 'pago_movil' | 'efectivo_usd' | 'efectivo_bs' | 'transferencia';
+export type PaymentMethod = 'punto' | 'pago_movil' | 'efectivo_usd' | 'efectivo_bs' | 'transferencia' | 'fiado' | 'mixto';
 
 export interface PaymentLine {
   id?: string;

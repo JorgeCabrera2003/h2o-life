@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 import { useH2OStore } from '@/lib/store';
-import { Camera, RefreshCw, CheckCircle, AlertTriangle, Droplet, Sparkles, Plus, Image as ImageIcon, Video, RotateCcw, X, Upload } from 'lucide-react';
+import { Camera, RefreshCw, Check, AlertTriangle, Droplet, Sparkles, Plus, Image as ImageIcon, Video, RotateCcw, X, Upload } from 'lucide-react';
 
 interface AiCameraModuleProps {
   onProductAddedToCart?: () => void;
@@ -193,18 +193,18 @@ export function AiCameraModule({ onProductAddedToCart }: AiCameraModuleProps) {
     <div className="max-w-3xl mx-auto px-4 py-4 pb-40 md:pb-36 animate-in fade-in duration-200">
       {/* Header */}
       <div className="text-center mb-5">
-        <div className="inline-flex items-center space-x-1.5 bg-sky-50 text-sky-700 px-3.5 py-1 rounded-full text-xs font-bold border border-sky-200/80 shadow-2xs mb-2">
+        <div className="inline-flex items-center space-x-1.5 bg-sky-50 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300 px-3.5 py-1 rounded-full text-xs font-bold border border-sky-200/80 dark:border-sky-800 shadow-2xs mb-2">
           <Sparkles className="w-3.5 h-3.5 text-sky-500 animate-pulse" />
           <span>Visión por Computadora & IA</span>
         </div>
-        <h2 className="text-xl font-black text-slate-900 tracking-tight">Cámara Inteligente H2O Life</h2>
-        <p className="text-xs text-slate-500 max-w-md mx-auto mt-0.5">
+        <h2 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Cámara Inteligente H2O Life</h2>
+        <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto mt-0.5">
           Escanea tanques para medir litros o identifica garrafones para cobrar en 1 toque
         </p>
       </div>
 
       {/* Selector de Modo */}
-      <div className="flex bg-slate-200/60 p-1 rounded-2xl max-w-sm mx-auto mb-5 border border-slate-300/40 shadow-inner">
+      <div className="flex bg-slate-200/60 dark:bg-slate-800/80 p-1 rounded-2xl max-w-sm mx-auto mb-5 border border-slate-300/40 dark:border-slate-700/50 shadow-inner">
         <button
           onClick={() => {
             setActiveMode('tank');
@@ -213,8 +213,8 @@ export function AiCameraModule({ onProductAddedToCart }: AiCameraModuleProps) {
           }}
           className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all pressable cursor-pointer ${
             activeMode === 'tank'
-              ? 'bg-white text-sky-800 shadow-xs border border-sky-100'
-              : 'text-slate-600 hover:text-slate-900'
+              ? 'bg-white dark:bg-slate-900 text-sky-800 dark:text-sky-400 shadow-xs border border-sky-100 dark:border-sky-800/50'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
           }`}
         >
           🚰 Nivel de Tanques
@@ -227,8 +227,8 @@ export function AiCameraModule({ onProductAddedToCart }: AiCameraModuleProps) {
           }}
           className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all pressable cursor-pointer ${
             activeMode === 'bottle'
-              ? 'bg-white text-sky-800 shadow-xs border border-sky-100'
-              : 'text-slate-600 hover:text-slate-900'
+              ? 'bg-white dark:bg-slate-900 text-sky-800 dark:text-sky-400 shadow-xs border border-sky-100 dark:border-sky-800/50'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
           }`}
         >
           🧴 Detección de Garrafón
@@ -237,12 +237,12 @@ export function AiCameraModule({ onProductAddedToCart }: AiCameraModuleProps) {
 
       {/* Selector de Tanque si está en modo Tanque */}
       {activeMode === 'tank' && (
-        <div className="mb-4 bg-white/95 backdrop-blur-md p-3.5 rounded-2xl border border-slate-200/80 shadow-2xs flex items-center justify-between">
-          <span className="text-xs font-bold text-slate-700">Tanque a Monitorear:</span>
+        <div className="mb-4 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <span className="text-xs font-bold text-slate-700 dark:text-slate-300 whitespace-nowrap">Tanque a Monitorear:</span>
           <select
             value={selectedTankId}
             onChange={e => setSelectedTankId(e.target.value)}
-            className="text-xs font-bold bg-slate-50 border border-slate-200 rounded-xl p-2 text-slate-800 focus:outline-hidden focus:border-sky-500 shadow-2xs"
+            className="w-full sm:w-auto flex-1 text-xs font-bold bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 text-slate-800 dark:text-slate-200 focus:outline-hidden focus:border-sky-500 shadow-2xs truncate"
           >
             {tanks.map(t => (
               <option key={t.id} value={t.id}>
@@ -353,14 +353,14 @@ export function AiCameraModule({ onProductAddedToCart }: AiCameraModuleProps) {
             </div>
           ) : (
             /* 3. ESTADO INICIAL / SELECCIÓN */
-            <div className="py-10 border-2 border-dashed border-sky-200 rounded-2xl bg-sky-50/40 mb-4 flex flex-col items-center justify-center">
-              <div className="w-16 h-16 rounded-2xl bg-sky-100 text-sky-600 flex items-center justify-center mb-3 shadow-inner">
+            <div className="py-10 px-4 text-center border-2 border-dashed border-sky-200 dark:border-sky-800/60 rounded-2xl bg-sky-50/40 dark:bg-sky-900/10 mb-4 flex flex-col items-center justify-center">
+              <div className="w-16 h-16 rounded-2xl bg-sky-100 dark:bg-sky-500/20 text-sky-600 dark:text-sky-400 flex items-center justify-center mb-3 shadow-inner">
                 <Camera className="w-8 h-8" />
               </div>
-              <p className="text-sm font-bold text-slate-800">
+              <p className="text-sm font-bold text-slate-800 dark:text-slate-200">
                 {activeMode === 'tank' ? 'Fotografía la marca de nivel del tanque' : 'Apunta la cámara al botellón'}
               </p>
-              <p className="text-xs text-slate-500 mt-1 max-w-xs">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-xs">
                 Activa el visor en tiempo real o carga una foto desde la galería de tu dispositivo
               </p>
               {cameraError && (
@@ -386,7 +386,7 @@ export function AiCameraModule({ onProductAddedToCart }: AiCameraModuleProps) {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="bg-white hover:bg-slate-50 text-slate-700 font-bold px-4 py-2.5 rounded-xl border border-slate-200 shadow-2xs pressable cursor-pointer flex items-center space-x-2 text-xs"
+                className="bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xs pressable cursor-pointer flex items-center space-x-2 text-xs"
               >
                 <Upload className="w-4 h-4 text-slate-400" />
                 <span>{imagePreview ? 'Subir Otra Foto' : 'Foto / Galería'}</span>
@@ -401,7 +401,7 @@ export function AiCameraModule({ onProductAddedToCart }: AiCameraModuleProps) {
         <div className="double-bezel animate-in fade-in slide-in-from-bottom-2 duration-200">
           <div className="double-bezel-inner p-5">
             <div className="flex items-center space-x-2 text-xs font-bold text-sky-700 mb-3 uppercase tracking-wider">
-              <CheckCircle className="w-4 h-4 text-emerald-500" />
+              <Check className="w-4 h-4 text-emerald-500" />
               <span>Diagnóstico Visual Completado</span>
             </div>
 

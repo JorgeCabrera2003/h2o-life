@@ -1,8 +1,10 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import { motion } from 'framer-motion';
 import { useH2OStore } from '@/lib/store';
 import { Product, Client, ProductCategory, PaymentMethod, PaymentLine, Sale } from '@/types';
+import { toast } from 'sonner';
 import {
   Droplet,
   Plus,
@@ -15,7 +17,6 @@ import {
   DollarSign,
   Receipt,
   Share2,
-  CheckCircle2,
   Search,
   X,
   MessageCircle,
@@ -36,6 +37,7 @@ import { analytics } from '@/lib/analytics';
 import { PaymentModal } from '@/components/pos/PaymentModal';
 import { ReceiptModal } from '@/components/pos/ReceiptModal';
 import { QuickClientModal } from '@/components/pos/QuickClientModal';
+import { SwipeableBottomSheet } from '@/components/common/SwipeableBottomSheet';
 
 interface PosModuleProps {
   isCartDrawerOpen?: boolean;
@@ -157,6 +159,21 @@ export function PosModule({
     });
   }, [products, selectedCategory, searchQuery]);
 
+  // Paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8; // Mejor número para grids de 2 o 4 columnas
+
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory, searchQuery]);
+
+  const paginatedProducts = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredProducts.slice(start, start + itemsPerPage);
+  }, [filteredProducts, currentPage]);
+
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+
   // Estados para feedback táctil e instantáneo en móvil
   const [justAddedRefill, setJustAddedRefill] = useState<number | null>(null);
   const [lastAddedNotice, setLastAddedNotice] = useState<{ name: string; detail: string } | null>(null);
@@ -227,8 +244,8 @@ export function PosModule({
     const finalPayments: PaymentLine[] = [
       {
         method: activePaymentMethod,
-        amount_usd: totalUsd,
-        amount_bs: totalBs,
+        amount_usd: activePaymentMethod === 'fiado' ? 0 : activePaymentMethod === 'mixto' ? cashUsdNum : totalUsd,
+        amount_bs: activePaymentMethod === 'fiado' ? 0 : activePaymentMethod === 'mixto' ? Number((cashUsdNum * exchangeRate.rate).toFixed(2)) : totalBs,
         reference: activePaymentMethod === 'pago_movil' ? pagoMovilRef : puntoRef,
         bank: activePaymentMethod === 'pago_movil' ? pagoMovilBank : undefined,
       },
@@ -251,6 +268,9 @@ export function PosModule({
     setCompletedSale(sale);
     setIsCheckoutOpen(false);
     if (setIsCartDrawerOpen) setIsCartDrawerOpen(false);
+    toast.success('Venta registrada exitosamente', {
+      description: `Folio: ${sale.folio}`
+    });
   };
 
   // Compartir por WhatsApp
@@ -259,8 +279,16 @@ export function PosModule({
     const itemsText = completedSale.items
       .map(i => `• ${i.quantity}x ${i.product_name} - $${i.subtotal_usd.toFixed(2)}`)
       .join('%0A');
-    const msg = `💧 *H2O LIFE - RECIBO DIGITAL*%0AFolio: ${completedSale.folio}%0ACliente: ${completedSale.client_name}%0AOperador: ${completedSale.worker_name}%0A-----------------------------%0A${itemsText}%0A-----------------------------%0A*Total: $${completedSale.total_usd.toFixed(2)} / Bs. ${completedSale.total_bs.toFixed(2)}*%0AMétodo: ${completedSale.payments.map(p => p.method.toUpperCase()).join(', ')}%0AGracias por su compra en H2O Life. ¡Agua 100% purificada!`;
-    window.open(`https://wa.me/?text=${msg}`, '_blank');
+    const msg = `💧 *H2O LIFE - RECIBO DIGITAL*%0ACliente: ${completedSale.client_name}%0A-----------------------------%0A${itemsText}%0A-----------------------------%0A*Total: $${completedSale.total_usd.toFixed(2)} / Bs. ${completedSale.total_bs.toFixed(2)}*%0AMétodo: ${completedSale.payments.map(p => p.method.toUpperCase()).join(', ')}%0AGracias por su compra en H2O Life. ¡Agua 100% purificada!`;
+    
+    // Buscar el teléfono del cliente
+    const saleClient = clients.find(c => c.id === completedSale.client_id);
+    let phoneStr = '';
+    if (saleClient && saleClient.phone && saleClient.phone.trim() !== 'N/A' && saleClient.phone.trim() !== '') {
+      phoneStr = saleClient.phone.replace(/\D/g, '');
+    }
+    
+    window.open(`https://wa.me/${phoneStr}?text=${msg}`, '_blank');
   };
 
   return (
@@ -288,17 +316,17 @@ export function PosModule({
       )}
 
       {/* 1. SECCIÓN RÁPIDA: RECARGAS (Atajo instantáneo de libreta) */}
-      <div className="bg-gradient-to-r from-sky-600 via-sky-500 to-cyan-500 rounded-3xl p-4 sm:p-5 text-white shadow-xl shadow-sky-500/20 mb-5 border border-sky-400/30 relative overflow-hidden">
+      <div className="bg-gradient-to-r from-sky-600 via-sky-500 to-cyan-500 dark:from-slate-800 dark:via-slate-800/95 dark:to-slate-900 rounded-2xl p-3 sm:p-4 text-white shadow-lg shadow-sky-500/20 dark:shadow-black/40 mb-4 border border-sky-400/30 dark:border-sky-500/20 relative overflow-hidden">
         {/* Ambient water crystal shine */}
-        <div className="absolute -top-12 -right-12 w-48 h-48 bg-white/10 rounded-full blur-2xl pointer-events-none" />
-        <div className="flex items-center justify-between mb-3.5 relative z-10">
-          <div className="flex items-center space-x-2.5">
-            <span className="p-2 rounded-2xl bg-white/20 backdrop-blur-md shadow-inner flex items-center justify-center">
-              <Droplet className="w-5 h-5 fill-white text-transparent animate-pulse" />
+        <div className="absolute -top-12 -right-12 w-48 h-48 bg-white/10 dark:bg-sky-500/5 rounded-full blur-2xl pointer-events-none" />
+        <div className="flex items-center justify-between mb-2.5 relative z-10">
+          <div className="flex items-center space-x-2">
+            <span className="p-1.5 rounded-xl bg-white/20 dark:bg-slate-700/80 backdrop-blur-md shadow-inner flex items-center justify-center">
+              <Droplet className="w-4 h-4 fill-white text-transparent animate-pulse dark:fill-sky-400" />
             </span>
             <div>
-              <h2 className="text-sm sm:text-base font-black tracking-tight">Atajo Rápido de Recargas de Agua</h2>
-              <p className="text-[11px] text-sky-100 font-medium">Toque instantáneo para sumar botellones al carrito</p>
+              <h2 className="text-xs sm:text-sm font-black tracking-tight dark:text-white">Atajo Rápido: Recargas</h2>
+              <p className="text-[10px] text-white/90 dark:text-slate-400 font-medium hidden sm:block">Toque instantáneo para sumar al carrito</p>
             </div>
           </div>
           <div className="flex items-center space-x-2">
@@ -306,7 +334,7 @@ export function PosModule({
               <button
                 type="button"
                 onClick={onNavigateToProducts}
-                className="text-[10px] font-bold bg-white/15 hover:bg-white/25 text-white px-2.5 py-1 rounded-full border border-white/20 pressable cursor-pointer hidden sm:inline-flex items-center space-x-1"
+                className="text-[10px] font-bold bg-white/15 dark:bg-slate-700/50 hover:bg-white/25 dark:hover:bg-slate-700/80 text-white px-2.5 py-1 rounded-full border border-white/20 dark:border-slate-600/50 pressable cursor-pointer hidden sm:inline-flex items-center space-x-1"
                 title="Cambiar precio de recarga o registrar productos"
               >
                 <span>⚙️ Ajustar Precios</span>
@@ -315,7 +343,7 @@ export function PosModule({
             <button
               type="button"
               onClick={onNavigateToProducts}
-              className="text-xs bg-white/20 hover:bg-white/30 font-black px-3 py-1 rounded-full border border-white/25 shadow-xs pressable cursor-pointer flex items-center space-x-1"
+              className="text-xs bg-white/20 dark:bg-slate-700/80 hover:bg-white/30 dark:hover:bg-slate-700 font-black px-3 py-1 rounded-full border border-white/25 dark:border-slate-600/50 shadow-xs pressable cursor-pointer flex items-center space-x-1 dark:text-sky-300"
               title="Toca para cambiar la tarifa de recarga"
             >
               <span>${unitRefillPrice.toFixed(2)} c/u</span>
@@ -334,28 +362,28 @@ export function PosModule({
                 key={qty}
                 type="button"
                 onClick={() => handleQuickRefill(qty)}
-                className={`border backdrop-blur-md rounded-2xl p-3.5 text-left transition-all flex flex-col justify-between group pressable min-h-[96px] cursor-pointer shadow-sm relative overflow-hidden ${
+                className={`border backdrop-blur-md rounded-xl p-2 sm:p-2.5 text-left transition-all flex flex-col justify-between group pressable min-h-[70px] cursor-pointer shadow-xs relative overflow-hidden ${
                   isJustAdded
-                    ? 'bg-white/35 border-emerald-300 ring-2 ring-emerald-300 scale-[1.02]'
-                    : 'bg-white/15 hover:bg-white/25 active:scale-[0.96] border-white/30'
+                    ? 'bg-white/35 dark:bg-emerald-500/20 border-emerald-300 dark:border-emerald-500/50 ring-1 ring-emerald-300 dark:ring-emerald-500/50 scale-[1.02]'
+                    : 'bg-white/15 dark:bg-slate-700/40 hover:bg-white/25 dark:hover:bg-slate-700/70 active:scale-[0.96] border-white/30 dark:border-slate-600/40'
                 }`}
               >
                 {isJustAdded && (
-                  <span className="absolute top-1.5 right-1.5 bg-emerald-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full shadow-xs animate-in zoom-in-75 duration-150">
+                  <span className="absolute top-1.5 right-1.5 bg-emerald-500 dark:bg-emerald-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full shadow-xs animate-in zoom-in-75 duration-150">
                     ✓ ¡Sumado!
                   </span>
                 )}
                 <div className="flex items-center justify-between">
-                  <span className="text-xs sm:text-sm font-black block tracking-tight">
-                    {qty} {qty === 1 ? 'Botellón (20L)' : 'Botellones'}
+                  <span className="text-[11px] sm:text-xs font-black block tracking-tight dark:text-slate-200">
+                    {qty} {qty === 1 ? 'Botellón' : 'Botellones'}
                   </span>
                   {!isJustAdded && (
-                    <span className="text-xs opacity-75 group-hover:scale-110 transition-transform">💧</span>
+                    <span className="text-[10px] sm:text-xs opacity-75 group-hover:scale-110 transition-transform">💧</span>
                   )}
                 </div>
-                <div className="mt-2 flex items-baseline justify-between pt-1.5 border-t border-white/15">
-                  <span className="text-[11px] text-sky-100 font-bold block tabular-nums">Bs. {costBs}</span>
-                  <span className="text-sm font-black bg-white/25 px-2 py-0.5 rounded-lg shadow-inner tabular-nums">
+                <div className="mt-1 flex items-baseline justify-between pt-1 border-t border-white/15 dark:border-slate-600/50">
+                  <span className="text-[10px] text-white/90 dark:text-slate-400 font-bold block tabular-nums">Bs. {costBs}</span>
+                  <span className="text-xs font-black bg-white/25 dark:bg-slate-900/50 px-1.5 py-0.5 rounded-md shadow-inner tabular-nums dark:text-sky-400">
                     ${costUsd}
                   </span>
                 </div>
@@ -377,8 +405,8 @@ export function PosModule({
                 setClientSearchQuery('');
                 setIsClientSelectOpen(!isClientSelectOpen);
               }}
-              className={`w-full bg-white hover:bg-slate-50 border rounded-2xl px-3.5 py-2 text-left shadow-2xs transition-all flex items-center justify-between gap-2.5 group cursor-pointer ${
-                isClientSelectOpen ? 'border-sky-500 ring-2 ring-sky-500/20' : 'border-slate-200 hover:border-sky-300'
+              className={`w-full bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border rounded-2xl px-3.5 py-2 text-left shadow-2xs transition-all flex items-center justify-between gap-2.5 group cursor-pointer ${
+                isClientSelectOpen ? 'border-sky-500 ring-2 ring-sky-500/20' : 'border-slate-200 dark:border-slate-700 hover:border-sky-300 dark:hover:border-sky-600'
               }`}
             >
               <div className="flex items-center space-x-2.5 overflow-hidden">
@@ -393,8 +421,8 @@ export function PosModule({
                 </div>
                 <div className="truncate">
                   <div className="flex items-center space-x-1.5">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Cliente:</span>
-                    <span className="text-xs font-black text-slate-900 truncate">
+                    <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Cliente:</span>
+                    <span className="text-xs font-black text-slate-900 dark:text-white truncate">
                       {selectedClient ? selectedClient.name : 'Seleccionar cliente...'}
                     </span>
                     {selectedClient && selectedClient.balance_usd < 0 && (
@@ -403,32 +431,32 @@ export function PosModule({
                       </span>
                     )}
                   </div>
-                  <p className="text-[11px] text-slate-500 truncate">
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
                     {selectedClient?.phone && selectedClient.phone !== 'N/A' ? `📞 ${selectedClient.phone}` : 'Venta en Tienda'}
                     {selectedClient?.address && selectedClient.address !== 'Venta directa en tienda' ? ` • 📍 ${selectedClient.address}` : ''}
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center space-x-1.5 shrink-0 text-slate-400 group-hover:text-sky-600 transition-colors">
-                <span className="text-[10px] font-bold bg-slate-100 group-hover:bg-sky-50 px-2 py-0.5 rounded-lg hidden sm:inline">
+              <div className="flex items-center space-x-1.5 shrink-0 text-slate-400 dark:text-slate-500 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
+                <span className="text-[10px] font-bold bg-slate-100 dark:bg-slate-700 group-hover:bg-sky-50 dark:group-hover:bg-slate-600 text-slate-500 dark:text-slate-300 px-2 py-0.5 rounded-lg hidden sm:inline">
                   {isClientSelectOpen ? 'Cerrar' : 'Buscar'}
                 </span>
-                <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isClientSelectOpen ? 'rotate-180 text-sky-600' : ''}`} />
+                <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isClientSelectOpen ? 'rotate-180 text-sky-600 dark:text-sky-400' : ''}`} />
               </div>
             </button>
 
             {/* DROPDOWN / POPOVER ANCLADO (SELECT CON BUSCADOR DINÁMICO) */}
             {isClientSelectOpen && (
-              <div className="absolute left-0 right-0 sm:right-auto sm:w-[480px] top-full mt-2 z-40 bg-white rounded-3xl border border-slate-200 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-150 flex flex-col max-h-[72vh] sm:max-h-[480px] overflow-hidden">
+              <div className="absolute left-0 right-0 sm:right-auto sm:w-[480px] top-full mt-2 z-40 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-150 flex flex-col max-h-[72vh] sm:max-h-[480px] overflow-hidden">
                 {/* Encabezado del Dropdown */}
-                <div className="p-3.5 pb-2.5 border-b border-slate-100 bg-slate-50/80 flex items-center justify-between">
+                <div className="p-3.5 pb-2.5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/80 flex items-center justify-between">
                   <div>
-                    <h4 className="font-black text-xs sm:text-sm text-slate-900 flex items-center space-x-1.5">
-                      <User className="w-4 h-4 text-sky-600" />
+                    <h4 className="font-black text-xs sm:text-sm text-slate-900 dark:text-white flex items-center space-x-1.5">
+                      <User className="w-4 h-4 text-sky-600 dark:text-sky-400" />
                       <span>Directorio de Clientes</span>
                     </h4>
-                    <p className="text-[10px] sm:text-[11px] text-slate-500">
+                    <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400">
                       Ordenados por registro más reciente
                     </p>
                   </div>
@@ -629,14 +657,14 @@ export function PosModule({
             placeholder="Buscar producto o helado..."
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            className="w-full sm:w-64 pl-9 pr-3 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:outline-hidden focus:border-sky-500 shadow-2xs"
+            className="w-full sm:w-64 pl-9 pr-3 py-2 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-hidden focus:border-sky-500 shadow-2xs"
           />
         </div>
       </div>
 
       {/* 3. FILTROS DE CATEGORÍA (Capsule Segmented Control) */}
       <div className="flex items-center justify-between mb-5 overflow-x-auto pb-1">
-        <div className="inline-flex p-1 bg-slate-200/60 backdrop-blur-md rounded-2xl gap-1">
+        <div className="inline-flex p-1 bg-slate-200/60 dark:bg-slate-800/60 backdrop-blur-md rounded-2xl gap-1">
           {[
             { id: 'todos', label: 'Todos los Productos', icon: '📦' },
             { id: 'agua_botellon', label: 'Agua & Botellones', icon: '💧' },
@@ -649,14 +677,22 @@ export function PosModule({
                 key={cat.id}
                 type="button"
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all shrink-0 pressable cursor-pointer flex items-center space-x-1.5 ${
+                className={`relative px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all shrink-0 pressable cursor-pointer flex items-center space-x-1.5 ${
                   isActive
-                    ? 'bg-white text-slate-900 shadow-sm border border-slate-200/80 scale-100'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
+                    ? 'text-slate-900 dark:text-white scale-100'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-slate-700/50'
                 }`}
               >
-                <span className="text-sm">{cat.icon}</span>
-                <span>{cat.label}</span>
+                {isActive && (
+                  <motion.div
+                    layoutId="category-pill-pos"
+                    className="absolute inset-0 bg-white dark:bg-slate-700 shadow-sm border border-slate-200/80 dark:border-slate-600 rounded-xl"
+                    initial={false}
+                    transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                  />
+                )}
+                <span className="relative z-10 text-sm">{cat.icon}</span>
+                <span className="relative z-10">{cat.label}</span>
               </button>
             );
           })}
@@ -666,24 +702,43 @@ export function PosModule({
       {/* 4. GRID DE PRODUCTOS & PANEL LATERAL DE CARRITO */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         {/* Catálogo de Productos */}
-        <div className="lg:col-span-2 grid grid-cols-2 sm:grid-cols-3 gap-3 content-start">
-          {filteredProducts.length === 0 ? (
-            <div className="col-span-full py-12 text-center text-slate-400 bg-white rounded-3xl border border-dashed border-slate-200">
-              <span className="text-3xl mb-2 block">🔍</span>
-              <p className="text-xs font-bold text-slate-700">No se encontraron productos</p>
-              <p className="text-[11px] text-slate-400 mt-1">
-                Prueba con otra palabra clave o selecciona otra categoría
-              </p>
-            </div>
-          ) : (
-            filteredProducts.map(product => {
+        <div className="lg:col-span-2 flex flex-col gap-4">
+          <motion.div 
+            key={selectedCategory + currentPage + searchQuery}
+            className="grid grid-cols-2 sm:grid-cols-3 gap-3 content-start"
+            variants={{
+              hidden: { opacity: 0 },
+              show: {
+                opacity: 1,
+                transition: {
+                  staggerChildren: 0.05
+                }
+              }
+            }}
+            initial="hidden"
+            animate="show"
+          >
+            {paginatedProducts.length === 0 ? (
+              <div className="col-span-full py-12 text-center text-slate-400 bg-white rounded-3xl border border-dashed border-slate-200">
+                <span className="text-3xl mb-2 block">🔍</span>
+                <p className="text-xs font-bold text-slate-700">No se encontraron productos</p>
+                <p className="text-[11px] text-slate-400 mt-1">
+                  Prueba con otra palabra clave o selecciona otra categoría
+                </p>
+              </div>
+            ) : (
+              paginatedProducts.map(product => {
               const priceBs = (product.price_usd * exchangeRate.rate).toFixed(2);
               const inCartItem = cart.find(i => i.product.id === product.id);
               const inCartQty = inCartItem?.quantity || 0;
               const isInCart = inCartQty > 0;
 
               return (
-                <div
+                <motion.div
+                  variants={{
+                    hidden: { opacity: 0, y: 12 },
+                    show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 400, damping: 25 } }
+                  }}
                   key={product.id}
                   role="button"
                   tabIndex={0}
@@ -694,58 +749,60 @@ export function PosModule({
                       addToCartWithFeedback(product, 1);
                     }
                   }}
-                  className={`bg-white rounded-3xl p-3.5 sm:p-5 border transition-all cursor-pointer flex flex-col justify-between group pressable active:scale-[0.98] min-h-[175px] relative cv-auto gpu-accelerated ${
+                  className={`bg-white dark:bg-slate-800/90 rounded-3xl p-3.5 sm:p-5 border transition-all cursor-pointer flex flex-col justify-between gap-3 group pressable active:scale-[0.97] relative cv-auto gpu-accelerated shadow-xs ${
                     isInCart
-                      ? 'border-sky-400 bg-sky-50/20 ring-2 ring-sky-400/20 shadow-md shadow-sky-500/10'
-                      : 'border-slate-200/80 hover:border-sky-300 hover:shadow-xl hover:shadow-sky-500/10'
+                      ? 'border-sky-400 dark:border-sky-500 bg-sky-50/20 dark:bg-sky-900/20 ring-2 ring-sky-400/20 dark:ring-sky-500/20 shadow-md shadow-sky-500/10'
+                      : 'border-slate-200/80 dark:border-slate-700 hover:border-sky-300 dark:hover:border-sky-600 hover:shadow-xl hover:shadow-sky-500/10'
                   }`}
                 >
-                  {isInCart && (
-                    <div className="absolute -top-2 -right-2 bg-gradient-to-r from-sky-600 to-cyan-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-md flex items-center space-x-1 animate-in zoom-in-75 duration-150 z-10">
-                      <span>🛒</span>
-                      <span>{inCartQty} en pedido</span>
-                    </div>
-                  )}
+
 
                   <div>
                     <div className="flex items-start justify-between mb-2">
-                      <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-tr from-sky-50 to-cyan-50 border border-sky-100/80 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shadow-2xs">
+                      <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-tr from-sky-50 to-cyan-50 dark:from-sky-900/50 dark:to-cyan-900/50 border border-sky-100/80 dark:border-sky-800/80 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shadow-2xs">
                         {product.icon || '📦'}
                       </div>
-                      <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
-                        {product.category}
-                      </span>
+                      {isInCart ? (
+                        <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-gradient-to-r from-sky-600 to-cyan-500 text-white shadow-md flex items-center gap-1 animate-in zoom-in-75 duration-150">
+                          <span>🛒</span>
+                          <span>{inCartQty}</span>
+                        </span>
+                      ) : (
+                        <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700/80 text-slate-600 dark:text-slate-300 line-clamp-1 max-w-[80px] text-right">
+                          {product.category}
+                        </span>
+                      )}
                     </div>
 
-                    <h3 className="text-xs sm:text-sm font-extrabold text-slate-900 line-clamp-2 mb-1 group-hover:text-sky-600 transition-colors">
+                    <h3 className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white line-clamp-2 mb-1 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors leading-tight">
                       {product.name}
                     </h3>
                   </div>
 
-                  <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between">
+                  <div className="mt-auto pt-2.5 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between">
                     <div>
-                      <span className="text-sm sm:text-base font-black text-slate-900 tabular-nums">
+                      <span className="text-sm sm:text-base font-black text-slate-900 dark:text-white tabular-nums leading-none">
                         ${product.price_usd.toFixed(2)}
                       </span>
-                      <span className="text-[9px] sm:text-[10px] font-extrabold text-sky-700 bg-sky-50 px-1.5 py-0.5 rounded-md border border-sky-100/80 block mt-0.5 tabular-nums">
+                      <span className="text-[9px] sm:text-[10px] font-extrabold text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-900/50 px-1.5 py-0.5 rounded-md border border-sky-100/80 dark:border-sky-800/80 block mt-0.5 tabular-nums">
                         Bs. {priceBs}
                       </span>
                     </div>
 
                     {isInCart ? (
                       <div
-                        className="flex items-center bg-white border border-sky-300 rounded-xl p-0.5 shadow-2xs"
+                        className="flex items-center bg-white dark:bg-slate-900 border border-sky-300 dark:border-sky-600 rounded-xl p-0.5 shadow-2xs"
                         onClick={e => e.stopPropagation()}
                       >
                         <button
                           type="button"
                           onClick={() => updateCartQuantity(product.id, inCartQty - 1)}
-                          className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 active:scale-90 font-black text-sm pressable cursor-pointer"
+                          className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 active:scale-90 font-black text-sm pressable cursor-pointer"
                           aria-label="Restar uno"
                         >
                           -
                         </button>
-                        <span className="w-6 text-center text-xs font-black text-sky-900">
+                        <span className="w-6 text-center text-xs font-black text-sky-900 dark:text-sky-100">
                           {inCartQty}
                         </span>
                         <button
@@ -764,42 +821,56 @@ export function PosModule({
                           e.stopPropagation();
                           addToCartWithFeedback(product, 1);
                         }}
-                        className="w-8 h-8 rounded-xl bg-sky-50 text-sky-600 hover:bg-gradient-to-r hover:from-sky-600 hover:to-cyan-500 hover:text-white flex items-center justify-center shadow-2xs transition-all pressable font-black text-sm cursor-pointer"
+                        className="w-8 h-8 rounded-xl bg-sky-50 dark:bg-slate-700 text-sky-600 dark:text-sky-400 hover:bg-gradient-to-r hover:from-sky-600 hover:to-cyan-500 hover:text-white dark:hover:text-white flex items-center justify-center shadow-2xs transition-all pressable font-black text-sm cursor-pointer"
                         aria-label={`Agregar ${product.name} al carrito`}
                       >
                         +
                       </button>
                     )}
                   </div>
-                </div>
+                </motion.div>
               );
             })
           )}
+          </motion.div>
+          
+          {/* Controles de Paginación */}
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center gap-3 mt-1 pb-4">
+              <button
+                type="button"
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-50 font-bold text-sm shadow-sm transition-all pressable cursor-pointer"
+              >
+                Anterior
+              </button>
+              <span className="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg">
+                Página {currentPage} de {totalPages}
+              </span>
+              <button
+                type="button"
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-50 font-bold text-sm shadow-sm transition-all pressable cursor-pointer"
+              >
+                Siguiente
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* Backdrop Oscuro para Mobile */}
-        {isCartDrawerOpen && (
-          <div
-            className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs lg:hidden animate-in fade-in duration-150"
-            onClick={() => setIsCartDrawerOpen && setIsCartDrawerOpen(false)}
-          />
-        )}
-
-        {/* Panel del Carrito de Ventas (Visible en Desktop y Drawer en Mobile con z-55) */}
-        <div
-          className={`fixed inset-y-0 right-0 z-55 w-full sm:w-96 bg-white shadow-2xl p-5 transform transition-transform duration-250 ease-out gpu-accelerated lg:static lg:z-auto lg:w-auto lg:h-auto lg:shadow-none lg:border lg:border-slate-200/80 lg:rounded-2xl lg:p-5 flex flex-col justify-between lg:sticky lg:top-4 pb-10 lg:pb-5 ${
-            isCartDrawerOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'
-          }`}
-        >
-          <div>
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
-              <div>
-                <h3 className="font-extrabold text-base text-slate-900 flex items-center space-x-1.5">
+        {/* Panel del Carrito de Ventas (Visible fijo en Desktop) */}
+        <div className="hidden lg:flex flex-col justify-between sticky top-4 bg-white dark:bg-slate-900 shadow-none border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 z-auto w-auto h-auto min-h-[500px]">
+          <div className="flex-1 flex flex-col min-h-0">
+            <div className="flex items-start justify-between pb-3 border-b border-slate-100 dark:border-slate-800 mb-3 shrink-0">
+              <div className="min-w-0 pr-2">
+                <h3 className="font-extrabold text-base text-slate-900 dark:text-white flex items-center space-x-1.5">
                   <span>🛒 Detalle del Pedido</span>
                 </h3>
-                <div className="flex items-center space-x-2 mt-0.5">
-                  <p className="text-xs text-slate-500 truncate max-w-[190px]">
-                    Cliente: <span className="font-bold text-sky-700">{selectedClient?.name}</span>
+                <div className="flex items-center flex-wrap gap-2 mt-1">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 truncate max-w-[150px] sm:max-w-[190px]">
+                    Cliente: <span className="font-bold text-sky-700 dark:text-sky-400">{selectedClient?.name}</span>
                   </p>
                   <button
                     type="button"
@@ -807,17 +878,17 @@ export function PosModule({
                       setIsClientSelectOpen(prev => !prev);
                       window.scrollTo({ top: 0, behavior: 'smooth' });
                     }}
-                    className="text-[10px] font-bold text-sky-600 hover:text-sky-800 bg-sky-50 hover:bg-sky-100 px-1.5 py-0.5 rounded-md cursor-pointer transition-colors"
+                    className="text-[10px] font-bold text-sky-600 dark:text-sky-300 hover:text-sky-800 dark:hover:text-sky-100 bg-sky-50 dark:bg-sky-900/40 hover:bg-sky-100 dark:hover:bg-sky-900/60 border border-sky-100/50 dark:border-sky-800/50 px-2 py-0.5 rounded-full cursor-pointer transition-colors shadow-xs"
                   >
                     Cambiar
                   </button>
                 </div>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-1 sm:space-x-2 shrink-0">
                 {cart.length > 0 && (
                   <button
                     onClick={clearCart}
-                    className="p-1.5 text-slate-400 hover:text-red-500 rounded-lg hover:bg-red-50 transition-colors"
+                    className="p-1.5 text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
                     title="Vaciar Carrito"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -827,18 +898,18 @@ export function PosModule({
                   <button
                     type="button"
                     onClick={() => setIsCartDrawerOpen(false)}
-                    className="p-2 sm:p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl lg:hidden pressable cursor-pointer flex items-center space-x-1"
+                    className="p-1.5 sm:p-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl lg:hidden pressable cursor-pointer flex items-center space-x-1 transition-colors"
                     aria-label="Cerrar pedido"
                   >
-                    <X className="w-5 h-5" />
-                    <span className="text-xs font-bold sm:hidden pr-1">Cerrar</span>
+                    <X className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <span className="text-[10px] sm:text-xs font-bold sm:hidden pr-1">Cerrar</span>
                   </button>
                 )}
               </div>
             </div>
 
             {/* Lista de Ítems */}
-            <div className="max-h-72 lg:max-h-80 overflow-y-auto space-y-2 pr-1">
+            <div className="flex-1 overflow-y-auto space-y-2 pr-1 pb-4 min-h-0 relative">
               {cart.length === 0 ? (
                 <div className="text-center py-12 text-slate-400">
                   <Droplet className="w-10 h-10 mx-auto text-slate-300 stroke-1 mb-2" />
@@ -849,36 +920,36 @@ export function PosModule({
                 cart.map(item => (
                   <div
                     key={item.product.id}
-                    className="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100"
+                    className="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-100 dark:border-slate-700/50"
                   >
                     <div className="min-w-0 flex-1 pr-2">
-                      <p className="text-xs font-bold text-slate-800 truncate">
+                      <p className="text-xs font-bold text-slate-800 dark:text-white truncate">
                         {item.product.name}
                       </p>
-                      <p className="text-[10px] text-slate-500">
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
                         ${item.unit_price_usd.toFixed(2)} c/u
                       </p>
                     </div>
 
-                    <div className="flex items-center space-x-2">
-                      <div className="flex items-center bg-white border border-slate-200 rounded-lg">
+                    <div className="flex items-center space-x-3 shrink-0">
+                      <div className="flex items-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg shadow-2xs overflow-hidden">
                         <button
                           onClick={() => updateCartQuantity(item.product.id, item.quantity - 1)}
-                          className="px-2 py-1 text-slate-500 hover:text-slate-800 font-bold"
+                          className="px-2.5 py-1 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 font-bold transition-colors"
                         >
                           -
                         </button>
-                        <span className="px-2 text-xs font-bold text-slate-800">
+                        <span className="px-2 text-xs font-bold text-slate-800 dark:text-white">
                           {item.quantity}
                         </span>
                         <button
                           onClick={() => updateCartQuantity(item.product.id, item.quantity + 1)}
-                          className="px-2 py-1 text-slate-500 hover:text-slate-800 font-bold"
+                          className="px-2.5 py-1 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 font-bold transition-colors"
                         >
                           +
                         </button>
                       </div>
-                      <span className="text-xs font-extrabold text-slate-900 w-12 text-right">
+                      <span className="text-xs font-extrabold text-slate-900 dark:text-white w-10 text-right tabular-nums">
                         ${item.subtotal_usd.toFixed(2)}
                       </span>
                     </div>
@@ -889,14 +960,14 @@ export function PosModule({
           </div>
 
           {/* Subtotal y Botón de Cobro (Single Primary CTA de Alta Gama) */}
-          <div className="mt-4 pt-4 border-t border-slate-100">
+          <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800/80">
             <div className="flex items-baseline justify-between mb-1">
-              <span className="text-xs text-slate-500 font-semibold">Total en Dólares:</span>
-              <span className="text-2xl font-black text-slate-900 tracking-tight tabular-nums">${totalUsd.toFixed(2)}</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold">Total en Dólares:</span>
+              <span className="text-2xl font-black text-slate-900 dark:text-white tracking-tight tabular-nums">${totalUsd.toFixed(2)}</span>
             </div>
             <div className="flex items-baseline justify-between mb-4">
-              <span className="text-xs text-slate-500 font-semibold">Total Tasa BCV:</span>
-              <span className="text-sm font-extrabold text-sky-700 bg-sky-50 px-2.5 py-1 rounded-xl border border-sky-100 tabular-nums">
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold">Total Tasa BCV:</span>
+              <span className="text-sm font-extrabold text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-900/40 px-2.5 py-1 rounded-xl border border-sky-100 dark:border-sky-800/50 tabular-nums">
                 Bs. {totalBs}
               </span>
             </div>
@@ -905,18 +976,139 @@ export function PosModule({
               type="button"
               onClick={handleOpenCheckout}
               disabled={cart.length === 0}
-              className="w-full min-h-[52px] bg-gradient-to-r from-sky-600 via-sky-500 to-cyan-500 hover:from-sky-700 hover:to-cyan-600 disabled:opacity-50 text-white font-black py-4 px-6 rounded-2xl shadow-xl shadow-sky-500/25 active:scale-[0.98] transition-all flex items-center justify-between pressable cursor-pointer"
+              className="w-full min-h-[44px] bg-gradient-to-r from-sky-600 to-cyan-500 dark:from-sky-700 dark:to-cyan-600 hover:from-sky-700 hover:to-cyan-600 disabled:opacity-50 text-white font-black py-3 px-6 rounded-xl shadow-md dark:shadow-sky-900/40 active:scale-[0.98] transition-all flex items-center justify-between pressable cursor-pointer"
             >
               <div className="flex items-center space-x-2">
-                <CreditCard className="w-5 h-5" />
+                <CreditCard className="w-4 h-4" />
                 <span className="text-xs sm:text-sm uppercase tracking-wide">Cobrar Orden</span>
               </div>
-              <span className="text-base font-black bg-white/20 px-2.5 py-1 rounded-xl tabular-nums">
+              <span className="text-base font-black bg-white/20 dark:bg-slate-900/30 px-2.5 py-1 rounded-xl tabular-nums shadow-inner">
                 ${totalUsd.toFixed(2)}
               </span>
             </button>
           </div>
         </div>
+
+        {/* Modal Inferior del Carrito para Mobile */}
+        <SwipeableBottomSheet
+          isOpen={isCartDrawerOpen}
+          onClose={() => setIsCartDrawerOpen && setIsCartDrawerOpen(false)}
+          title="🛒 Detalle del Pedido"
+          maxWidth="md"
+        >
+          <div className="flex-1 flex flex-col min-h-[50vh] max-h-[75vh]">
+            <div className="flex items-start justify-between pb-3 border-b border-slate-100 dark:border-slate-800 mb-3 shrink-0 px-1">
+              <div className="min-w-0 pr-2">
+                <div className="flex items-center flex-wrap gap-2">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 truncate max-w-[150px] sm:max-w-[190px]">
+                    Cliente: <span className="font-bold text-sky-700 dark:text-sky-400">{selectedClient?.name}</span>
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (setIsCartDrawerOpen) setIsCartDrawerOpen(false);
+                      setIsClientSelectOpen(true);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    className="text-[10px] font-bold text-sky-600 dark:text-sky-300 hover:text-sky-800 dark:hover:text-sky-100 bg-sky-50 dark:bg-sky-900/40 hover:bg-sky-100 dark:hover:bg-sky-900/60 border border-sky-100/50 dark:border-sky-800/50 px-2 py-0.5 rounded-full cursor-pointer transition-colors shadow-xs"
+                  >
+                    Cambiar
+                  </button>
+                </div>
+              </div>
+              <div className="flex items-center space-x-1 sm:space-x-2 shrink-0">
+                {cart.length > 0 && (
+                  <button
+                    onClick={clearCart}
+                    className="p-1.5 text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                    title="Vaciar Carrito"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Lista de Ítems */}
+            <div className="flex-1 overflow-y-auto space-y-2 pr-1 pb-4 min-h-0 relative px-1">
+              {cart.length === 0 ? (
+                <div className="text-center py-12 text-slate-400">
+                  <Droplet className="w-10 h-10 mx-auto text-slate-300 stroke-1 mb-2" />
+                  <p className="text-xs font-semibold">El carrito está vacío</p>
+                  <p className="text-[11px]">Selecciona recargas o productos</p>
+                </div>
+              ) : (
+                cart.map(item => (
+                  <div
+                    key={item.product.id}
+                    className="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-100 dark:border-slate-700/50"
+                  >
+                    <div className="min-w-0 flex-1 pr-2">
+                      <p className="text-xs font-bold text-slate-800 dark:text-white truncate">
+                        {item.product.name}
+                      </p>
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
+                        ${item.unit_price_usd.toFixed(2)} c/u
+                      </p>
+                    </div>
+
+                    <div className="flex items-center space-x-3 shrink-0">
+                      <div className="flex items-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg shadow-2xs overflow-hidden">
+                        <button
+                          onClick={() => updateCartQuantity(item.product.id, item.quantity - 1)}
+                          className="px-2.5 py-1 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 font-bold transition-colors"
+                        >
+                          -
+                        </button>
+                        <span className="px-2 text-xs font-bold text-slate-800 dark:text-white">
+                          {item.quantity}
+                        </span>
+                        <button
+                          onClick={() => updateCartQuantity(item.product.id, item.quantity + 1)}
+                          className="px-2.5 py-1 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 font-bold transition-colors"
+                        >
+                          +
+                        </button>
+                      </div>
+                      <span className="text-xs font-extrabold text-slate-900 dark:text-white w-10 text-right tabular-nums">
+                        ${item.subtotal_usd.toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Subtotal y Botón de Cobro */}
+            <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800/80 px-1 pb-4">
+              <div className="flex items-baseline justify-between mb-1">
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold">Total en Dólares:</span>
+                <span className="text-2xl font-black text-slate-900 dark:text-white tracking-tight tabular-nums">${totalUsd.toFixed(2)}</span>
+              </div>
+              <div className="flex items-baseline justify-between mb-4">
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold">Total Tasa BCV:</span>
+                <span className="text-sm font-extrabold text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-900/40 px-2.5 py-1 rounded-xl border border-sky-100 dark:border-sky-800/50 tabular-nums">
+                  Bs. {totalBs}
+                </span>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleOpenCheckout}
+                disabled={cart.length === 0}
+                className="w-full min-h-[44px] bg-gradient-to-r from-sky-600 to-cyan-500 dark:from-sky-700 dark:to-cyan-600 hover:from-sky-700 hover:to-cyan-600 disabled:opacity-50 text-white font-black py-3 px-6 rounded-xl shadow-md dark:shadow-sky-900/40 active:scale-[0.98] transition-all flex items-center justify-between pressable cursor-pointer"
+              >
+                <div className="flex items-center space-x-2">
+                  <CreditCard className="w-4 h-4" />
+                  <span className="text-xs sm:text-sm uppercase tracking-wide">Cobrar Orden</span>
+                </div>
+                <span className="text-base font-black bg-white/20 dark:bg-slate-900/30 px-2.5 py-1 rounded-xl tabular-nums shadow-inner">
+                  ${totalUsd.toFixed(2)}
+                </span>
+              </button>
+            </div>
+          </div>
+        </SwipeableBottomSheet>
       </div>
 
       {/* 5. MODAL DE COBRO / MULTIPAGO VENEZOLANO */}
