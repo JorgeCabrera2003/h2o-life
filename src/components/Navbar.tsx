@@ -21,7 +21,7 @@ interface NavbarProps {
 }
 
 export function Navbar({ onNavigate, activeTab }: NavbarProps) {
-  const { currentUser, setCurrentUser, exchangeRate, setExchangeRateValue } = useH2OStore();
+  const { currentUser, setCurrentUser, logout, exchangeRate, setExchangeRateValue } = useH2OStore();
   const [isEditingRate, setIsEditingRate] = useState(false);
   const [customRate, setCustomRate] = useState(exchangeRate.rate.toString());
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -203,37 +203,54 @@ export function Navbar({ onNavigate, activeTab }: NavbarProps) {
 
             {showUserMenu && (
               <div className="absolute right-0 mt-2 w-60 bg-white dark:bg-slate-800 rounded-2xl shadow-xl shadow-sky-950/10 dark:shadow-black/40 border border-sky-100 dark:border-slate-700 py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
-                <div className="px-3.5 py-1.5 border-b border-slate-100 dark:border-slate-700 mb-1">
-                  <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                    Cambiar Operador de Turno
-                  </p>
+                {currentUser.role === 'superadmin' ? (
+                  <>
+                    <div className="px-3.5 py-1.5 border-b border-slate-100 dark:border-slate-700 mb-1">
+                      <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                        Cambiar Operador de Turno
+                      </p>
+                    </div>
+                    {INITIAL_USERS.map(user => {
+                      const isSelected = currentUser.id === user.id;
+                      return (
+                        <button
+                          key={user.id}
+                          onClick={() => {
+                            setCurrentUser(user);
+                            setShowUserMenu(false);
+                          }}
+                          className={`w-full text-left px-3.5 py-2.5 flex items-center justify-between hover:bg-sky-50/80 dark:hover:bg-slate-700 transition-colors cursor-pointer ${
+                            isSelected ? 'bg-sky-50 dark:bg-sky-900/50 font-bold text-sky-950 dark:text-sky-300' : 'text-slate-700 dark:text-slate-300'
+                          }`}
+                        >
+                          <div className="flex items-center space-x-2.5">
+                            <span className="text-lg leading-none">{user.avatar}</span>
+                            <div>
+                              <p className="text-xs font-bold text-slate-900 dark:text-white">{user.name}</p>
+                              <p className="text-[10px] text-slate-500 dark:text-slate-400 capitalize">
+                                {user.role === 'worker' ? 'Operador de Turno' : user.role === 'admin' ? 'Administradora' : 'Superadmin'}
+                              </p>
+                            </div>
+                          </div>
+                          {isSelected && <Check className="w-4 h-4 text-sky-600 dark:text-sky-400 shrink-0" />}
+                        </button>
+                      );
+                    })}
+                  </>
+                ) : null}
+
+                {/* Botón de cerrar sesión para todos (o al menos no-superadmins) */}
+                <div className={`${currentUser.role === 'superadmin' ? 'border-t border-slate-100 dark:border-slate-700 mt-1 pt-1' : ''}`}>
+                  <button
+                    onClick={() => {
+                      setShowUserMenu(false);
+                      logout();
+                    }}
+                    className="w-full text-left px-3.5 py-2.5 text-sm font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer"
+                  >
+                    Cerrar Turno (Salir)
+                  </button>
                 </div>
-                {INITIAL_USERS.map(user => {
-                  const isSelected = currentUser.id === user.id;
-                  return (
-                    <button
-                      key={user.id}
-                      onClick={() => {
-                        setCurrentUser(user);
-                        setShowUserMenu(false);
-                      }}
-                      className={`w-full text-left px-3.5 py-2.5 flex items-center justify-between hover:bg-sky-50/80 dark:hover:bg-slate-700 transition-colors cursor-pointer ${
-                        isSelected ? 'bg-sky-50 dark:bg-sky-900/50 font-bold text-sky-950 dark:text-sky-300' : 'text-slate-700 dark:text-slate-300'
-                      }`}
-                    >
-                      <div className="flex items-center space-x-2.5">
-                        <span className="text-lg leading-none">{user.avatar}</span>
-                        <div>
-                          <p className="text-xs font-bold text-slate-900 dark:text-white">{user.name}</p>
-                          <p className="text-[10px] text-slate-500 dark:text-slate-400 capitalize">
-                            {user.role === 'worker' ? 'Operador de Turno' : user.role === 'admin' ? 'Administradora' : 'Superadmin'}
-                          </p>
-                        </div>
-                      </div>
-                      {isSelected && <Check className="w-4 h-4 text-sky-600 dark:text-sky-400 shrink-0" />}
-                    </button>
-                  );
-                })}
               </div>
             )}
           </div>
