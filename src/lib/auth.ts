@@ -32,7 +32,7 @@ const USER_CREDENTIALS = [
     email: 'freyeliz@h2olife.com',
     avatar: '👩‍💼',
     phone: '+58 424-5658068',
-    pinHash: '92576b5d9beffbc720138cc3f57ce79cbaee8bbce9e3b4db2d40e94bbbbbfed2', // 5678
+    pinHash: 'f8638b979b2f4f793ddb6dbd197e0ee25a7a6ea32b0ae22f5e3c5d119d839e75', // 5678
     permissions: ['admin', 'pos', 'audit']
   },
   {
