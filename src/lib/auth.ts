@@ -42,7 +42,7 @@ const USER_CREDENTIALS = [
     email: 'karla@h2olife.com',
     avatar: '👩‍🔧',
     phone: '+58 424-5717589',
-    pinHash: 'e662cc94e6bf76a1618cbf5e5c77749001b3337f7158756997b8e1f5cdbb4599', // 4321
+    pinHash: 'fe2592b42a727e977f055947385b709cc82b16b9a87f88c6abf3900d65d0cdc3', // 4321
     permissions: ['pos']
   },
 ];
