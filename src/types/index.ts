@@ -7,6 +7,7 @@ export interface UserProfile {
   email: string;
   avatar?: string;
   phone?: string;
+  permissions?: string[];
 }
 
 export type ProductCategory = 'agua' | 'botellon' | 'helado' | 'snack' | 'insumo' | 'servicio';
