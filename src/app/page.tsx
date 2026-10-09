@@ -10,6 +10,7 @@ import { LoginScreen } from '@/components/auth/LoginScreen';
 import { Client } from '@/types';
 import { useH2OStore } from '@/lib/store';
 import { hasPermission } from '@/lib/auth';
+import { LaunchAnimation } from '@/components/common/LaunchAnimation';
 
 // Componente visual de carga suave para transiciones fluidas de pestañas
 function TabLoadingSkeleton({ title, subtitle }: { title: string; subtitle: string }) {
@@ -158,16 +159,25 @@ function H2OLifeAppContent() {
     }
   }, []);
 
+  const [showLaunch, setShowLaunch] = useState(true);
+
   if (!isAuthenticated) {
-    return <LoginScreen />;
+    return (
+      <>
+        {showLaunch && <LaunchAnimation onComplete={() => setShowLaunch(false)} />}
+        <LoginScreen />
+      </>
+    );
   }
 
   return (
-    <div
-      suppressHydrationWarning
-      className="min-h-screen flex flex-col bg-slate-50 bg-mesh-water text-slate-900 selection:bg-sky-500 selection:text-white"
-    >
-      <Navbar onNavigate={setActiveTab} activeTab={activeTab} />
+    <>
+      {showLaunch && <LaunchAnimation onComplete={() => setShowLaunch(false)} />}
+      <div
+        suppressHydrationWarning
+        className="min-h-screen flex flex-col bg-slate-50 bg-mesh-water text-slate-900 selection:bg-sky-500 selection:text-white"
+      >
+        <Navbar onNavigate={setActiveTab} activeTab={activeTab} />
 
       <main className="flex-1 w-full pb-36 sm:pb-40">
         {activeTab === 'pos' && (
@@ -216,6 +226,7 @@ function H2OLifeAppContent() {
         onOpenCart={() => setIsCartDrawerOpen(true)}
       />
     </div>
+    </>
   );
 }
 
